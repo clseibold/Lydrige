@@ -1,0 +1,12 @@
+apply plugin: 'c'
+
+libraries {
+    mpc {}
+}
+executables {
+    main {
+        binaries.all {
+            lib libraries.mpc.shared
+        }
+    }
+}
