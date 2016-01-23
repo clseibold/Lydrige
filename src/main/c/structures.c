@@ -1,4 +1,4 @@
-#include "structures.h"
+#include "../headers/structures.h"
 
 char* dtype_name(int t) {
 	switch (t) {

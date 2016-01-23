@@ -1,4 +1,4 @@
-#include "printing.h"
+#include "../headers/printing.h"
 
 #include <stdio.h>
 #include <ctype.h>

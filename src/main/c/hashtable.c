@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include "hashtable.h"
+#include "../headers/hashtable.h"
 
 #include <string.h>
 #include <stdio.h>
