@@ -1,4 +1,4 @@
-#include "builtin.h"
+#include "../headers/builtin.h"
 
 /* Returns extracted element at index i, shifts list elements backwards to fill in where element was at */
 dval* dval_pop(dval* v, int i) {

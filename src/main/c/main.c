@@ -5,12 +5,12 @@
 #include <stdint.h>
 #include <readline/readline.h>
 
-#include "hashtable.h"
+#include "../headers/hashtable.h"
 #include "../../mpc/headers/mpc.h"
-#include "structures.h"
-#include "reading.h"
-#include "printing.h"
-#include "builtin.h"
+#include "../headers/structures.h"
+#include "../headers/reading.h"
+#include "../headers/printing.h"
+#include "../headers/builtin.h"
 
 /*
 static char buffer[2048];
