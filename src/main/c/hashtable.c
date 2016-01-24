@@ -6,7 +6,7 @@
 
 static char* mystrdup(const char* s) {
 	char* b;
-	if (!(b = malloc(strlen(s) + 1))) return NULL;
+	if (!(b = (char*)malloc(strlen(s) + 1))) return NULL;
 	strcpy(b, s);
 	return b;
 }
@@ -20,7 +20,7 @@ static hash_size def_hashfunc(const char* key) {
 HASHTBL* hashtbl_create(hash_size size, hash_size(*hashfunc)(const char*)) {
 	HASHTBL* hashtbl;
 
-	if (!(hashtbl = malloc(sizeof(HASHTBL)))) return NULL;
+	if (!(hashtbl = (HASHTBL*)malloc(sizeof(HASHTBL)))) return NULL;
 
 	if (!(hashtbl->nodes = calloc(size, sizeof(struct hashnode_s*)))) {
 		free(hashtbl);

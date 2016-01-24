@@ -45,7 +45,7 @@ typedef dval*(*dbuiltin)(denv*, dval*);
 union ddata {
 	long integer;
 	double doub;
-	byte byte : 8; // Fix this, this should be an unsigned char (byte) with 8 bits!
+	byte b : 8; // Fix this, this should be an unsigned char (byte) with 8 bits!
 	char character;
 	char* str;
 };

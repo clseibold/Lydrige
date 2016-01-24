@@ -2,22 +2,22 @@
 
 char* dtype_name(int t) {
 	switch (t) {
-	case DVAL_FUNC: return "Function";
-	case DDATA_INT: return "Integer";
-	case DDATA_DOUBLE: return "Double";
-	case DDATA_BYTE: return "Byte";
-	case DDATA_STRING: return "String";
-	case DVAL_ERR: return "Error";
-	case DVAL_SYM: return "Symbol";
-	case DVAL_SEXPR: return "S-Expression";
-	case DVAL_QEXPR: return "Q-Expression";
-	default: return "Unknown";
+	case DVAL_FUNC: return (char*)"Function";
+	case DDATA_INT: return (char*)"Integer";
+	case DDATA_DOUBLE: return (char*)"Double";
+	case DDATA_BYTE: return (char*)"Byte";
+	case DDATA_STRING: return (char*)"String";
+	case DVAL_ERR: return (char*)"Error";
+	case DVAL_SYM: return (char*)"Symbol";
+	case DVAL_SEXPR: return (char*)"S-Expression";
+	case DVAL_QEXPR: return (char*)"Q-Expression";
+	default: return (char*)"Unknown";
 	}
 }
 
 /* Constructors */
 denv* denv_new(void) {
-	denv* e = malloc(sizeof(denv));
+	denv* e = (denv*)malloc(sizeof(denv));
 	e->par = NULL;
 	e->count = 0;
 	/*e->syms = NULL;
@@ -30,59 +30,59 @@ denv* denv_new(void) {
 }
 
 dval* dval_int(long x) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_INT;
-	v->content = malloc(sizeof(ddata));
+	v->content = (ddata*)malloc(sizeof(ddata));
 	v->content->integer = x;
-	
+
 	return v;
 }
 
 dval* dval_double(double x) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_DOUBLE;
-	v->content = malloc(sizeof(ddata));
+	v->content = (ddata*)malloc(sizeof(ddata));
 	v->content->doub = x;
 	return v;
 }
 
 dval* dval_byte(byte x) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_BYTE;
-	v->content = malloc(sizeof(ddata));
-	v->content->byte = x;
+	v->content = (ddata*)malloc(sizeof(ddata));
+	v->content->b = x;
 	return v;
 }
 
 dval* dval_string(char* str) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_STRING;
-	v->content = malloc(sizeof(ddata));
-	v->content->str = malloc(strlen(str) + 1);
+	v->content = (ddata*)malloc(sizeof(ddata));
+	v->content->str = (char*)malloc(strlen(str) + 1);
 	strcpy(v->content->str, str);
 	return v;
 }
 
 dval* dval_char(char character) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_CHAR;
-	v->content = malloc(sizeof(ddata));
+	v->content = (ddata*)malloc(sizeof(ddata));
 	v->content->character = character;
 	return v;
 }
 
 dval* dval_err(char* fmt, ...) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_ERR;
 
 	va_list va;
 	va_start(va, fmt);
-	v->content = malloc(sizeof(ddata));
-	v->content->str = malloc(512);
+	v->content = (ddata*)malloc(sizeof(ddata));
+	v->content->str = (char*)malloc(512);
 
 	vsnprintf(v->content->str, 511, fmt, va);
 
-	v->content->str = realloc(v->content->str, strlen(v->content->str) + 1);
+	v->content->str = (char*)realloc(v->content->str, strlen(v->content->str) + 1);
 
 	va_end(va);
 
@@ -90,24 +90,24 @@ dval* dval_err(char* fmt, ...) {
 }
 
 dval* dval_sym(char* s) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
-	v->content = malloc(sizeof(ddata));
-	v->content->str = malloc(strlen(s) + 1);
+	v->content = (ddata*)malloc(sizeof(ddata));
+	v->content->str = (char*)malloc(strlen(s) + 1);
 	strcpy(v->content->str, s);
 	return v;
 }
 
 dval* dval_usym(char* s) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_USYM;
-	v->content->str = malloc(strlen(s) + 1);
+	v->content->str = (char*)malloc(strlen(s) + 1);
 	strcpy(v->content->str, s);
 	return v;
 }
 
 dval* dval_sexpr(void) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SEXPR;
 	v->count = 0;
 	v->cell = NULL;
@@ -115,7 +115,7 @@ dval* dval_sexpr(void) {
 }
 
 dval* dval_qexpr(void) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_QEXPR;
 	v->count = 0;
 	v->cell = NULL;
@@ -123,14 +123,14 @@ dval* dval_qexpr(void) {
 }
 
 dval* dval_func(dbuiltin func) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_FUNC;
 	v->builtin = func;
 	return v;
 }
 
 dval* dval_lambda(dval* formals, dval* body) {
-	dval* v = malloc(sizeof(dval));
+	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_FUNC;
 
 	v->builtin = NULL;
@@ -177,14 +177,14 @@ void dval_del(dval* v) {
 
 dval* dval_add(dval* v, dval* x) {
 	v->count++;
-	v->cell = realloc(v->cell, sizeof(dval*) * v->count);
+	v->cell = (dval**)realloc(v->cell, sizeof(dval*) * v->count);
 	v->cell[v->count - 1] = x;
 	return v;
 }
 
 /* Returns copy of given ddata */
 union ddata* ddata_copy(int type, union ddata* d) {
-	union ddata* x = malloc(sizeof(ddata));
+	union ddata* x = (ddata*)malloc(sizeof(ddata));
 
 	switch (type) {
 	case DDATA_INT:
@@ -192,11 +192,11 @@ union ddata* ddata_copy(int type, union ddata* d) {
 	case DDATA_DOUBLE:
 		x->doub = d->doub; break;
 	case DDATA_BYTE:
-		x->byte = d->byte; break;
+		x->b = d->b; break;
 	case DDATA_CHAR:
 		x->character = d->character; break;
 	case DDATA_STRING:
-		x->str = malloc(strlen(d->str) + 1);
+		x->str = (char*)malloc(strlen(d->str) + 1);
 		strcpy(x->str, d->str); break;
 	}
 
@@ -205,7 +205,7 @@ union ddata* ddata_copy(int type, union ddata* d) {
 
 /* Returns copy of given dval */
 dval* dval_copy(dval* v) {
-	dval* x = malloc(sizeof(dval));
+	dval* x = (dval*)malloc(sizeof(dval));
 	x->type = v->type;
 
 	switch (v->type) {
@@ -226,15 +226,15 @@ dval* dval_copy(dval* v) {
 	case DDATA_STRING:
 		x->content = ddata_copy(x->type, v->content); break;
 	case DVAL_ERR:
-		x->content->str = malloc(strlen(v->content->str) + 1);
+		x->content->str = (char*)malloc(strlen(v->content->str) + 1);
 		strcpy(x->content->str, v->content->str); break;
 	case DVAL_SYM:
-		x->content->str = malloc(strlen(v->content->str) + 1);
+		x->content->str = (char*)malloc(strlen(v->content->str) + 1);
 		strcpy(x->content->str, v->content->str); break;
 	case DVAL_SEXPR:
 	case DVAL_QEXPR:
 		x->count = v->count;
-		x->cell = malloc(sizeof(dval*) * x->count);
+		x->cell = (dval**)malloc(sizeof(dval*) * x->count);
 		for (int i = 0; i < x->count; i++) {
 			x->cell[i] = dval_copy(v->cell[i]);
 		}
@@ -244,7 +244,7 @@ dval* dval_copy(dval* v) {
 }
 
 denv* denv_copy(denv* e) { // There may be a problem with this
-	denv* n = malloc(sizeof(denv));
+	denv* n = (denv*)malloc(sizeof(denv));
 	n->par = e->par;
 	n->count = e->count;
 	n->hashtbl = hashtbl_create(0, NULL);

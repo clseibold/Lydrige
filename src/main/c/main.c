@@ -3,8 +3,25 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+
+#ifdef _WIN32
+static char buffer[2048];
+
+char* readline(char* prompt) {
+  fputs(prompt, stdout);
+  fgets(buffer, 2048, stdin);
+  char* cpy = malloc(strlen(buffer)+1);
+  strcpy(cpy, buffer);
+  cpy[strlen(cpy)-1] = '\0';
+  return cpy;
+}
+
+void add_history(char* unused) {}
+
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
+#endif
 
 #include "../headers/hashtable.h"
 #include "../../mpc/headers/mpc.h"
@@ -12,19 +29,6 @@
 #include "../headers/reading.h"
 #include "../headers/printing.h"
 #include "../headers/builtin.h"
-
-/*
-static char buffer[2048];
-
-char* readline(char* prompt) {
-	fputs(prompt, stdout);
-	fgets(buffer, 2048, stdin);
-	char* cpy = malloc(strlen(buffer) + 1);
-	strcpy(cpy, buffer);
-	cpy[strlen(cpy) - 1] = '\0';
-	return cpy;
-}
-*/
 
 int main(int argc, char** argv) {
 	Expr = mpc_new("expr");
@@ -46,16 +50,15 @@ int main(int argc, char** argv) {
 		data : <byte> | <double> | <integer> | <string> | <character> ; \
 		double : /-?[0-9]+\\.[0-9]+/ ; \
 		integer : /-?[0-9]+/ ; \
-		byte : /0x[0-9a-zA-Z][0-9a-zA-Z]/ ; \
+		byte : /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
 		string : /\"(\\\\.|[^\"])*\"/ ; \
 		character : /\'(\\\\.|[^\"])\'/ ; \
 		comment : /;[^\\r\\n]*/ ; \
-		symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.]+/ ; \
+		symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
 		sexpr : '(' <expr>* ')' ; \
 		qexpr : '{' <expr>* '}' ; \
 		line : /^/ <expr>* /$/ ; \
 		", Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, Sexpr, Qexpr, Line);
-
 
 	//printf("%d", sizeof(dval));
 
@@ -74,10 +77,10 @@ int main(int argc, char** argv) {
 			if (mpc_parse("<stdin>", input, Line, &r)) {
 				//mpc_ast_print(r.output);
 				// TODO: do Lexical Scoping here?
-				dval* x = dval_eval(e, dval_read(r.output));
+				dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
 				dval_println(x);
 				dval_del(x);
-				mpc_ast_delete(r.output);
+				mpc_ast_delete((mpc_ast_t*)r.output);
 			}
 			else {
 				mpc_err_print(r.error);
