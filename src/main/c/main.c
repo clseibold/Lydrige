@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 #include "../headers/hashtable.h"
 #include "../../mpc/headers/mpc.h"

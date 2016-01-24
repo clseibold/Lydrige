@@ -71,7 +71,7 @@ int dval_eq(dval* x, dval* y) {
 
 dval* denv_get(denv* e, dval* k) {
 	dval* d;
-	if (d = hashtbl_get(e->hashtbl, k->content->str)) {
+	if ((d = hashtbl_get(e->hashtbl, k->content->str))) {
 		return dval_copy(d);
 	}
 
@@ -439,9 +439,9 @@ dval* builtin_const(denv* e, dval* a) { // TODO
 		"Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", "const", syms->count, a->count - 1);
 
 	for (int i = 0; i < syms->count; i++) {
-		if (strcmp("def", "def") == 0) {
+		//if (strcmp("def", "def") == 0) {
 			denv_put(e, syms->cell[i], a->cell[i + 1], 1); // TODO: do differently?
-		}
+		//}
 	}
 
 	dval_del(a);
