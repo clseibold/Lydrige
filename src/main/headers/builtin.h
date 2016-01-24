@@ -3,6 +3,7 @@
 #include "structures.h"
 #include "printing.h"
 #include "reading.h"
+#include <math.h>
 #include "../../mpc/headers/mpc.h"
 
 dval* dval_pop(dval* v, int i);

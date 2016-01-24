@@ -17,9 +17,9 @@ void dval_expr_print(dval* v, char open, char close) {
 }
 
 void dval_print_str(dval* v) {
-	char* escaped = malloc(strlen(v->content->str) + 1);
+	char* escaped = (char*)malloc(strlen(v->content->str) + 1);
 	strcpy(escaped, v->content->str);
-	escaped = mpcf_escape(escaped);
+	escaped = (char*)mpcf_escape(escaped);
 	printf("\"%s\"", escaped); // Should this have quotes?!
 	free(escaped);
 }
@@ -37,7 +37,7 @@ void dval_print(dval* v) {
 		printf("%f", v->content->doub);
 		break;
 	case DDATA_BYTE:
-		printf("0x%X", v->content->byte);
+		printf("0x%X", v->content->b);
 		break;
 	case DDATA_STRING:
 		dval_print_str(v); break;

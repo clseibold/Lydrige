@@ -8,7 +8,7 @@ dval* dval_pop(dval* v, int i) {
 
 	v->count--;
 
-	v->cell = realloc(v->cell, sizeof(dval*) * v->count);
+	v->cell = (dval**)realloc(v->cell, sizeof(dval*) * v->count);
 	return x;
 }
 
@@ -40,7 +40,7 @@ int dval_eq(dval* x, dval* y) {
 	case DDATA_DOUBLE:
 		return (x->content->doub == y->content->doub);
 	case DDATA_BYTE:
-		return (x->content->byte == y->content->byte);
+		return (x->content->b == y->content->b);
 	case DDATA_STRING:
 		return (strcmp(x->content->str, y->content->str) == 0);
 	case DVAL_ERR:
@@ -71,7 +71,7 @@ int dval_eq(dval* x, dval* y) {
 
 dval* denv_get(denv* e, dval* k) {
 	dval* d;
-	if ((d = hashtbl_get(e->hashtbl, k->content->str))) {
+	if ((d = (dval*)hashtbl_get(e->hashtbl, k->content->str))) {
 		return dval_copy(d);
 	}
 
@@ -79,7 +79,7 @@ dval* denv_get(denv* e, dval* k) {
 		return denv_get(e->par, k);
 	}
 	// TODO: Return unbound symbol type!
-	return dval_err("Unbound symbol '%s'", k->content->str);
+	return dval_err((char*)"Unbound symbol '%s'", k->content->str);
 	// dval_usym(k->sym);
 }
 
@@ -117,9 +117,9 @@ void denv_def(denv* e, dval* k, dval* v, int constant) {
 /* Returns length of given Q-Expression */
 dval* builtin_len(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'eval' passed too many arguments.");
+		(char*) "Funcion 'eval' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'eval' passed incorrect types.");
+		(char*) "Function 'eval' passed incorrect types.");
 
 	dval* x = dval_int(a->cell[0]->count);
 	dval_del(a);
@@ -129,11 +129,11 @@ dval* builtin_len(denv* e, dval* a) {
 /* Returns Q-Expression of first element given a Q-Expression */
 dval* builtin_first(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'first' passed too many arguments.");
+		(char*) "Funcion 'first' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'first' passed incorrect types.");
+		(char*) "Function 'first' passed incorrect types.");
 	LASSERT(a, a->cell[0]->count != 0,
-		"Function 'first' passed {}.");
+		(char*) "Function 'first' passed {}.");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -148,11 +148,11 @@ dval* builtin_first(denv* e, dval* a) {
 /* Returns Q-Expression of last element given a Q-Expression */
 dval* builtin_last(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'first' passed too many arguments.");
+		(char*) "Funcion 'first' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'first' passed incorrect types.");
+		(char*) "Function 'first' passed incorrect types.");
 	LASSERT(a, a->cell[0]->count != 0,
-		"Function 'first' passed {}.");
+		(char*) "Function 'first' passed {}.");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -167,11 +167,11 @@ dval* builtin_last(denv* e, dval* a) {
 /* Returns Q-Expression with first element removed given a Q-Expression */
 dval* builtin_head(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'tail' passed too many arguments.");
+		(char*) "Funcion 'tail' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'tail' passed incorrect types.");
+		(char*) "Function 'tail' passed incorrect types.");
 	LASSERT(a, a->cell[0]->count != 0,
-		"Function 'tail' passed {}.");
+		(char*) "Function 'tail' passed {}.");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -183,11 +183,11 @@ dval* builtin_head(denv* e, dval* a) {
 /* Returns Q-Expression with last element removed given a Q-Expression*/
 dval* builtin_tail(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'tail' passed too many arguments.");
+		(char*) "Funcion 'tail' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'tail' passed incorrect types.");
+		(char*) "Function 'tail' passed incorrect types.");
 	LASSERT(a, a->cell[0]->count != 0,
-		"Function 'tail' passed {}.");
+		(char*) "Function 'tail' passed {}.");
 
 	dval* v = dval_take(a, 0);
 	dval_del(dval_pop(v, 0));
@@ -203,9 +203,9 @@ dval* builtin_list(denv* e, dval* a) {
 /* Evaluates a Q-Expression as if it were an S-Expression */
 dval* builtin_eval(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		"Funcion 'eval' passed too many arguments.");
+		(char*) "Funcion 'eval' passed too many arguments.");
 	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		"Function 'eval' passed incorrect types.");
+		(char*) "Function 'eval' passed incorrect types.");
 
 	dval* x = dval_take(a, 0);
 	x->type = DVAL_SEXPR;
@@ -223,7 +223,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	while (a->count) {
 		if (f->formals->count == 0) {
 			dval_del(a); return dval_err(
-				"Function passed too many arguments. Got %i, Expected %i.", given, total);
+				(char*)"Function passed too many arguments. Got %i, Expected %i.", given, total);
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
@@ -231,7 +231,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		if (strcmp(sym->content->str, "&") == 0) {
 			if (f->formals->count != 1) {
 				dval_del(a);
-				return dval_err("Function format invalid. Symbol '&' not followed by single symbol.");
+				return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
 			}
 
 			dval* nsym = dval_pop(f->formals, 0);
@@ -250,7 +250,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	if (f->formals->count > 0 && strcmp(f->formals->cell[0]->content->str, "&") == 0) {
 		if (f->formals->count != 2) {
-			return dval_err("Function format invalid. Symbol '&' not followed by single symbol.");
+			return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
 		}
 
 		dval_del(dval_pop(f->formals, 0));
@@ -275,7 +275,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 dval* builtin_join(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
 		LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-			"Function 'join' passed incorrect type.");
+			(char*) "Function 'join' passed incorrect type.");
 	}
 
 	dval* x = dval_pop(a, 0);
@@ -292,7 +292,7 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	for (int i = 0; i < a->count; i++) {
 		if ((a->cell[i]->type != DDATA_INT) && a->cell[i]->type != DDATA_DOUBLE) {
 			dval_del(a);
-			return dval_err("Cannot operate on non-number!");
+			return dval_err((char*)"Cannot operate on non-number!");
 		}
 	}
 
@@ -320,13 +320,14 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 				if (strcmp(op, "/") == 0) {
 					if (y->content->doub == 0) {
 						dval_del(x); dval_del(y);
-						x = dval_err("Division By Zero!"); break;
+						x = dval_err((char*)"Division By Zero!"); break;
 					}
 					x->content->doub /= y->content->doub;
 				}
 				if (strcmp(op, "%") == 0) {
-					x = dval_err("Must use integers with modulus function.");
+					x = dval_err((char*)"Must use integers with modulus function.");
 				}
+				if (strcmp(op, "^") == 0) x->content->doub = pow(x->content->doub, y->content->doub);
 			}
 			else {
 				if (strcmp(op, "+") == 0) { x->content->doub += (double)(y->content->integer); }
@@ -335,13 +336,14 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 				if (strcmp(op, "/") == 0) {
 					if (y->content->integer == 0) {
 						dval_del(x); dval_del(y);
-						x = dval_err("Division By Zero!"); break;
+						x = dval_err((char*)"Division By Zero!"); break;
 					}
 					x->content->doub /= (double)(y->content->integer);
 				}
 				if (strcmp(op, "%") == 0) {
-					x = dval_err("Must use integers with modulus function.");
+					x = dval_err((char*)"Must use integers with modulus function.");
 				}
+				if (strcmp(op, "^") == 0) x->content->doub = pow(x->content->doub, (double)y->content->integer);
 			}
 		}
 		else {
@@ -353,13 +355,14 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 				if (strcmp(op, "/") == 0) {
 					if (y->content->doub == 0) {
 						dval_del(x); dval_del(y);
-						x = dval_err("Division By Zero!"); break;
+						x = dval_err((char*)"Division By Zero!"); break;
 					}
 					x->content->doub = xNum / y->content->doub;
 				}
 				if (strcmp(op, "%") == 0) {
-					x = dval_err("Must use integers with modulus function.");
+					x = dval_err((char*)"Must use integers with modulus function.");
 				}
+				if (strcmp(op, "^") == 0) x->content->doub = pow(xNum, y->content->doub);
 				x->type = DDATA_DOUBLE;
 				xIsDoub = 1;
 			}
@@ -370,17 +373,18 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 				if (strcmp(op, "/") == 0) {
 					if (y->content->integer == 0) {
 						dval_del(x); dval_del(y);
-						x = dval_err("Division By Zero!"); break;
+						x = dval_err((char*)"Division By Zero!"); break;
 					}
 					x->content->integer /= y->content->integer;
 				}
 				if (strcmp(op, "%") == 0) {
 					if (y->content->integer == 0) {
 						dval_del(x); dval_del(y);
-						x = dval_err("Modulus By Zero!"); break;
+						x = dval_err((char*)"Modulus By Zero!"); break;
 					}
 					x->content->integer %= y->content->integer;
 				}
+				if (strcmp(op, "^") == 0) x->content->integer = pow(x->content->integer, y->content->integer);
 			}
 		}
 		dval_del(y);
@@ -396,13 +400,13 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 	dval* syms = a->cell[0];
 	for (int i = 0; i < syms->count; i++) {
 		LASSERT(a, (syms->cell[i]->type == DVAL_SYM),
-			"Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
+			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
 			dtype_name(syms->cell[i]->type),
 			dtype_name(DVAL_SYM));
 	}
 
 	LASSERT(a, (syms->count == a->count - 1),
-		"Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
+		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
 
 	for (int i = 0; i < syms->count; i++) {
 		if (strcmp(func, "def") == 0) {
@@ -419,24 +423,24 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 }
 
 dval* builtin_def(denv* e, dval* a) {
-	return builtin_var(e, a, "def");
+	return builtin_var(e, a, (char*)"def");
 }
 
 dval* builtin_const(denv* e, dval* a) { // TODO
 	//LASSERT_NUM("const", a, 2); // const func {varNameAsUSYM} varValue, func - def or =
 	// LASSERT_TYPE("const", a, 0, DVAL_FUNC);
-	LASSERT_TYPE("const", a, 0, DVAL_QEXPR); // TODO: do differently?
+	LASSERT_TYPE((char*) "const", a, 0, DVAL_QEXPR); // TODO: do differently?
 
 	dval* syms = a->cell[0];
 	for (int i = 0; i < syms->count; i++) {
 		LASSERT(a, (syms->cell[i]->type == DVAL_SYM),
-			"Function '%s' cannot define non-symbol. Got %s, Expected %s.", "const",
+			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", "const",
 			dtype_name(syms->cell[i]->type),
 			dtype_name(DVAL_SYM));
 	}
 
 	LASSERT(a, (syms->count == a->count - 1),
-		"Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", "const", syms->count, a->count - 1);
+		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", "const", syms->count, a->count - 1);
 
 	for (int i = 0; i < syms->count; i++) {
 		//if (strcmp("def", "def") == 0) {
@@ -449,17 +453,17 @@ dval* builtin_const(denv* e, dval* a) { // TODO
 }
 
 dval* builtin_put(denv* e, dval* a) {
-	return builtin_var(e, a, "=");
+	return builtin_var(e, a, (char*)"=");
 }
 
 dval* builtin_lambda(denv* e, dval* a) {
-	LASSERT_NUM("\\", a, 2);
-	LASSERT_TYPE("\\", a, 0, DVAL_QEXPR);
-	LASSERT_TYPE("\\", a, 1, DVAL_QEXPR);
+	LASSERT_NUM((char*) "\\", a, 2);
+	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
+	LASSERT_TYPE((char*) "\\", a, 1, DVAL_QEXPR);
 
 	for (int i = 0; i < a->cell[0]->count; i++) {
 		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
-			"Cannot define non-symbol. Got %s, Expected %s.",
+			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
 	}
 
@@ -471,23 +475,27 @@ dval* builtin_lambda(denv* e, dval* a) {
 }
 
 dval* builtin_add(denv* e, dval* a) {
-	return builtin_op(e, a, "+");
+	return builtin_op(e, a, (char*)"+");
 }
 
 dval* builtin_sub(denv* e, dval* a) {
-	return builtin_op(e, a, "-");
+	return builtin_op(e, a, (char*)"-");
 }
 
 dval* builtin_mul(denv* e, dval* a) {
-	return builtin_op(e, a, "*");
+	return builtin_op(e, a, (char*)"*");
 }
 
 dval* builtin_div(denv* e, dval* a) {
-	return builtin_op(e, a, "/");
+	return builtin_op(e, a, (char*)"/");
 }
 
 dval* builtin_mod(denv* e, dval* a) {
-	return builtin_op(e, a, "%");
+	return builtin_op(e, a, (char*)"%");
+}
+
+dval* builtin_pow(denv* e, dval* a) {
+	return builtin_op(e, a, (char*)"^");
 }
 
 dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, strings, and characters!
@@ -517,19 +525,19 @@ dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, s
 }
 
 dval* builtin_gt(denv* e, dval* a) {
-	return builtin_ord(e, a, ">");
+	return builtin_ord(e, a, (char*)">");
 }
 
 dval* builtin_lt(denv* e, dval* a) {
-	return builtin_ord(e, a, "<");
+	return builtin_ord(e, a, (char*)"<");
 }
 
 dval* builtin_ge(denv* e, dval* a) {
-	return builtin_ord(e, a, ">=");
+	return builtin_ord(e, a, (char*)">=");
 }
 
 dval* builtin_le(denv* e, dval* a) {
-	return builtin_ord(e, a, "<=");
+	return builtin_ord(e, a, (char*)"<=");
 }
 
 dval* builtin_cmp(denv* e, dval* a, char* op) {
@@ -546,11 +554,11 @@ dval* builtin_cmp(denv* e, dval* a, char* op) {
 }
 
 dval* builtin_eq(denv* e, dval* a) {
-	return builtin_cmp(e, a, "==");
+	return builtin_cmp(e, a, (char*)"==");
 }
 
 dval* builtin_ne(denv* e, dval* a) {
-	return builtin_cmp(e, a, "!=");
+	return builtin_cmp(e, a, (char*)"!=");
 }
 
 dval* builtin_not(denv* e, dval* a) {
@@ -571,7 +579,7 @@ dval* builtin_not(denv* e, dval* a) {
 
 dval* builtin_and(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE("and", a, a->cell[i]->type, DDATA_INT);
+		LASSERT_TYPE((char*) "and", a, a->cell[i]->type, DDATA_INT);
 	}
 
 	int current = a->cell[0]->content->integer;
@@ -587,7 +595,7 @@ dval* builtin_and(denv* e, dval* a) {
 
 dval* builtin_or(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE("or", a, a->cell[i]->type, DDATA_INT);
+		LASSERT_TYPE((char*) "or", a, a->cell[i]->type, DDATA_INT);
 	}
 
 	int current = a->cell[0]->content->integer;
@@ -601,15 +609,15 @@ dval* builtin_or(denv* e, dval* a) {
 }
 
 /*dval* builtin_min(denv* e, dval* a) { // TODO
-	
+
 
 }*/
 
 dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
-	LASSERT_NUM("if", a, 3);
-	LASSERT_TYPE("if", a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE);
-	LASSERT_TYPE("if", a, 1, DVAL_QEXPR);
-	LASSERT_TYPE("if", a, 2, DVAL_QEXPR);
+	LASSERT_NUM((char*) "if", a, 3);
+	LASSERT_TYPE((char*) "if", a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE);
+	LASSERT_TYPE((char*) "if", a, 1, DVAL_QEXPR);
+	LASSERT_TYPE((char*) "if", a, 2, DVAL_QEXPR);
 
 	dval* x;
 	a->cell[1]->type = DVAL_SEXPR;
@@ -627,13 +635,13 @@ dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
 }
 
 dval* builtin_load(denv* e, dval* a) {
-	LASSERT_NUM("load", a, 1);
-	LASSERT_TYPE("load", a, 0, DDATA_STRING);
+	LASSERT_NUM((char*) "load", a, 1);
+	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
 
 	mpc_result_t r;
 	if (mpc_parse_contents(a->cell[0]->content->str, Line, &r)) {
-		dval* expr = dval_read(r.output);
-		mpc_ast_delete(r.output);
+		dval* expr = dval_read((mpc_ast_t*)r.output);
+		mpc_ast_delete((mpc_ast_t*)r.output);
 
 		while (expr->count) {
 			dval* x = dval_eval(e, dval_pop(expr, 0));
@@ -647,12 +655,11 @@ dval* builtin_load(denv* e, dval* a) {
 		dval_del(a);
 
 		return dval_sexpr();
-	}
-	else {
-		char* err_msg = mpc_err_string(r.output);
-		mpc_err_delete(r.output);
+	} else {
+		char* err_msg = mpc_err_string(r.error);
+		mpc_err_delete(r.error);
 
-		dval* err = dval_err("Could not load Library %s", err_msg);
+		dval* err = dval_err((char*)"Could not load Library %s", err_msg);
 		free(err_msg);
 		dval_del(a);
 
@@ -679,8 +686,8 @@ dval* builtin_print(denv* e, dval* a) {
 }
 
 dval* builtin_error(denv* e, dval* a) {
-	LASSERT_NUM("error", a, 1);
-	LASSERT_TYPE("error", a, 0, DDATA_STRING);
+	LASSERT_NUM((char*) "error", a, 1);
+	LASSERT_TYPE((char*) "error", a, 0, DDATA_STRING);
 
 	dval* err = dval_err(a->cell[0]->content->str);
 
@@ -696,9 +703,6 @@ dval* builtin_exit(denv* e, dval* a) {
 dval* dval_eval_sexpr(denv* e, dval* v) {
 	for (int i = 0; i < v->count; i++) {
 		v->cell[i] = dval_eval(e, v->cell[i]);
-	}
-
-	for (int i = 0; i < v->count; i++) {
 		if (v->cell[i]->type == DVAL_ERR) {
 			return dval_take(v, i);
 		}
@@ -715,7 +719,7 @@ dval* dval_eval_sexpr(denv* e, dval* v) {
 	dval* f = dval_pop(v, 0);
 	if (f->type != DVAL_FUNC) {
 		dval* err = dval_err(
-			"S-Expression starts with incorrect type. Got %s, Expected %s.",
+			(char*)"S-Expression starts with incorrect type. Got %s, Expected %s.",
 			dtype_name(f->type), dtype_name(DVAL_FUNC));
 		dval_del(v); dval_del(f);
 		return err;
@@ -746,40 +750,41 @@ void denv_add_builtin(denv* e, char* name, dbuiltin func) {
 }
 
 void denv_add_builtins(denv* e) {
-	denv_add_builtin(e, "list", builtin_list);
-	denv_add_builtin(e, "first", builtin_first);
-	denv_add_builtin(e, "last", builtin_last);
-	denv_add_builtin(e, "head", builtin_head);
-	denv_add_builtin(e, "tail", builtin_tail);
-	denv_add_builtin(e, "eval", builtin_eval);
-	denv_add_builtin(e, "join", builtin_join);
-	denv_add_builtin(e, "len", builtin_len);
+	denv_add_builtin(e, (char*)"list", builtin_list);
+	denv_add_builtin(e, (char*)"first", builtin_first);
+	denv_add_builtin(e, (char*)"last", builtin_last);
+	denv_add_builtin(e, (char*)"head", builtin_head);
+	denv_add_builtin(e, (char*)"tail", builtin_tail);
+	denv_add_builtin(e, (char*)"eval", builtin_eval);
+	denv_add_builtin(e, (char*)"join", builtin_join);
+	denv_add_builtin(e, (char*)"len", builtin_len);
 
-	denv_add_builtin(e, "+", builtin_add);
-	denv_add_builtin(e, "-", builtin_sub);
-	denv_add_builtin(e, "*", builtin_mul);
-	denv_add_builtin(e, "/", builtin_div);
-	denv_add_builtin(e, "%", builtin_mod);
+	denv_add_builtin(e, (char*)"+", builtin_add);
+	denv_add_builtin(e, (char*)"-", builtin_sub);
+	denv_add_builtin(e, (char*)"*", builtin_mul);
+	denv_add_builtin(e, (char*)"/", builtin_div);
+	denv_add_builtin(e, (char*)"%", builtin_mod);
+	denv_add_builtin(e, (char*)"^", builtin_pow);
 
-	denv_add_builtin(e, "def", builtin_def);
-	denv_add_builtin(e, "const", builtin_const); // TODO
-	denv_add_builtin(e, "=", builtin_put);
-	denv_add_builtin(e, "\\", builtin_lambda);
-	denv_add_builtin(e, "lambda", builtin_lambda);
+	denv_add_builtin(e, (char*)"def", builtin_def);
+	denv_add_builtin(e, (char*)"const", builtin_const); // TODO
+	denv_add_builtin(e, (char*)"=", builtin_put);
+	denv_add_builtin(e, (char*)"\\", builtin_lambda);
+	denv_add_builtin(e, (char*)"lambda", builtin_lambda);
 
-	denv_add_builtin(e, "if", builtin_if);
-	denv_add_builtin(e, "==", builtin_eq);
-	denv_add_builtin(e, "!=", builtin_ne);
-	denv_add_builtin(e, ">", builtin_gt);
-	denv_add_builtin(e, "<", builtin_lt);
-	denv_add_builtin(e, ">=", builtin_ge);
-	denv_add_builtin(e, "<=", builtin_le);
-	denv_add_builtin(e, "!", builtin_not);
-	denv_add_builtin(e, "and", builtin_and);
-	denv_add_builtin(e, "or", builtin_or);
+	denv_add_builtin(e, (char*)"if", builtin_if);
+	denv_add_builtin(e, (char*)"==", builtin_eq);
+	denv_add_builtin(e, (char*)"!=", builtin_ne);
+	denv_add_builtin(e, (char*)">", builtin_gt);
+	denv_add_builtin(e, (char*)"<", builtin_lt);
+	denv_add_builtin(e, (char*)">=", builtin_ge);
+	denv_add_builtin(e, (char*)"<=", builtin_le);
+	denv_add_builtin(e, (char*)"!", builtin_not);
+	denv_add_builtin(e, (char*)"and", builtin_and);
+	denv_add_builtin(e, (char*)"or", builtin_or);
 
-	denv_add_builtin(e, "print", builtin_print);
-	denv_add_builtin(e, "error", builtin_error);
-	denv_add_builtin(e, "load", builtin_load);
-	denv_add_builtin(e, "exit", builtin_exit);
+	denv_add_builtin(e, (char*)"print", builtin_print);
+	denv_add_builtin(e, (char*)"error", builtin_error);
+	denv_add_builtin(e, (char*)"load", builtin_load);
+	denv_add_builtin(e, (char*)"exit", builtin_exit);
 }
