@@ -40,25 +40,27 @@ int main(int argc, char** argv) {
 	String = mpc_new("string");
 	Character = mpc_new("character");
 	Symbol = mpc_new("symbol");
+	List = mpc_new("list");
 	Sexpr = mpc_new("sexpr");
 	Qexpr = mpc_new("qexpr");
 	Line = mpc_new("line");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
-		expr : <data> | <symbol> | <sexpr> | <qexpr> | <comment> ; \
-		data : <byte> | <double> | <integer> | <string> | <character> ; \
-		double : /-?[0-9]+\\.[0-9]+/ ; \
-		integer : /-?[0-9]+/ ; \
-		byte : /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
-		string : /\"(\\\\.|[^\"])*\"/ ; \
-		character : /\'(\\\\.|[^\"])\'/ ; \
-		comment : /;[^\\r\\n]*/ ; \
-		symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
-		sexpr : '(' <expr>* ')' ; \
-		qexpr : '{' <expr>* '}' ; \
-		line : /^/ <expr>* /$/ ; \
-		", Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, Sexpr, Qexpr, Line);
+		expr		: <data> | <symbol> | <sexpr> | <qexpr> | <list> | <comment> ; \
+		data		: <byte> | <double> | <integer> | <string> | <character> ; \
+		double		: /-?[0-9]+\\.[0-9]+/ ; \
+		integer		: /-?[0-9]+/ ; \
+		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
+		string		: /\"(\\\\.|[^\"])*\"/ ; \
+		character	: /\'(\\\\.|[^\"])\'/ ; \
+		comment		: /;[^\\r\\n]*/ ; \
+		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
+		list		: '[' <expr>* ']' ; \
+		sexpr		: '(' <expr>* ')' ; \
+		qexpr		: '{' <expr>* '}' ; \
+		line		: /^/ <expr>* /$/ ; \
+		", Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
 
 	//printf("%d", sizeof(dval));
 
@@ -101,6 +103,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(12, Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, Sexpr, Qexpr, Line);
+	mpc_cleanup(13, Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
 	return 0;
 }

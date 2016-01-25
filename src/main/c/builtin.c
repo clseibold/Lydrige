@@ -56,6 +56,7 @@ int dval_eq(dval* x, dval* y) {
 		else {
 			return dval_eq(x->formals, y->formals) && dval_eq(x->body, y->body);
 		}
+	case DVAL_LIST:
 	case DVAL_QEXPR:
 	case DVAL_SEXPR:
 		if (x->count != y->count) {
@@ -119,23 +120,23 @@ void denv_def(denv* e, dval* k, dval* v, int constant) {
 /* Returns length of given Q-Expression */
 dval* builtin_len(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'eval' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		(char*) "Function 'eval' passed incorrect types.");
+		(char*) "Funcion 'len' passed too many arguments.");
+	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		(char*) "Function 'len' passed incorrect type.");
 
 	dval* x = dval_int(a->cell[0]->count);
 	dval_del(a);
 	return x;
 }
 
-/* Returns Q-Expression of first element given a Q-Expression */
+/* Returns Q-Expression of first element given a Q-Expression or List Literal */
 dval* builtin_first(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
 		(char*) "Funcion 'first' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		(char*) "Function 'first' passed incorrect types.");
+	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		(char*) "Function 'first' passed incorrect type.");
 	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'first' passed {}.");
+		(char*) "Function 'first' passed {} or [].");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -150,11 +151,11 @@ dval* builtin_first(denv* e, dval* a) {
 /* Returns Q-Expression of last element given a Q-Expression */
 dval* builtin_last(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'first' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		(char*) "Function 'first' passed incorrect types.");
+		(char*) "Funcion 'last' passed too many arguments.");
+	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		(char*) "Function 'last' passed incorrect type.");
 	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'first' passed {}.");
+		(char*) "Function 'last' passed {} or [].");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -169,11 +170,11 @@ dval* builtin_last(denv* e, dval* a) {
 /* Returns Q-Expression with first element removed given a Q-Expression */
 dval* builtin_head(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'tail' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		(char*) "Function 'tail' passed incorrect types.");
+		(char*) "Funcion 'head' passed too many arguments.");
+	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		(char*) "Function 'head' passed incorrect type.");
 	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'tail' passed {}.");
+		(char*) "Function 'head' passed {} or [].");
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -184,12 +185,10 @@ dval* builtin_head(denv* e, dval* a) {
 
 /* Returns Q-Expression with last element removed given a Q-Expression*/
 dval* builtin_tail(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'tail' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-		(char*) "Function 'tail' passed incorrect types.");
-	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'tail' passed {}.");
+	LASSERT_NUM((char*) "tail", a, 1);
+	LASSERT_MTYPE("tail", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST, \
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("tail", a, 0);
 
 	dval* v = dval_take(a, 0);
 	dval_del(dval_pop(v, 0));
@@ -202,11 +201,11 @@ dval* builtin_list(denv* e, dval* a) {
 	return a;
 }
 
-/* Evaluates a Q-Expression as if it were an S-Expression */
+/* Evaluates a Q-Expression or List Literal as if it were an S-Expression */
 dval* builtin_eval(denv* e, dval* a) {
 	LASSERT(a, a->count == 1,
 		(char*) "Funcion 'eval' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
+	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
 		(char*) "Function 'eval' passed incorrect types.");
 
 	dval* x = dval_take(a, 0);
@@ -273,11 +272,11 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	}
 }
 
-/* Returns Q-Expression joining one or more of given Q-Expressions */
-dval* builtin_join(denv* e, dval* a) {
+/* Returns Q-Expression or List Literal joining one or more of given Q-Expressions or List Literals */
+dval* builtin_join(denv* e, dval* a) { // TODO: Allow List Literal
 	for (int i = 0; i < a->count; i++) {
-		LASSERT(a, a->cell[0]->type == DVAL_QEXPR,
-			(char*) "Function 'join' passed incorrect type.");
+		LASSERT_MTYPE("join", a, i, a->cell[i]->type == DVAL_QEXPR || a->cell[i]->type == DVAL_LIST, \
+			"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 	}
 
 	dval* x = dval_pop(a, 0);
@@ -292,10 +291,8 @@ dval* builtin_join(denv* e, dval* a) {
 
 dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	for (int i = 0; i < a->count; i++) {
-		if ((a->cell[i]->type != DDATA_INT) && a->cell[i]->type != DDATA_DOUBLE) {
-			dval_del(a);
-			return dval_err((char*)"Cannot operate on non-number!");
-		}
+		LASSERT_MTYPE(op, a, i, a->cell[i]->type == DDATA_INT || a->cell[i]->type == DDATA_DOUBLE, \
+			"%s or %s.", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE));
 	}
 
 	dval* x = dval_pop(a, 0);
@@ -397,7 +394,7 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 }
 
 dval* builtin_var(denv* e, dval* a, char* func) {
-	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
+	LASSERT_TYPE(func, a, 0, DVAL_QEXPR); // Allow List Literals???
 
 	dval* syms = a->cell[0];
 	for (int i = 0; i < syms->count; i++) {
@@ -428,7 +425,7 @@ dval* builtin_def(denv* e, dval* a) {
 	return builtin_var(e, a, (char*)"def");
 }
 
-dval* builtin_const(denv* e, dval* a) {
+dval* builtin_const(denv* e, dval* a) { // TODO: Allow List Literals
 	//LASSERT_NUM("const", a, 2); // const func {varNameAsUSYM} varValue, func - def or =
 	// LASSERT_TYPE("const", a, 0, DVAL_FUNC);
 	LASSERT_TYPE((char*) "const", a, 0, DVAL_QEXPR); // TODO: do differently?
@@ -458,7 +455,9 @@ dval* builtin_put(denv* e, dval* a) {
 	return builtin_var(e, a, (char*)"=");
 }
 
-dval* builtin_lambda(denv* e, dval* a) {
+/* (\ {x} {+ x 1}) */
+// TODO: Segmentation Fault on call of lambda variable/symbol
+dval* builtin_lambda(denv* e, dval* a) { // TODO: Allow List Literals
 	LASSERT_NUM((char*) "\\", a, 2);
 	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
 	LASSERT_TYPE((char*) "\\", a, 1, DVAL_QEXPR);
@@ -502,8 +501,12 @@ dval* builtin_pow(denv* e, dval* a) {
 
 dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, strings, and characters!
 	LASSERT_NUM(op, a, 2);
-	LASSERT_TYPE(op, a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
-	LASSERT_TYPE(op, a, 1, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
+	LASSERT_MTYPE(op, a, 0, a->cell[0]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE || a->cell[0]->type == DDATA_CHAR, \
+		"%s, %s, %s, or %s", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE), dtype_name(DDATA_CHAR));
+	LASSERT_MTYPE(op, a, 1, a->cell[1]->type == DDATA_INT || a->cell[1]->type == DDATA_DOUBLE || a->cell[1]->type == DDATA_BYTE || a->cell[1]->type == DDATA_CHAR, \
+		"%s, %s, %s, or %s", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE), dtype_name(DDATA_CHAR));
+	//LASSERT_TYPE(op, a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
+	// LASSERT_TYPE(op, a, 1, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
 
 	int r;
 
@@ -555,7 +558,7 @@ dval* builtin_cmp(denv* e, dval* a, char* op) {
 	return dval_int(r);
 }
 
-dval* builtin_eq(denv* e, dval* a) {
+dval* builtin_eq(denv* e, dval* a) { // TODO: Allow comparing to more than two dvals
 	return builtin_cmp(e, a, (char*)"==");
 }
 
@@ -597,7 +600,7 @@ dval* builtin_and(denv* e, dval* a) {
 
 dval* builtin_or(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE((char*) "or", a, a->cell[i]->type, DDATA_INT);
+		LASSERT_TYPE((char*) "or", a, a->cell[i]->type, DDATA_INT); // TODO: Is this correct?
 	}
 
 	int current = a->cell[0]->content->integer;
@@ -615,11 +618,14 @@ dval* builtin_or(denv* e, dval* a) {
 
 }*/
 
-dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
+dval* builtin_if(denv* e, dval* a) { // Make work with bytes and List Literals!
 	LASSERT_NUM((char*) "if", a, 3);
-	LASSERT_TYPE((char*) "if", a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE);
-	LASSERT_TYPE((char*) "if", a, 1, DVAL_QEXPR);
-	LASSERT_TYPE((char*) "if", a, 2, DVAL_QEXPR);
+	LASSERT_MTYPE("if", a, 0, a->cell[0]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE, \
+		"%s, %s, or %s.", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE));
+	LASSERT_MTYPE("if", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST, \
+		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_MTYPE("if", a, 2, a->cell[2]->type == DVAL_QEXPR || a->cell[2]->type == DVAL_LIST, \
+		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	dval* x;
 	a->cell[1]->type = DVAL_SEXPR;
@@ -636,7 +642,7 @@ dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
 	return x;
 }
 
-dval* builtin_load(denv* e, dval* a) {
+dval* builtin_load(denv* e, dval* a) { // TODO: BUGGY
 	LASSERT_NUM((char*) "load", a, 1);
 	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
 
@@ -732,6 +738,21 @@ dval* dval_eval_sexpr(denv* e, dval* v) {
 	return result;
 }
 
+dval* dval_eval_list(denv* e, dval* v) {
+	for (int i = 0; i < v->count; i++) {
+		v->cell[i] = dval_eval(e, v->cell[i]);
+		if (v->cell[i]->type == DVAL_ERR) {
+			return dval_take(v, i);
+		}
+	}
+
+	if (v->count == 0) {
+		return v;
+	}
+
+	return v;
+}
+
 dval* dval_eval(denv* e, dval* v) {
 	if (v->type == DVAL_SYM) {
 		dval* x = denv_get(e, v);
@@ -740,6 +761,8 @@ dval* dval_eval(denv* e, dval* v) {
 	}
 	if (v->type == DVAL_SEXPR) {
 		return dval_eval_sexpr(e, v);
+	} else if (v->type == DVAL_LIST) {
+		return dval_eval_list(e, v);
 	}
 	return v;
 }

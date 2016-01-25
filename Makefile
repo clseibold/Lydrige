@@ -1,4 +1,4 @@
-default: build/main
+default: all
 all: clean main dev
 all-dev: clean dev run-dev
 all-main: clean main run

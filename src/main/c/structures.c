@@ -10,6 +10,7 @@ char* dtype_name(int t) {
 	case DDATA_STRING: return (char*)"String";
 	case DVAL_ERR: return (char*)"Error";
 	case DVAL_SYM: return (char*)"Symbol";
+	case DVAL_LIST: return (char*)"List";
 	case DVAL_SEXPR: return (char*)"S-Expression";
 	case DVAL_QEXPR: return (char*)"Q-Expression";
 	default: return (char*)"Unknown";
@@ -123,6 +124,14 @@ dval* dval_qexpr(void) {
 	return v;
 }
 
+dval* dval_list(void) {
+	dval* v = (dval*) malloc(sizeof(dval));
+	v->type = DVAL_LIST;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 dval* dval_func(dbuiltin func) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_FUNC;
@@ -164,6 +173,7 @@ void dval_del(dval* v) {
 	case DVAL_ERR:
 	case DVAL_SYM:
 	case DDATA_STRING: free(v->content->str); free(v->content); break;
+	case DVAL_LIST:
 	case DVAL_QEXPR:
 	case DVAL_SEXPR:
 		for (int i = 0; i < v->count; i++) {
@@ -224,6 +234,7 @@ dval* dval_copy(dval* v) {
 	case DDATA_BYTE:
 	case DDATA_DOUBLE:
 	case DDATA_INT:
+	case DDATA_CHAR:
 	case DDATA_STRING:
 		x->content = ddata_copy(x->type, v->content); break;
 	case DVAL_ERR:
@@ -232,6 +243,7 @@ dval* dval_copy(dval* v) {
 	case DVAL_SYM:
 		x->content->str = (char*)malloc(strlen(v->content->str) + 1);
 		strcpy(x->content->str, v->content->str); break;
+	case DVAL_LIST:
 	case DVAL_SEXPR:
 	case DVAL_QEXPR:
 		x->count = v->count;
