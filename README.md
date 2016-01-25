@@ -5,7 +5,7 @@ Lydrige is an interpreted programming language built off of and expanded from th
 ## Basic Syntax ##
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
 Here is an example of the syntax of a simple print statement:
-`(print "This number evaluates to " (+ 1 1))`. This print statement returns `()`
+`(print "This number evaluates to " (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
 
 ## Builtin Functions ##
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Notice that this list does not include the basic operators (+, -, *, /, %, and ^ (power)).
