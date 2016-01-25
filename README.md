@@ -8,7 +8,7 @@ Here is an example of the syntax of a simple print statement:
 `(print "This number evaluates to " (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
 
 ## Builtin Functions ##
-Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Notice that this list does not include the basic operators (+, -, *, /, %, and ^ (power)).
+Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (+, -, *, /, %, ^ (power), ==, >, <, >=, <=, !=).
 * `list` - returns a q-expression with all of the given arguments inside.
 * `first` - returns the first item in a given q-expression or list literal.
 * `last` - returns the last item in a given q-expression or list literal.
