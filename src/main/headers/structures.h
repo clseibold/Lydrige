@@ -14,6 +14,11 @@
     "Function '%s' passed incorrect type for argument %i. " \
     "Got %s, Expected %s.", \
     func, index, dtype_name(args->cell[index]->type), dtype_name(expect))
+#define LASSERT_MTYPE(func, args, index, cond, fmt, ...) \
+	LASSERT(args, cond, \
+	"Function '%s' passed incorrect type for argument %i. "\
+	"Got %s, Expected " \
+	fmt, func, index, dtype_name(args->cell[index]->type), ##__VA_ARGS__)
 #define LASSERT_NUM(func, args, num) \
   LASSERT(args, args->count == num, \
     "Function '%s' passed incorrect number of arguments. " \
@@ -21,7 +26,7 @@
     func, args->count, num)
 #define LASSERT_NOT_EMPTY(func, args, index) \
   LASSERT(args, args->cell[index]->count != 0, \
-    "Function '%s' passed {} for argument %i.", func, index);
+    "Function '%s' passed {} or [] for argument %i.", func, index);
 
 struct dval;
 struct denv;
@@ -31,7 +36,7 @@ typedef struct denv denv;
 typedef union ddata ddata;
 typedef unsigned char byte;
 
-enum { DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_FUNC };
+enum { DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_LIST, DVAL_FUNC };
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
@@ -87,6 +92,7 @@ mpc_parser_t* Comment;
 mpc_parser_t* String;
 mpc_parser_t* Character;
 mpc_parser_t* Symbol;
+mpc_parser_t* List;
 mpc_parser_t* Sexpr;
 mpc_parser_t* Qexpr;
 mpc_parser_t* Line;
@@ -105,6 +111,7 @@ dval* dval_sym(char* s);
 dval* dval_usym(char* s);
 dval* dval_sexpr(void);
 dval* dval_qexpr(void);
+dval* dval_list(void);
 dval* dval_func(dbuiltin func);
 dval* dval_lambda(dval* formals, dval* body);
 
