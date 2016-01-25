@@ -86,7 +86,7 @@ dval* denv_get(denv* e, dval* k) {
 	// dval_usym(k->sym);
 }
 
-void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: doesn't work correctly
+void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: does this work correctly?
 	dval* t;
 	if (hashtbl_get(e->hashtbl, k->content->str)) { // If already defined in hashtable
 		if (((dval*)hashtbl_get(e->hashtbl, k->content->str))->constant == 0) { // If not constant (in hashtable)
@@ -119,12 +119,30 @@ void denv_def(denv* e, dval* k, dval* v, int constant) {
 /* Returns length of given Q-Expression */
 dval* builtin_len(denv* e, dval* a) {
 	LASSERT_NUM("len", a, 1);
-	LASSERT_MTYPE("len", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST, \
+	LASSERT_MTYPE("len", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	dval* x = dval_int(a->cell[0]->count);
 	dval_del(a);
 	return x;
+}
+
+/** Returns the item at given index from given q-expression or list.
+  * The q-expression or list is deleted.
+  */
+dval* builtin_get(denv* e, dval* a) {
+	LASSERT_NUM("get", a, 2);
+	LASSERT_TYPE("get", a, 0, DDATA_INT);
+	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->content->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+
+	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->content->integer));
+	dval_del(a);
+	return result;
 }
 
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
@@ -802,6 +820,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*)"inner_eval", builtin_inner_eval);
 	denv_add_builtin(e, (char*)"join", builtin_join);
 	denv_add_builtin(e, (char*)"len", builtin_len);
+	denv_add_builtin(e, (char*)"get", builtin_get);
 
 	denv_add_builtin(e, (char*)"+", builtin_add);
 	denv_add_builtin(e, (char*)"-", builtin_sub);
