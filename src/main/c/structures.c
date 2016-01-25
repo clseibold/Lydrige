@@ -206,6 +206,8 @@ union ddata* ddata_copy(int type, union ddata* d) {
 		x->b = d->b; break;
 	case DDATA_CHAR:
 		x->character = d->character; break;
+	case DVAL_ERR:
+	case DVAL_SYM:
 	case DDATA_STRING:
 		x->str = (char*)malloc(strlen(d->str) + 1);
 		strcpy(x->str, d->str); break;
@@ -220,7 +222,7 @@ dval* dval_copy(dval* v) {
 	x->type = v->type;
 
 	switch (v->type) {
-	case DVAL_FUNC:
+	case DVAL_FUNC: // TODO: Make sure this is correct!
 		if (v->builtin) {
 			x->builtin = v->builtin;
 		}
@@ -236,19 +238,21 @@ dval* dval_copy(dval* v) {
 	case DDATA_INT:
 	case DDATA_CHAR:
 	case DDATA_STRING:
-		x->content = ddata_copy(x->type, v->content); break;
+		x->content = ddata_copy(x->type, v->content);
+		break;
 	case DVAL_ERR:
-		x->content->str = (char*)malloc(strlen(v->content->str) + 1);
-		strcpy(x->content->str, v->content->str); break;
+		x->content = ddata_copy(x->type, v->content);
+		break;
 	case DVAL_SYM:
-		x->content->str = (char*)malloc(strlen(v->content->str) + 1);
-		strcpy(x->content->str, v->content->str); break;
+		x->content = ddata_copy(x->type, v->content);
+		x->constant = v->constant;
+		break;
 	case DVAL_LIST:
 	case DVAL_SEXPR:
 	case DVAL_QEXPR:
 		x->count = v->count;
-		x->cell = (dval**)malloc(sizeof(dval*) * x->count);
-		for (int i = 0; i < x->count; i++) {
+		x->cell = (dval**)malloc(sizeof(dval*) * v->count);
+		for (int i = 0; i < v->count; i++) {
 			x->cell[i] = dval_copy(v->cell[i]);
 		}
 		break;
@@ -260,7 +264,7 @@ denv* denv_copy(denv* e) { // There may be a problem with this
 	denv* n = (denv*)malloc(sizeof(denv));
 	n->par = e->par;
 	n->count = e->count;
-	n->hashtbl = hashtbl_create(0, NULL);
+	//n->hashtbl = hashtbl_create(0, NULL);
 	// TODO: Go through each node in e's hashtable and insert into n's hashtable!
 	n->hashtbl = hashtbl_copy(e->hashtbl);
 	return n;
