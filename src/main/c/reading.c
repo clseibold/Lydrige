@@ -29,8 +29,12 @@ dval* dval_read_string(mpc_ast_t* t) {
 	return str;
 }
 
-dval* dval_read_character(mpc_ast_t* t) { // TODO
-	return dval_sexpr(); // Change this eventually!
+dval* dval_read_character(mpc_ast_t* t) {
+	// Remove the quotes
+	errno = 0;
+	char c = 'a';
+	sscanf(t->contents, "'%c'", &c); // TODO: Unescape char
+	return errno != ERANGE ? dval_char(c) : dval_err((char*) "invalid character");
 }
 
 dval* dval_read(mpc_ast_t* t) {
@@ -44,10 +48,9 @@ dval* dval_read(mpc_ast_t* t) {
 		return dval_read_string(t);
 	} else if (strstr(t->tag, "symbol")) {
 		return dval_sym(t->contents);
-	}
-	/* else if (strstr(t->tag, "character")) {
+	} else if (strstr(t->tag, "character")) {
 		return dval_read_character(t);
-	}*/
+	}
 
 	dval* x = NULL;
 	if (strcmp(t->tag, ">") == 0) {

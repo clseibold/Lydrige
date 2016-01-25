@@ -6,6 +6,7 @@ char* dtype_name(int t) {
 	case DDATA_INT: return (char*)"Integer";
 	case DDATA_DOUBLE: return (char*)"Double";
 	case DDATA_BYTE: return (char*)"Byte";
+	case DDATA_CHAR: return (char*)"Char";
 	case DDATA_STRING: return (char*)"String";
 	case DVAL_ERR: return (char*)"Error";
 	case DVAL_SYM: return (char*)"Symbol";

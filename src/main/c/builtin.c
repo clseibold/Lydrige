@@ -41,6 +41,8 @@ int dval_eq(dval* x, dval* y) {
 		return (x->content->doub == y->content->doub);
 	case DDATA_BYTE:
 		return (x->content->b == y->content->b);
+	case DDATA_CHAR:
+		return (x->content->character == y->content->character);
 	case DDATA_STRING:
 		return (strcmp(x->content->str, y->content->str) == 0);
 	case DVAL_ERR:
@@ -222,8 +224,8 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	while (a->count) {
 		if (f->formals->count == 0) {
-			dval_del(a); return dval_err(
-				(char*)"Function passed too many arguments. Got %i, Expected %i.", given, total);
+			dval_del(a);
+			return dval_err((char*)"Function passed too many arguments. Got %i, Expected %i.", given, total);
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
@@ -426,7 +428,7 @@ dval* builtin_def(denv* e, dval* a) {
 	return builtin_var(e, a, (char*)"def");
 }
 
-dval* builtin_const(denv* e, dval* a) { // TODO
+dval* builtin_const(denv* e, dval* a) {
 	//LASSERT_NUM("const", a, 2); // const func {varNameAsUSYM} varValue, func - def or =
 	// LASSERT_TYPE("const", a, 0, DVAL_FUNC);
 	LASSERT_TYPE((char*) "const", a, 0, DVAL_QEXPR); // TODO: do differently?
@@ -500,8 +502,8 @@ dval* builtin_pow(denv* e, dval* a) {
 
 dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, strings, and characters!
 	LASSERT_NUM(op, a, 2);
-	LASSERT_TYPE(op, a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE);
-	LASSERT_TYPE(op, a, 1, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE);
+	LASSERT_TYPE(op, a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
+	LASSERT_TYPE(op, a, 1, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
 
 	int r;
 
@@ -767,7 +769,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*)"^", builtin_pow);
 
 	denv_add_builtin(e, (char*)"def", builtin_def);
-	denv_add_builtin(e, (char*)"const", builtin_const); // TODO
+	denv_add_builtin(e, (char*)"const", builtin_const);
 	denv_add_builtin(e, (char*)"=", builtin_put);
 	denv_add_builtin(e, (char*)"\\", builtin_lambda);
 	denv_add_builtin(e, (char*)"lambda", builtin_lambda);
