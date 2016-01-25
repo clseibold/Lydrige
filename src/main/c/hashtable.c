@@ -140,17 +140,17 @@ int hashtbl_resize(HASHTBL* hashtbl, hash_size size) {
 
 HASHTBL* hashtbl_copy(HASHTBL* hashtbl) {
 	HASHTBL* h = hashtbl_create(hashtbl->size, hashtbl->hashfunc);
-	hash_size n;
+	//hash_size n;
 	struct hashnode_s *node, *oldnode;
 
-	for (n = 0; n < hashtbl->size; ++n) {
-		node = hashtbl->nodes[n];
+	//for (n = 0; n < hashtbl->size; ++n) {
+		node = hashtbl->nodes[0];
 		while (node) {
 			hashtbl_insert(h, node->key, node->data);
 			oldnode = node;
 			node = node->next;
 		}
-	}
+	//}
 
 	return h;
 }

@@ -78,7 +78,6 @@ int main(int argc, char** argv) {
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
 				//mpc_ast_print(r.output);
-				// TODO: do Lexical Scoping here?
 				dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
 				dval_println(x);
 				dval_del(x);
@@ -91,7 +90,7 @@ int main(int argc, char** argv) {
 
 			free(input);
 		}
-	} else if (argc >= 2) { // TODO: Lexical Scoping?
+	} else if (argc >= 2) {
 		for (int i = 1; i < argc; i++) {
 			dval* args = dval_add(dval_sexpr(), dval_string(argv[i]));
 			dval* x = builtin_load(e, args);

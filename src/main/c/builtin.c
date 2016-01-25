@@ -88,30 +88,29 @@ dval* denv_get(denv* e, dval* k) {
 
 void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: doesn't work correctly
 	dval* t;
-	if (hashtbl_get(e->hashtbl, k->content->str)) {
-		if (((dval*)hashtbl_get(e->hashtbl, k->content->str))->constant == 0) {
-			hashtbl_remove(e->hashtbl, k->content->str);
-			t = dval_copy(v);
-			t->constant = constant;
-			hashtbl_insert(e->hashtbl, k->content->str, t);
+	if (hashtbl_get(e->hashtbl, k->content->str)) { // If already defined in hashtable
+		if (((dval*)hashtbl_get(e->hashtbl, k->content->str))->constant == 0) { // If not constant (in hashtable)
+			hashtbl_remove(e->hashtbl, k->content->str); // Remove from hashtable
+			t = dval_copy(v); // Copy value into t
+			t->constant = constant; // set constant
+			hashtbl_insert(e->hashtbl, k->content->str, t); // insert new value
 			return;
-		}
-		else {
+		} else {
 			printf("Error: Cannot edit '%s'. It is a constant\n", k->content->str);
 			return;
 		}
+	} else { // Not in hashtable yet!
+		e->count++;
+		hashtbl_resize(e->hashtbl, e->hashtbl->size + 1); // Add one space to hashtable
+		t = dval_copy(v); // Copy value into t
+		t->constant = constant; // set constant
+		hashtbl_insert(e->hashtbl, k->content->str, t); // insert into table
+		return;
 	}
-
-	e->count++;
-	hashtbl_resize(e->hashtbl, e->hashtbl->size + 1); // TODO: Make this more efficient?
-	t = dval_copy(v);
-	t->constant = constant;
-	hashtbl_insert(e->hashtbl, k->content->str, t);
-	return;
 }
 
 void denv_def(denv* e, dval* k, dval* v, int constant) {
-	while (e->par) {
+	while (e->par) { // Find root environment
 		e = e->par;
 	}
 	denv_put(e, k, v, constant);
@@ -203,6 +202,20 @@ dval* builtin_eval(denv* e, dval* a) {
 	dval* x = dval_take(a, 0);
 	x->type = DVAL_SEXPR;
 	return dval_eval(e, x);
+}
+
+/** Evaluates the insides of a q-expression and returns the new q-expression.
+  * Acts as if the q-expression is a list literal.
+  */
+dval* builtin_inner_eval(denv* e, dval* a) {
+	LASSERT_NUM("inner_eval", a, 1);
+	LASSERT_TYPE("inner_eval", a, 0, DVAL_QEXPR);
+
+	dval* x = dval_take(a, 0);
+	for (int i = 0; i < x->count; i++) {
+		x->cell[i] = dval_eval(e, x->cell[i]);
+	}
+	return x;
 }
 
 dval* dval_call(denv* e, dval* f, dval* a) {
@@ -388,7 +401,7 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 dval* builtin_var(denv* e, dval* a, char* func) {
 	LASSERT_TYPE(func, a, 0, DVAL_QEXPR); // Allow List Literals???
 
-	dval* syms = a->cell[0];
+	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
 	for (int i = 0; i < syms->count; i++) {
 		LASSERT(a, (syms->cell[i]->type == DVAL_SYM),
 			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
@@ -399,7 +412,7 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 	LASSERT(a, (syms->count == a->count - 1),
 		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
 
-	for (int i = 0; i < syms->count; i++) {
+	for (int i = 0; i < syms->count; i++) { // For each of the symbols
 		if (strcmp(func, "def") == 0) {
 			denv_def(e, syms->cell[i], a->cell[i + 1], 0);
 		}
@@ -774,6 +787,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*)"head", builtin_head);
 	denv_add_builtin(e, (char*)"tail", builtin_tail);
 	denv_add_builtin(e, (char*)"eval", builtin_eval);
+	denv_add_builtin(e, (char*)"inner_eval", builtin_inner_eval);
 	denv_add_builtin(e, (char*)"join", builtin_join);
 	denv_add_builtin(e, (char*)"len", builtin_len);
 
