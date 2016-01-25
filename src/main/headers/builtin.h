@@ -13,9 +13,10 @@ int dval_eq(dval* x, dval* y);
 dval* denv_get(denv* e, dval* k);
 void denv_put(denv* e, dval* k, dval* v, int constant);
 void denv_def(denv* e, dval* k, dval* v, int constant);
-void denv_const(denv* e, dval* k, dval* v); // TODO
+void denv_const(denv* e, dval* k, dval* v);
 
 dval* builtin_len(denv* e, dval* a);
+dval* builtin_get(denv* e, dval* a);
 dval* builtin_first(denv* e, dval* a);
 dval* builtin_last(denv* e, dval* a);
 dval* builtin_head(denv* e, dval* a);

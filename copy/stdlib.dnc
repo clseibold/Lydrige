@@ -1,10 +1,22 @@
-(def {nil} {})
-(def {true} 1)
-(def {false} 0)
+; Atoms
+(const {nil} {})
+(const {true} 1)
+(const {false} 0)
 
+; Function Definition
 (def {fun} (\ {f b} {
-  def (head f) (\ (tail f) b)
+  def (first f) (\ (tail f) b)
 }))
 
-(def {x} 4)
-(print x)
+; Constant Function Definition
+(def {const_fun} (\ {f b} {
+	def (first f) (\ (tail f) b)
+}))
+
+; Unpack List for function
+(const_fun {unpack f l} {
+	eval (join (list f) l)
+})
+
+; Pack List for Function
+(const_fun {pack f & xs} {f xs})
