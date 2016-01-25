@@ -119,10 +119,9 @@ void denv_def(denv* e, dval* k, dval* v, int constant) {
 
 /* Returns length of given Q-Expression */
 dval* builtin_len(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'len' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		(char*) "Function 'len' passed incorrect type.");
+	LASSERT_NUM("len", a, 1);
+	LASSERT_MTYPE("len", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST, \
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	dval* x = dval_int(a->cell[0]->count);
 	dval_del(a);
@@ -131,12 +130,10 @@ dval* builtin_len(denv* e, dval* a) {
 
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
 dval* builtin_first(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'first' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		(char*) "Function 'first' passed incorrect type.");
-	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'first' passed {} or [].");
+	LASSERT_NUM("first", a, 1);
+	LASSERT_MTYPE("first", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("first", a, 0);
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -150,12 +147,10 @@ dval* builtin_first(denv* e, dval* a) {
 
 /* Returns Q-Expression of last element given a Q-Expression */
 dval* builtin_last(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'last' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		(char*) "Function 'last' passed incorrect type.");
-	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'last' passed {} or [].");
+	LASSERT_NUM("last", a, 1);
+	LASSERT_MTYPE("last", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("last", a, 0);
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -169,12 +164,10 @@ dval* builtin_last(denv* e, dval* a) {
 
 /* Returns Q-Expression with first element removed given a Q-Expression */
 dval* builtin_head(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'head' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		(char*) "Function 'head' passed incorrect type.");
-	LASSERT(a, a->cell[0]->count != 0,
-		(char*) "Function 'head' passed {} or [].");
+	LASSERT_NUM("head", a, 1);
+	LASSERT_MTYPE("head", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("head", a, 0);
 
 	// Take first argument
 	dval* v = dval_take(a, 0);
@@ -203,10 +196,9 @@ dval* builtin_list(denv* e, dval* a) {
 
 /* Evaluates a Q-Expression or List Literal as if it were an S-Expression */
 dval* builtin_eval(denv* e, dval* a) {
-	LASSERT(a, a->count == 1,
-		(char*) "Funcion 'eval' passed too many arguments.");
-	LASSERT(a, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		(char*) "Function 'eval' passed incorrect types.");
+	LASSERT_NUM("eval", a, 1);
+	LASSERT_MTYPE("eval", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	dval* x = dval_take(a, 0);
 	x->type = DVAL_SEXPR;
@@ -584,7 +576,7 @@ dval* builtin_not(denv* e, dval* a) {
 
 dval* builtin_and(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE((char*) "and", a, a->cell[i]->type, DDATA_INT);
+		LASSERT_TYPE((char*) "and", a, i, DDATA_INT);
 	}
 
 	int current = a->cell[0]->content->integer;
@@ -600,7 +592,7 @@ dval* builtin_and(denv* e, dval* a) {
 
 dval* builtin_or(denv* e, dval* a) {
 	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE((char*) "or", a, a->cell[i]->type, DDATA_INT); // TODO: Is this correct?
+		LASSERT_TYPE((char*) "or", a, i, DDATA_INT);
 	}
 
 	int current = a->cell[0]->content->integer;
@@ -729,7 +721,8 @@ dval* dval_eval_sexpr(denv* e, dval* v) {
 		dval* err = dval_err(
 			(char*)"S-Expression starts with incorrect type. Got %s, Expected %s.",
 			dtype_name(f->type), dtype_name(DVAL_FUNC));
-		dval_del(v); dval_del(f);
+		dval_del(v);
+		dval_del(f);
 		return err;
 	}
 
