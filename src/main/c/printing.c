@@ -17,11 +17,11 @@ void dval_expr_print(dval* v, char open, char close) {
 }
 
 void dval_print_str(dval* v) {
-	char* escaped = (char*)malloc(strlen(v->content->str) + 1);
-	strcpy(escaped, v->content->str);
-	escaped = (char*)mpcf_escape(escaped);
-	printf("\"%s\"", escaped); // Should this have quotes?!
-	free(escaped);
+	// char* escaped = (char*)malloc(strlen(v->content->str) + 1);
+	// strcpy(escaped, v->content->str);
+	// escaped = (char*)mpcf_escape(escaped);
+	printf("%s", v->content->str);
+	//free(escaped);
 }
 
 void dval_print_char(dval* v) {
