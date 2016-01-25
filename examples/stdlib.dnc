@@ -1,0 +1,146 @@
+; Atoms
+(const {ok} ())
+(const {nil} {})
+(const {true} 1)
+(const {false} 0)
+(const {func} "Function")
+(const {string} (typeof ""))
+(const {int} (typeof 0))
+(const {double} (typeof 0.0))
+(const {byte} (typeof 0x00))
+(const {char} (typeof 'c'))
+(const {err} "Error")
+(const {ls} (typeof []))
+(const {qexpr} (typeof {}))
+
+; Function Definition With Error Checking
+(def {fn} (\ {f b} {
+    if (and (== (typeof f) qexpr) (== (typeof b) qexpr)) {
+        def (first f) (\ (tail f) b)
+    } {
+       error "Arguments must be q-expressions!"
+    }
+}))
+
+
+; Change if statements to:
+;       if (cond) {do} (else if cond) {do} (else if cond) {do} ... {else do}
+
+
+; Static Typing syntax: (built into interpreter, based on strings and typeof)
+; This is inferred:
+;       def {name} 5
+; Explicit:
+;       def {name int} 5
+; ':' is a new syntax to the language that tells the
+; interpreter what type the symbol should be when being defined.
+; This is also used to report errors when trying to change the
+; symbol to another value.
+; You can specify that the symbol should be dynamic by giving it a nil type:
+;       def {name nil} "Any Value can Go Here"
+; Lambda's can be also be statically typed for their return value(s) and argument(s):
+;       def {name func} (\ {var int} {+ var 1} int)
+
+
+; An easy way to handle errors:
+;       if_err (inner_eval {testing 4}) {err} {return}
+; * err is a variable that has been assigned to the error that was found.
+; * return is a variable that has been assigned to the return value of the first argument (expr).
+; The second argument (q-expr/list) is evaluated when an error is found.
+; The third argument (q-expr/list) is evaluated when an error was not found.
+
+
+; While Loops
+;       while {var} {== 1 (len "hello")} {
+;           ; code (they return something, where does the returned thing go?
+;           ; Should they go into a qexpr that gets returned when the while loop is finished!?!)
+;           ; Note that var is a variable that is defined before the loop, but within this scope.
+;           ; This loop has its own environment. Therefore var cannot be accessed outside of this loop.
+;       }
+;
+;       while {== 1 (len "hello)} {
+;           ; code
+;           ; There is no variable.
+;       }
+
+
+; Constant Function Definition
+(def {const_fn} (\ {f b} {
+	def (first f) (\ (tail f) b)
+}))
+
+; Unpack List for function
+(const_fn {unpack f l} {
+	eval (join (list f) l)
+})
+
+; Pack List for Function
+(const_fn {pack f & xs} {f xs})
+
+; Demonstrates how to check the type of something,
+; Used for optional static typing!
+(def {is_5_int} (if (== (typeof 5) int) {"5 is an integer"} {"5 is not an integer"}))
+
+(fn {do & l} {
+    if (== l nil)
+        {nil}
+        {last l}
+})
+
+; Library Implementation of Static Typing
+
+; Extract first and second element, check them, give rest to check_fn_arg_types unless empty, then return 1/true
+(fn {check_fn_arg_types args} {
+    if (== (typeof args) qexpr) {
+        if (!= (len args) 0) {
+            if (== (typeof (get 1 args)) string) {
+                check_fn_arg_types (tail (tail args))
+            } {
+               ; if (== (typeof (get 1 args))) ; Check if it is a symbol, then just skip (not every arg needs a type)
+                false
+            }
+        } {
+            true
+        }
+    } {
+       error "Argument 1 must be a q-expression!"
+    }
+})
+
+; TODO: add code to lambda (if fn function) to check the input of the lambda
+; to see if it matches the correct types, returns errors if it doesn't, or
+; eval the function body if it does
+
+(fn {remove_fn_types args} {
+    if (== (typeof args) qexpr) {
+        if (!= (len args) 0) {
+            (join (first args) (remove_fn_types (tail (tail args))))
+        } {
+            {}
+        }
+    } {
+        error "Argument 1 must be a q-expression!"
+    }
+})
+
+; @NO_ARG_CHECKING
+(fn {get_fn_arg_checking args} {
+    {if (== true true)}
+})
+
+(fn {fn args l} {
+    if (and (== (typeof args) qexpr) (== (typeof l) qexpr)) {
+        ; TODO
+        if (check_fn_arg_types (tail args)) {
+            ; Remove arg types from qexpr, no longer needed after type checking
+            ; Inside function code, add check for given arguments (to see if they match the argument types given at definition)
+            do
+                (= {bare_args} (remove_fn_types (tail args)))
+                (def (first args) (\ bare_args (join (get_fn_arg_checking args) (list l) {{error "ERROR"}})))
+        } {
+            error "All arguments must have a type (string)!"
+        }
+    } {
+        error "Arguments 1 and 2 must be q-expressions!"
+    }
+})
