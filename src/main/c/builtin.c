@@ -422,8 +422,14 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 		}
 	}
 
+	dval* result = dval_qexpr();
+	result->count = a->count - 1;
+	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
+	for (int i = 0; i < result->count; i++) {
+		result->cell[i] = dval_copy(a->cell[i + 1]);
+	}
 	dval_del(a);
-	return dval_sexpr();
+	return result;
 }
 
 dval* builtin_def(denv* e, dval* a) {
@@ -452,8 +458,14 @@ dval* builtin_const(denv* e, dval* a) { // TODO: Allow List Literals
 		//}
 	}
 
+	dval* result = dval_qexpr();
+	result->count = a->count - 1;
+	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
+	for (int i = 0; i < result->count; i++) {
+		result->cell[i] = dval_copy(a->cell[i + 1]);
+	}
 	dval_del(a);
-	return dval_sexpr();
+	return result;
 }
 
 dval* builtin_put(denv* e, dval* a) {
