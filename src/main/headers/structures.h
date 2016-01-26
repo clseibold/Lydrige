@@ -36,7 +36,7 @@ typedef struct denv denv;
 typedef union ddata ddata;
 typedef unsigned char byte;
 
-enum { DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_LIST, DVAL_FUNC };
+enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_LIST, DVAL_FUNC };
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
@@ -58,6 +58,7 @@ union ddata {
 struct dval {
 	int type;
 	union ddata* content;
+	long max; // Used for ranges
 	int constant; // Boolean of whether value is constant. Only used if symbol is associated with value.
 
 	/*char* err;

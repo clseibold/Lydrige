@@ -1,5 +1,13 @@
 #include "../headers/reading.h"
 
+dval* dval_read_range(mpc_ast_t* t) {
+	errno = 0;
+	long min = 0;
+	long max = 0;
+	sscanf(t->content, "%i..%i", &min, &max);
+	return errno != ERANGE ? dval_range(min, max) : dval_err((char*)"invalid range");
+}
+
 dval* dval_read_int(mpc_ast_t* t) {
 	errno = 0;
 	long x = strtol(t->contents, NULL, 10);
@@ -40,6 +48,8 @@ dval* dval_read_character(mpc_ast_t* t) {
 dval* dval_read(mpc_ast_t* t) {
 	if (strstr(t->tag, "double")) {
 		return dval_read_double(t);
+	} else if (strstr(t->tag, "range")) {
+		return dval_read_range(t);
 	} else if (strstr(t->tag, "integer")) {
 		return dval_read_int(t);
 	} else if (strstr(t->tag, "byte")) {

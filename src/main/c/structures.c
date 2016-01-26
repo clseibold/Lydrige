@@ -3,6 +3,7 @@
 char* dtype_name(int t) {
 	switch (t) {
 	case DVAL_FUNC: return (char*)"Function";
+	case DDATA_RANGE: return (char*)"Range";
 	case DDATA_INT: return (char*)"Integer";
 	case DDATA_DOUBLE: return (char*)"Double";
 	case DDATA_BYTE: return (char*)"Byte";
@@ -29,6 +30,16 @@ denv* denv_new(void) {
 		exit(EXIT_FAILURE);
 	}
 	return e;
+}
+
+dval* dval_range(long min, long max) {
+	dval* v = (dval*) malloc(sizeof(dval));
+	v->type = DDATA_RANGE;
+	v->content = (ddata*) malloc(sizeof(ddata));
+	v->content->integer = min;
+	v->max = max;
+	
+	return v;
 }
 
 dval* dval_int(long x) {
@@ -198,6 +209,8 @@ union ddata* ddata_copy(int type, union ddata* d) {
 	union ddata* x = (ddata*)malloc(sizeof(ddata));
 
 	switch (type) {
+	case DDATA_RANGE:
+		x->integer = d->integer; break;
 	case DDATA_INT:
 		x->integer = d->integer; break;
 	case DDATA_DOUBLE:
@@ -233,6 +246,8 @@ dval* dval_copy(dval* v) {
 			x->body = dval_copy(v->body);
 		}
 		break;
+	case DDATA_RANGE:
+		x->max = v->max; // Do not break here!
 	case DDATA_BYTE:
 	case DDATA_DOUBLE:
 	case DDATA_INT:
