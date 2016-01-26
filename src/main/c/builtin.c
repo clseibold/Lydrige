@@ -133,7 +133,7 @@ dval* builtin_len(denv* e, dval* a) {
 /** Returns the item at given index from given q-expression or list.
   * The q-expression or list is deleted.
   */
-dval* builtin_get(denv* e, dval* a) {
+dval* builtin_get(denv* e, dval* a) { // Make work for strings
 	LASSERT_NUM("get", a, 2);
 	LASSERT_TYPE("get", a, 0, DDATA_INT);
 	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
@@ -144,6 +144,25 @@ dval* builtin_get(denv* e, dval* a) {
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
 	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->content->integer));
+	dval_del(a);
+	return result;
+}
+
+/** Sets the item at given index from given q-expression or list to a given value and returns
+  *   the new list as a q-expression. Ex: `set index qexpr/list value`
+  */
+dval* builtin_set(denv* e, dval* a) {
+	LASSERT_NUM("set", a, 3);
+	LASSERT_TYPE("set", a, 0, DDATA_INT);
+	LASSERT_MTYPE("set", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->content->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+	
+	dval* result = dval_pop(a, 1);
+	result->cell[a->cell[0]->content->integer] = dval_pop(a, 1);
 	dval_del(a);
 	return result;
 }
@@ -622,7 +641,7 @@ dval* builtin_eq(denv* e, dval* a) { // TODO: Allow comparing more than two dval
 }
 
 /** Returns dval integer 1 (true) if the first item is not equal to all of the other
-  * items. Note that it does not have to be all of them, just at least one.
+  * items.
   * Ex: `(!= (typeof x) integer double)` returns 1 if x is not an integer nor a double.
   */
 dval* builtin_ne(denv* e, dval* a) {
@@ -854,6 +873,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*)"join", builtin_join);
 	denv_add_builtin(e, (char*)"len", builtin_len);
 	denv_add_builtin(e, (char*)"get", builtin_get);
+	denv_add_builtin(e, (char*)"set", builtin_set);
 	denv_add_builtin(e, (char*)"typeof", builtin_typeof);
 
 	denv_add_builtin(e, (char*)"+", builtin_add);

@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
 	Double = mpc_new("double");
 	Integer = mpc_new("integer");
 	Byte = mpc_new("byte");
+	Range = mpc_new("range");
 	Comment = mpc_new("comment");
 	String = mpc_new("string");
 	Character = mpc_new("character");
@@ -52,6 +53,7 @@ int main(int argc, char** argv) {
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
 		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
+		range		: <integer> ".." <integer> ; \
 		string		: /\"(\\\\.|[^\"])*\"/ ; \
 		character	: /\'(\\\\.|[^\"])\'/ ; \
 		comment		: /;[^\\r\\n]*/ ; \
@@ -60,7 +62,7 @@ int main(int argc, char** argv) {
 		sexpr		: '(' <expr>* ')' ; \
 		qexpr		: '{' <expr>* '}' ; \
 		line		: /^/ <expr>* /$/ ; \
-		", Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
+		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
 
 	//printf("%d", sizeof(dval));
 
@@ -102,6 +104,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(13, Expr, Data, Double, Integer, Byte, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
+	mpc_cleanup(14, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, List, Sexpr, Qexpr, Line);
 	return 0;
 }

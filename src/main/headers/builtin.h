@@ -17,6 +17,7 @@ void denv_const(denv* e, dval* k, dval* v);
 
 dval* builtin_len(denv* e, dval* a);
 dval* builtin_get(denv* e, dval* a);
+dval* builtin_set(denv* e, dval* a);
 dval* builtin_typeof(denv* e, dval* a);
 dval* builtin_first(denv* e, dval* a);
 dval* builtin_last(denv* e, dval* a);
