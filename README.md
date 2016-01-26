@@ -31,7 +31,8 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `load` - loads in a separate file
 * `exit` - exits the REPL (currently not working)
 * `inner_eval` - acts as if the given q-expression is a list literal. The items are evaluated, but the expression itself is not.
-* `get` - gets item from given list at given index
+* `get` - gets item from given q-expression or list literal at given index
+* `set` - returns a new q-expression with the item at the given index of give q-expression or list literal to a given value.
 
 ## Data Types ##
 Here are all of the data types in Lydrige and how you represent them within the language:
