@@ -29,6 +29,9 @@ dval* dval_join(dval* x, dval* y) {
 	return x;
 }
 
+/** Determines whether two dvals are equal.
+  * If they are not, a zero is returned.
+  */
 int dval_eq(dval* x, dval* y) {
 	if (x->type != y->type) {
 		return 0;
@@ -254,8 +257,9 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	while (a->count) {
 		if (f->formals->count == 0) {
+
 			dval_del(a);
-			return dval_err((char*)"Function passed too many arguments. Got %i, Expected %i.", given, total);
+			return dval_err((char*)"Function 'UNKNOWN' passed too many arguments. Got %i, Expected %i.", given, total); // TODO
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
@@ -589,22 +593,38 @@ dval* builtin_le(denv* e, dval* a) {
 }
 
 dval* builtin_cmp(denv* e, dval* a, char* op) {
-	LASSERT_NUM(op, a, 2);
+	LASSERT(a, a->count > 1, "You must have at least 2 arguments. Got %i, Expected 2+", a->count);
 	int r;
 	if (strcmp(op, "==") == 0) {
-		r = dval_eq(a->cell[0], a->cell[1]);
+		for (int i = 1; i < a->count; i++) {
+			if ((r = dval_eq(a->cell[0], a->cell[i]))) {
+				break;
+			}
+		}
 	}
 	if (strcmp(op, "!=") == 0) {
-		r = !dval_eq(a->cell[0], a->cell[1]);
+		for (int i = 1; i < a->count; i++) {
+			if (!(r = !dval_eq(a->cell[0], a->cell[i]))) {
+				break;
+			}
+		}
 	}
 	dval_del(a);
 	return dval_int(r);
 }
 
-dval* builtin_eq(denv* e, dval* a) { // TODO: Allow comparing to more than two dvals
+/** Returns dval integer 1 (true) if the first item is equal to any of the other
+  * items. Note that is does not have to be all of them, just at least one.
+  * Ex: `(== (typeof x) integer double)` returns 1 if x is either an integer or a double
+  */
+dval* builtin_eq(denv* e, dval* a) { // TODO: Allow comparing more than two dvals
 	return builtin_cmp(e, a, (char*)"==");
 }
 
+/** Returns dval integer 1 (true) if the first item is not equal to all of the other
+  * items. Note that it does not have to be all of them, just at least one.
+  * Ex: `(!= (typeof x) integer double)` returns 1 if x is not an integer nor a double.
+  */
 dval* builtin_ne(denv* e, dval* a) {
 	return builtin_cmp(e, a, (char*)"!=");
 }
@@ -660,8 +680,6 @@ dval* builtin_or(denv* e, dval* a) {
 
 
 }*/
-
-// if (cond) {do} (else if cond) {do} {else}
 
 dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
 	if (a->count % 2 == 0) { // TODO: Make better later
