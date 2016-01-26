@@ -30,8 +30,11 @@ void dval_print_char(dval* v) {
 
 void dval_print(dval* v) {
 	switch (v->type) {
+	case DDATA_RANGE:
+		printf("%ld..%ld", v->content->integer, v->max);
+		break;
 	case DDATA_INT:
-		printf("%li", v->content->integer);
+		printf("%ld", v->content->integer);
 		break;
 	case DDATA_DOUBLE:
 		printf("%f", v->content->doub);

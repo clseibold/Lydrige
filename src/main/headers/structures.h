@@ -87,6 +87,7 @@ static int running = 1;
 mpc_parser_t* Expr;
 mpc_parser_t* Data;
 mpc_parser_t* Double;
+mpc_parser_t* Range;
 mpc_parser_t* Integer;
 mpc_parser_t* Byte;
 mpc_parser_t* Comment;
@@ -102,6 +103,7 @@ char* dtype_name(int t);
 
 /* Constructors */
 denv* denv_new(void);
+dval* dval_range(long min, long max);
 dval* dval_int(long x);
 dval* dval_double(double x);
 dval* dval_byte(byte x);

@@ -4,27 +4,27 @@ dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
 	long max = 0;
-	sscanf(t->content, "%i..%i", &min, &max);
-	return errno != ERANGE ? dval_range(min, max) : dval_err((char*)"invalid range");
+	sscanf(t->contents, "%ld..%ld", &min, &max);
+	return errno != ERANGE ? dval_range(min, max) : dval_err((char*) "invalid range");
 }
 
 dval* dval_read_int(mpc_ast_t* t) {
 	errno = 0;
 	long x = strtol(t->contents, NULL, 10);
-	return errno != ERANGE ? dval_int(x) : dval_err((char*)"invalid integer");
+	return errno != ERANGE ? dval_int(x) : dval_err((char*) "invalid integer");
 }
 
 dval* dval_read_double(mpc_ast_t* t) {
 	errno = 0;
 	double x = strtod(t->contents, NULL);
-	return errno != ERANGE ? dval_double(x) : dval_err((char*)"invalid double");
+	return errno != ERANGE ? dval_double(x) : dval_err((char*) "invalid double");
 }
 
 dval* dval_read_byte(mpc_ast_t* t) {
 	errno = 0;
 	unsigned int hex = 0x00;
 	sscanf(t->contents, "0x%02x", &hex);
-	return errno != ERANGE ? dval_byte((byte) hex) : dval_err((char*)"invalid byte (hex)");
+	return errno != ERANGE ? dval_byte((byte) hex) : dval_err((char*) "invalid byte (hex)");
 }
 
 dval* dval_read_string(mpc_ast_t* t) {
