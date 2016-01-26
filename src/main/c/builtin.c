@@ -661,31 +661,38 @@ dval* builtin_or(denv* e, dval* a) {
 
 }*/
 
-dval* builtin_if(denv* e, dval* a) { // Make work with bytes and List Literals!
-	LASSERT_NUM((char*) "if", a, 3);
-	LASSERT_MTYPE("if", a, 0, a->cell[0]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE, \
-		"%s, %s, or %s.", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE));
-	LASSERT_MTYPE("if", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST, \
-		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_MTYPE("if", a, 2, a->cell[2]->type == DVAL_QEXPR || a->cell[2]->type == DVAL_LIST, \
+// if (cond) {do} (else if cond) {do} {else}
+
+dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
+	if (a->count % 2 == 0) { // TODO: Make better later
+		return dval_err((char*) "Must have a q-expression for each s-expression conditional, except for the else q-expression. The else q-expression is required.");
+	}
+	for (int i = 0; i < a->count-1; i += 2) {
+		if (i == a->count - 1) break;
+		LASSERT_MTYPE("if", a, i, a->cell[i]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE,
+			"%s, %s, or %s", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE));
+		LASSERT_MTYPE("if", a, i+1, a->cell[i+1]->type == DVAL_QEXPR || a->cell[i+1]->type == DVAL_LIST,
+			"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	}
+	LASSERT_MTYPE("if", a, a->count-1, a->cell[a->count-1]->type == DVAL_QEXPR || a->cell[a->count-1]->type == DVAL_LIST,
 		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	dval* x;
-	a->cell[1]->type = DVAL_SEXPR;
-	a->cell[2]->type = DVAL_SEXPR;
-
-	if (a->cell[0]->content->integer) {
-		x = dval_eval(e, dval_pop(a, 1));
+	for (int i = 0; i < a->count-1; i+=2) {
+		a->cell[i+1]->type = DVAL_SEXPR;
+		if (a->cell[i]->content->integer) {
+			x = dval_eval(e, dval_pop(a, i + 1));
+			dval_del(a);
+			return x;
+		}
 	}
-	else {
-		x = dval_eval(e, dval_pop(a, 2));
-	}
-
+	a->cell[a->count-1]->type = DVAL_SEXPR;
+	x = dval_eval(e, dval_pop(a, a->count-1));
 	dval_del(a);
 	return x;
 }
 
-dval* builtin_load(denv* e, dval* a) { // TODO: BUGGY
+dval* builtin_load(denv* e, dval* a) {
 	LASSERT_NUM((char*) "load", a, 1);
 	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
 
