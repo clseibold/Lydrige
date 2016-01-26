@@ -700,7 +700,7 @@ dval* builtin_or(denv* e, dval* a) {
 
 }*/
 
-dval* builtin_if(denv* e, dval* a) { // Make work with bytes!
+dval* builtin_if(denv* e, dval* a) { // Make work with bytes?
 	if (a->count % 2 == 0) { // TODO: Make better later
 		return dval_err((char*) "Must have a q-expression for each s-expression conditional, except for the else q-expression. The else q-expression is required.");
 	}
@@ -863,45 +863,45 @@ void denv_add_builtin(denv* e, char* name, dbuiltin func) {
 }
 
 void denv_add_builtins(denv* e) {
-	denv_add_builtin(e, (char*)"list", builtin_list);
-	denv_add_builtin(e, (char*)"first", builtin_first);
-	denv_add_builtin(e, (char*)"last", builtin_last);
-	denv_add_builtin(e, (char*)"head", builtin_head);
-	denv_add_builtin(e, (char*)"tail", builtin_tail);
-	denv_add_builtin(e, (char*)"eval", builtin_eval);
-	denv_add_builtin(e, (char*)"inner_eval", builtin_inner_eval);
-	denv_add_builtin(e, (char*)"join", builtin_join);
-	denv_add_builtin(e, (char*)"len", builtin_len);
-	denv_add_builtin(e, (char*)"get", builtin_get);
-	denv_add_builtin(e, (char*)"set", builtin_set);
-	denv_add_builtin(e, (char*)"typeof", builtin_typeof);
+	denv_add_builtin(e, (char*) "list", builtin_list);
+	denv_add_builtin(e, (char*) "first", builtin_first);
+	denv_add_builtin(e, (char*) "last", builtin_last);
+	denv_add_builtin(e, (char*) "head", builtin_head);
+	denv_add_builtin(e, (char*) "tail", builtin_tail);
+	denv_add_builtin(e, (char*) "eval", builtin_eval);
+	denv_add_builtin(e, (char*) "inner_eval", builtin_inner_eval);
+	denv_add_builtin(e, (char*) "join", builtin_join);
+	denv_add_builtin(e, (char*) "len", builtin_len);
+	denv_add_builtin(e, (char*) "get", builtin_get);
+	denv_add_builtin(e, (char*) "set", builtin_set);
+	denv_add_builtin(e, (char*) "typeof", builtin_typeof);
 
-	denv_add_builtin(e, (char*)"+", builtin_add);
-	denv_add_builtin(e, (char*)"-", builtin_sub);
-	denv_add_builtin(e, (char*)"*", builtin_mul);
-	denv_add_builtin(e, (char*)"/", builtin_div);
-	denv_add_builtin(e, (char*)"%", builtin_mod);
-	denv_add_builtin(e, (char*)"^", builtin_pow);
+	denv_add_builtin(e, (char*) "+", builtin_add);
+	denv_add_builtin(e, (char*) "-", builtin_sub);
+	denv_add_builtin(e, (char*) "*", builtin_mul);
+	denv_add_builtin(e, (char*) "/", builtin_div);
+	denv_add_builtin(e, (char*) "%", builtin_mod);
+	denv_add_builtin(e, (char*) "^", builtin_pow);
 
-	denv_add_builtin(e, (char*)"def", builtin_def);
-	denv_add_builtin(e, (char*)"const", builtin_const);
-	denv_add_builtin(e, (char*)"=", builtin_put);
-	denv_add_builtin(e, (char*)"\\", builtin_lambda);
-	denv_add_builtin(e, (char*)"lambda", builtin_lambda);
+	denv_add_builtin(e, (char*) "def", builtin_def);
+	denv_add_builtin(e, (char*) "const", builtin_const);
+	denv_add_builtin(e, (char*) "=", builtin_put);
+	denv_add_builtin(e, (char*) "\\", builtin_lambda);
+	denv_add_builtin(e, (char*) "lambda", builtin_lambda);
 
-	denv_add_builtin(e, (char*)"if", builtin_if);
-	denv_add_builtin(e, (char*)"==", builtin_eq);
-	denv_add_builtin(e, (char*)"!=", builtin_ne);
-	denv_add_builtin(e, (char*)">", builtin_gt);
-	denv_add_builtin(e, (char*)"<", builtin_lt);
-	denv_add_builtin(e, (char*)">=", builtin_ge);
-	denv_add_builtin(e, (char*)"<=", builtin_le);
-	denv_add_builtin(e, (char*)"!", builtin_not);
-	denv_add_builtin(e, (char*)"and", builtin_and);
-	denv_add_builtin(e, (char*)"or", builtin_or);
-
-	denv_add_builtin(e, (char*)"print", builtin_print);
-	denv_add_builtin(e, (char*)"error", builtin_error);
-	denv_add_builtin(e, (char*)"load", builtin_load);
-	denv_add_builtin(e, (char*)"exit", builtin_exit);
+	denv_add_builtin(e, (char*) "if", builtin_if);
+	denv_add_builtin(e, (char*) "==", builtin_eq);
+	denv_add_builtin(e, (char*) "!=", builtin_ne);
+	denv_add_builtin(e, (char*) ">", builtin_gt);
+	denv_add_builtin(e, (char*) "<", builtin_lt);
+	denv_add_builtin(e, (char*) ">=", builtin_ge);
+	denv_add_builtin(e, (char*) "<=", builtin_le);
+	denv_add_builtin(e, (char*) "!", builtin_not);
+	denv_add_builtin(e, (char*) "and", builtin_and);
+	denv_add_builtin(e, (char*) "or", builtin_or);
+ 
+	denv_add_builtin(e, (char*) "print", builtin_print);
+	denv_add_builtin(e, (char*) "error", builtin_error);
+	denv_add_builtin(e, (char*) "load", builtin_load);
+	denv_add_builtin(e, (char*) "exit", builtin_exit);
 }

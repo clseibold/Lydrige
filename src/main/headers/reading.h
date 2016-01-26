@@ -4,6 +4,7 @@
 #include "structures.h"
 #include "../../mpc/headers/mpc.h"
 
+dval* dval_read_range(mpc_ast_t* t);
 dval* dval_read_int(mpc_ast_t* t);
 dval* dval_read_double(mpc_ast_t* t);
 dval* dval_read_byte(mpc_ast_t* t);

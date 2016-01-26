@@ -2,19 +2,19 @@
 
 char* dtype_name(int t) {
 	switch (t) {
-	case DVAL_FUNC: return (char*)"Function";
-	case DDATA_RANGE: return (char*)"Range";
-	case DDATA_INT: return (char*)"Integer";
-	case DDATA_DOUBLE: return (char*)"Double";
-	case DDATA_BYTE: return (char*)"Byte";
-	case DDATA_CHAR: return (char*)"Char";
-	case DDATA_STRING: return (char*)"String";
-	case DVAL_ERR: return (char*)"Error";
-	case DVAL_SYM: return (char*)"Symbol";
-	case DVAL_LIST: return (char*)"List";
-	case DVAL_SEXPR: return (char*)"S-Expression";
-	case DVAL_QEXPR: return (char*)"Q-Expression";
-	default: return (char*)"Unknown";
+	case DVAL_FUNC: return (char*) "Function";
+	case DDATA_RANGE: return (char*) "Range";
+	case DDATA_INT: return (char*) "Integer";
+	case DDATA_DOUBLE: return (char*) "Double";
+	case DDATA_BYTE: return (char*) "Byte";
+	case DDATA_CHAR: return (char*) "Char";
+	case DDATA_STRING: return (char*) "String";
+	case DVAL_ERR: return (char*) "Error";
+	case DVAL_SYM: return (char*) "Symbol";
+	case DVAL_LIST: return (char*) "List";
+	case DVAL_SEXPR: return (char*) "S-Expression";
+	case DVAL_QEXPR: return (char*) "Q-Expression";
+	default: return (char*) "Unknown";
 	}
 }
 
@@ -177,6 +177,7 @@ void dval_del(dval* v) {
 			dval_del(v->body);
 		}
 		break;
+	case DDATA_RANGE:
 	case DDATA_INT:
 	case DDATA_BYTE:
 	case DDATA_CHAR:

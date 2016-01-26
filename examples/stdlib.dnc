@@ -22,47 +22,6 @@
 			}}))
 
 
-; Change if statements to:
-;       if (cond) {do} (else if cond) {do} (else if cond) {do} ... {else do}
-
-
-; Static Typing syntax: (built into interpreter, based on strings and typeof)
-; This is inferred:
-;       def {name} 5
-; Explicit:
-;       def {name int} 5
-; ':' is a new syntax to the language that tells the
-; interpreter what type the symbol should be when being defined. MAYBE?
-; This is also used to report errors when trying to change the
-; symbol to another value.
-; You can specify that the symbol should be dynamic by giving it a nil type:
-;       def {name nil} "Any Value can Go Here"
-; Lambda's can be also be statically typed for their return value(s) and argument(s):
-;       def {name func} (\ {var int} {+ var 1} int)
-
-
-; An easy way to handle errors:
-;       if_err (inner_eval {testing 4}) {err} {return}
-; * err is a variable that has been assigned to the error that was found.
-; * return is a variable that has been assigned to the return value of the first argument (expr).
-; The second argument (q-expr/list) is evaluated when an error is found.
-; The third argument (q-expr/list) is evaluated when an error was not found.
-
-
-; While Loops
-;       while {var} {== 1 (len "hello")} {
-;           ; code (they return something, where does the returned thing go?
-;           ; Should they go into a qexpr that gets returned when the while loop is finished!?!)
-;           ; Note that var is a variable that is defined before the loop, but within this scope.
-;           ; This loop has its own environment. Therefore var cannot be accessed outside of this loop.
-;       }
-;
-;       while {== 1 (len "hello)} {
-;           ; code
-;           ; There is no variable.
-;       }
-
-
 ; Constant Function Definition
 (def {const_fn} (\ {f b} {
 	def (first f) (\ (tail f) b)
@@ -107,7 +66,7 @@
 (fn {check_fn_arg_types args} {
 	if (== (typeof args) qexpr) {
 		if (!= (len args) 0) {
-			if (== (typeof (get 1 args)) string) {
+			if (== (typeof (get 1 args)) string nil) {
 				check_fn_arg_types (tail (tail args))
 				} { false }
 				} { true }

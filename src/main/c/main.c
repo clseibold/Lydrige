@@ -49,11 +49,11 @@ int main(int argc, char** argv) {
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
 		expr		: <data> | <symbol> | <sexpr> | <qexpr> | <list> | <comment> ; \
-		data		: <byte> | <double> | <integer> | <string> | <character> ; \
+		data		: <byte> | <double> | <range> | <integer> | <string> | <character> ; \
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
 		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
-		range		: <integer> ".." <integer> ; \
+		range		: <integer> \"..\" <integer> ; \
 		string		: /\"(\\\\.|[^\"])*\"/ ; \
 		character	: /\'(\\\\.|[^\"])\'/ ; \
 		comment		: /;[^\\r\\n]*/ ; \
