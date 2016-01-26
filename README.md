@@ -40,6 +40,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `byte` - hex (ex: `0x10`)
 * `char` - character surrounded by single quotes (ex: `'c'`)
 * `string` - quotes wrapped around one or more characters (ex: `"string"`)
+* `range` - A range of numbers. (ex: `5..20` is a range of numbers 5 through 20, but not including 20) (Not currently working)
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
