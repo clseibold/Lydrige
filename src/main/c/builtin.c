@@ -143,7 +143,7 @@ dval* builtin_get(denv* e, dval* a) { // Make work for strings
 	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
-	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->content->integer));
+	dval* result = /*dval_eval(e, */dval_pop(a->cell[1], a->cell[0]->content->integer)/*)*/;
 	dval_del(a);
 	return result;
 }

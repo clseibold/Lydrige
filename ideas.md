@@ -37,11 +37,13 @@ The third argument (q-expr/list) is evaluated when an error was not found.
          - This function takes in an integer, but if one is not provided, the function uses the default
          - Since this function only has one argument, when calling the function using defaults, you must pass it () in order to call (and not return the  function lambda)
          - Note that when using `:`, you can put multiple things after it, but they must be within parentheses (which, in this case, do not denote an s-expression since it is apart of the `:` syntax).
+   - Casting
+      * `(5 : double)`
+         - This casts the value `5` to a double and returns it (`5.0`)
 
 * Allow `def` to use a q-expression or list literal for assigning multiple variables.
    - `def {x : int y : string} {5 "Hello, World!"}`
    - `def {x : int y : string} [(+ 1 (len "hello")) "hello"]`
-      * The children of this list literal will evaluate before asigning to the variables
 
 ## While Loops ##
 Should they be automatically wrapped around "do" function, so you can have mutiple s-expressions?

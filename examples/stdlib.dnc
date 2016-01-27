@@ -84,7 +84,7 @@
 			} { error "Argument 1 must be a q-expression!" }})
 
 ; @NO_ARG_CHECKING
-(fn {get_fn_arg_checking args} {
+(fn {get_fn_arg_checking bare_args} {
 	{if (== true true)}})
 
 (fn {fn args l} {
@@ -92,6 +92,7 @@
 		if (check_fn_arg_types (tail args)) {
 			do
 				(= {bare_args} (remove_fn_types (tail args)))
-				(def (first args) (\ bare_args (join (get_fn_arg_checking args) (list l) {{error "ERROR"}})))
-				} { error "All arguments must have a type (string)!" }
-				} { error "Arguments 1 and 2 must be q-expressions!" }})
+				(= {arg_types} (get_fn_arg_types (tail args)))
+				(def (first args) (\ bare_args (join (get_fn_arg_checking bare_args) (list l) {{error "ERROR"}})))
+		} { error "All arguments must have a type!" }
+	} { error "Arguments 1 and 2 must be q-expressions!" }})

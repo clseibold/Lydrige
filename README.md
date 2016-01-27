@@ -1,6 +1,6 @@
 # Lydrige
 ## Introduction ##
-Lydrige is an interpreted programming language built off of and expanded from the interpreter from the BuildYourOwnLisp book (by Mr Daniel Holden). Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple higher level language inspired by Lisp. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions. You can see future ideas and plans in the ideas.md file.
+Lydrige is an interpreted programming language built off of and expanded from the interpreter from the BuildYourOwnLisp book (by Mr Daniel Holden). Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple higher level language inspired by Lisp. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions. You can see future ideas and plans in the [ideas.md file](https://github.com/christianap/Lydrige/blob/master/ideas.md "ideas.md file").
 
 ## Basic Syntax ##
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
@@ -31,7 +31,7 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `load` - loads in a separate file
 * `exit` - exits the REPL (currently not working)
 * `inner_eval` - acts as if the given q-expression is a list literal. The items are evaluated, but the expression itself is not.
-* `get` - gets item from given q-expression or list literal at given index
+* `get` - gets item from given q-expression or list literal at given index, does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (get 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
 * `set` - returns a new q-expression with the item at the given index of give q-expression or list literal to a given value.
 
 ## Data Types ##
