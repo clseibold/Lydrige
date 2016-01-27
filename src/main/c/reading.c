@@ -4,7 +4,7 @@ dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
 	long max = 0;
-	sscanf(t->contents, "%ld..%ld", &min, &max);
+	sscanf(t->contents, "%ld..%ld", &min, &max); // TODO: Not working at the moment
 	return errno != ERANGE ? dval_range(min, max) : dval_err((char*) "invalid range");
 }
 
