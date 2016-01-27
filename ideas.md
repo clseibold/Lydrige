@@ -1,5 +1,4 @@
- This file lists ideas of language features and changes.
-
+This file lists ideas of language features and changes that may or may not be implemented into the language.
 
 ## Static Typing syntax: (built into interpreter, based on strings and typeof) ##
 This is inferred: `def {name} 5`
@@ -16,18 +15,17 @@ Lambda's can be also be statically typed for their return value(s) and argument(
 
 `def {name func} (\ {var int} {+ var 1} int)`
 
+An easy way to handle errors:
+`if_err (inner_eval {testing 4}) {err} {return}`
+* err is a variable that has been assigned to the error that was found.
+* return is a variable that has been assigned to the return value of the first argument (expr).
+The second argument (q-expr/list) is evaluated when an error is found.
+The third argument (q-expr/list) is evaluated when an error was not found.
 
- An easy way to handle errors:
-       `if_err (inner_eval {testing 4}) {err} {return}`
- * err is a variable that has been assigned to the error that was found.
- * return is a variable that has been assigned to the return value of the first argument (expr).
- The second argument (q-expr/list) is evaluated when an error is found.
- The third argument (q-expr/list) is evaluated when an error was not found.
 
-
- ## While Loops ##
- Should they be automatically wrapped around "do" function, so you can have mutiple s-expressions?
-`
+## While Loops ##
+Should they be automatically wrapped around "do" function, so you can have mutiple s-expressions?
+```clojure
 (while {var int} {== var (len "hello")} {
     ; They return something, where does the returned thing go?
    	; The variable var is declared as a local variable within this while scope
@@ -72,4 +70,4 @@ Lambda's can be also be statically typed for their return value(s) and argument(
    	;   a list literal (also because changing i depends on what it was before).
    	(= i (+ i 1))
  })
-`
+```
