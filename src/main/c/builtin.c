@@ -38,6 +38,8 @@ int dval_eq(dval* x, dval* y) {
 	}
 
 	switch (x->type) {
+	case DDATA_RANGE:
+		return (x->content->integer == y->content->integer && x->max == y->max);
 	case DDATA_INT:
 		return (x->content->integer == y->content->integer);
 	case DDATA_DOUBLE:
@@ -143,7 +145,24 @@ dval* builtin_get(denv* e, dval* a) { // Make work for strings
 	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
-	dval* result = /*dval_eval(e, */dval_pop(a->cell[1], a->cell[0]->content->integer)/*)*/;
+	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->content->integer));
+	dval_del(a);
+	return result;
+}
+
+/** Very similar to the `get` function, except, what is returned is not automatically semi-evaluated.
+ */
+dval* builtin_extract(denv* e, dval* a) {
+	LASSERT_NUM("get", a, 2);
+	LASSERT_TYPE("get", a, 0, DDATA_INT);
+	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->content->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+	
+	dval* result = dval_pop(a->cell[1], a->cell[0]->content->integer);
 	dval_del(a);
 	return result;
 }
@@ -873,6 +892,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "join", builtin_join);
 	denv_add_builtin(e, (char*) "len", builtin_len);
 	denv_add_builtin(e, (char*) "get", builtin_get);
+	denv_add_builtin(e, (char*) "extract", builtin_extract);
 	denv_add_builtin(e, (char*) "set", builtin_set);
 	denv_add_builtin(e, (char*) "typeof", builtin_typeof);
 

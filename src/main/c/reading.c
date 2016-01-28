@@ -58,6 +58,8 @@ dval* dval_read(mpc_ast_t* t) {
 		return dval_read_string(t);
 	} else if (strstr(t->tag, "symbol")) {
 		return dval_sym(t->contents);
+	} else if (strstr(t->tag, "note")) {
+		return dval_err("Notes are not implemented yet!");
 	} else if (strstr(t->tag, "character")) {
 		return dval_read_character(t);
 	}

@@ -248,7 +248,7 @@ dval* dval_copy(dval* v) {
 		}
 		break;
 	case DDATA_RANGE:
-		x->max = v->max; // Do not break here!
+		x->max = v->max;
 	case DDATA_BYTE:
 	case DDATA_DOUBLE:
 	case DDATA_INT:

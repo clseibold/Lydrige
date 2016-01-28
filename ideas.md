@@ -11,7 +11,7 @@ This is also used to report errors when trying to change the symbol to another v
 
 `def {name : nil} "Any Value can Go Here"`
 
-Lambda's can be also be statically typed for their return value(s) and argument(s):
+Lambda's can also be statically typed for their argument(s):
 
 `def {name : func} (\ {var : int} {+ var 1} int)`
 
@@ -46,7 +46,7 @@ The third argument (q-expr/list) is evaluated when an error was not found.
    - `def {x : int y : string} [(+ 1 (len "hello")) "hello"]`
 
 ## While Loops ##
-Should they be automatically wrapped around "do" function, so you can have mutiple s-expressions?
+Should they be automatically wrapped around "do" function, so you can have mutiple s-expressions inside the body?
 ```clojure
 (while {var int} {== var (len "hello")} {
     ; They return something, where does the returned thing go?
