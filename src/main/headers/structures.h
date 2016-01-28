@@ -94,6 +94,7 @@ mpc_parser_t* Comment;
 mpc_parser_t* String;
 mpc_parser_t* Character;
 mpc_parser_t* Symbol;
+mpc_parser_t* Note;
 mpc_parser_t* List;
 mpc_parser_t* Sexpr;
 mpc_parser_t* Qexpr;

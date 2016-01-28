@@ -31,7 +31,8 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `load` - loads in a separate file
 * `exit` - exits the REPL (currently not working)
 * `inner_eval` - acts as if the given q-expression is a list literal. The items are evaluated, but the expression itself is not.
-* `get` - gets item from given q-expression or list literal at given index, does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (get 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
+* `get` - gets item from given q-expression or list literal at given index. (ex: `get 0 {2 3 4 5}` will return `2` , `get 0 {unbound}` will return an error)
+* `extract` - very similar to the `get` function, except does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (get 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
 * `set` - returns a new q-expression with the item at the given index of give q-expression or list literal to a given value.
 
 ## Data Types ##
