@@ -50,7 +50,7 @@ typedef dval*(*dbuiltin)(denv*, dval*);
 union ddata {
 	long integer;
 	double doub;
-	byte b : 8; // Fix this, this should be an unsigned char (byte) with 8 bits!
+	byte b : 8;
 	char character;
 	char* str;
 };
@@ -60,9 +60,6 @@ struct dval {
 	union ddata* content;
 	long max; // Used for ranges
 	int constant; // Boolean of whether value is constant. Only used if symbol is associated with value.
-
-	/*char* err;
-	char* sym;*/
 
 	dbuiltin builtin;
 	denv* env;
@@ -76,8 +73,6 @@ struct dval {
 struct denv {
 	denv* par;
 	int count;
-	/*char** syms;
-	dval** vals; // TODO: Switch to hashtable!*/
 	HASHTBL* hashtbl;
 };
 

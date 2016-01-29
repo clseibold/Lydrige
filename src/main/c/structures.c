@@ -38,7 +38,7 @@ dval* dval_range(long min, long max) {
 	v->content = (ddata*) malloc(sizeof(ddata));
 	v->content->integer = min;
 	v->max = max;
-	
+
 	return v;
 }
 

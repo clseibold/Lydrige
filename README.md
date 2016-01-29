@@ -20,7 +20,8 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `typeof` - returns a string of the type of the given item.
 * `def` - defines a variable in global scope/root environment. The variable is mutable (simply use def again with same variable name).
 * `const` - similar to def, but defines variable as immutable. If variable already existed (and not immutable), the value is change and is made immutable.
-* `=` - similar to def, but defines variable in local scope/current environment
+* `let` - similar to def, but defines variable in local scope/current environment
+* `let_const` - defines variable in local scope/current environment. The variable is immutable. (will be implemented soon!)
 * `\` - creates a lambda with the first given q-expression as the argument names and the second q-expression as the body
 * `lambda` - alial to \
 * `if` - if given integer is 1, the first given q-expression is evaluated, otherwise the second given q-expression is evaluated
