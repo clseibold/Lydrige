@@ -161,7 +161,7 @@ dval* builtin_extract(denv* e, dval* a) {
 		"Index must be zero or positive.");
 	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
-	
+
 	dval* result = dval_pop(a->cell[1], a->cell[0]->content->integer);
 	dval_del(a);
 	return result;
@@ -179,7 +179,7 @@ dval* builtin_set(denv* e, dval* a) {
 		"Index must be zero or positive.");
 	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
-	
+
 	dval* result = dval_pop(a, 1);
 	result->cell[a->cell[0]->content->integer] = dval_pop(a, 1);
 	dval_del(a);
@@ -466,7 +466,7 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	return x;
 }
 
-dval* builtin_var(denv* e, dval* a, char* func) {
+dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 	LASSERT_TYPE(func, a, 0, DVAL_QEXPR); // Allow List Literals???
 
 	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
@@ -482,11 +482,9 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 
 	for (int i = 0; i < syms->count; i++) { // For each of the symbols
 		if (strcmp(func, "def") == 0) {
-			denv_def(e, syms->cell[i], a->cell[i + 1], 0);
-		}
-
-		if (strcmp(func, "=") == 0) {
-			denv_put(e, syms->cell[i], a->cell[i + 1], 0);
+			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
+		}else if (strcmp(func, "let") == 0) {
+			denv_put(e, syms->cell[i], a->cell[i + 1], constant);
 		}
 	}
 
@@ -501,47 +499,17 @@ dval* builtin_var(denv* e, dval* a, char* func) {
 }
 
 dval* builtin_def(denv* e, dval* a) {
-	return builtin_var(e, a, (char*)"def");
+	return builtin_var(e, a, (char*)"def", 0);
 }
 
-dval* builtin_const(denv* e, dval* a) { // TODO: Allow List Literals
-	//LASSERT_NUM("const", a, 2); // const func {varNameAsUSYM} varValue, func - def or =
-	// LASSERT_TYPE("const", a, 0, DVAL_FUNC);
-	LASSERT_TYPE((char*) "const", a, 0, DVAL_QEXPR); // TODO: do differently?
-
-	dval* syms = a->cell[0];
-	for (int i = 0; i < syms->count; i++) {
-		LASSERT(a, (syms->cell[i]->type == DVAL_SYM),
-			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", "const",
-			dtype_name(syms->cell[i]->type),
-			dtype_name(DVAL_SYM));
-	}
-
-	LASSERT(a, (syms->count == a->count - 1),
-		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", "const", syms->count, a->count - 1);
-
-	for (int i = 0; i < syms->count; i++) {
-		//if (strcmp("def", "def") == 0) {
-			denv_put(e, syms->cell[i], a->cell[i + 1], 1); // TODO: do differently?
-		//}
-	}
-
-	dval* result = dval_qexpr();
-	result->count = a->count - 1;
-	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
-	for (int i = 0; i < result->count; i++) {
-		result->cell[i] = dval_copy(a->cell[i + 1]);
-	}
-	dval_del(a);
-	return result;
+dval* builtin_const(denv* e, dval* a) {
+	return builtin_var(e, a, (char*) "def", 1);
 }
 
 dval* builtin_put(denv* e, dval* a) {
-	return builtin_var(e, a, (char*)"=");
+	return builtin_var(e, a, (char*) "let", 0);
 }
 
-/* (\ {x} {+ x 1}) */
-// TODO: Segmentation Fault on call of lambda variable/symbol
 dval* builtin_lambda(denv* e, dval* a) { // TODO: Allow List Literals
 	LASSERT_NUM((char*) "\\", a, 2);
 	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
@@ -905,7 +873,7 @@ void denv_add_builtins(denv* e) {
 
 	denv_add_builtin(e, (char*) "def", builtin_def);
 	denv_add_builtin(e, (char*) "const", builtin_const);
-	denv_add_builtin(e, (char*) "=", builtin_put);
+	denv_add_builtin(e, (char*) "let", builtin_put);
 	denv_add_builtin(e, (char*) "\\", builtin_lambda);
 	denv_add_builtin(e, (char*) "lambda", builtin_lambda);
 
@@ -919,7 +887,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "!", builtin_not);
 	denv_add_builtin(e, (char*) "and", builtin_and);
 	denv_add_builtin(e, (char*) "or", builtin_or);
- 
+
 	denv_add_builtin(e, (char*) "print", builtin_print);
 	denv_add_builtin(e, (char*) "error", builtin_error);
 	denv_add_builtin(e, (char*) "load", builtin_load);

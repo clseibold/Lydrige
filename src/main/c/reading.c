@@ -8,6 +8,8 @@ dval* dval_read_range(mpc_ast_t* t) {
 	sscanf(t->children[2]->contents, "%ld", &max);
 	if (min < 0 || max < 0) {
 		return dval_err((char*) "invalid range. Range cannot start from or end at a negative number!");
+	} else if (min == max) {
+		return dval_err((char*) "invalid range. The two bounds of a range cannot be the same number!");
 	}
 	return errno != ERANGE ? dval_range(min, max) : dval_err((char*) "invalid range");
 }

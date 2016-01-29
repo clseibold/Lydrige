@@ -29,7 +29,7 @@ dval* builtin_eval(denv* e, dval* a);
 dval* dval_call(denv* e, dval* f, dval* a);
 dval* builtin_join(denv* e, dval* a);
 dval* builtin_op(denv* e, dval* a, char* op);
-dval* builtin_var(denv* e, dval* a, char* func);
+dval* builtin_var(denv* e, dval* a, char* func, int constant);
 dval* builtin_def(denv* e, dval* a);
 dval* builtin_put(denv* e, dval* a);
 dval* builtin_lambda(denv* e, dval* a);

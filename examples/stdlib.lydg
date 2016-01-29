@@ -5,6 +5,7 @@
 (const {false} 0)
 (const {func} "Function")
 (const {string} (typeof ""))
+(const {range} (typeof 4..5))
 (const {int} (typeof 0))
 (const {double} (typeof 0.0))
 (const {byte} (typeof 0x00))
@@ -17,20 +18,22 @@
 (def {fn} (\ {f b} {
 	if (and (== (typeof f) qexpr) (== (typeof b) qexpr)) {
 		def (first f) (\ (tail f) b)
-		} {
-			error "Arguments must be q-expressions!"
-			}}))
-
+	} {
+		error "Arguments must be q-expressions!"
+	}}))
 
 ; Constant Function Definition
-(def {const_fn} (\ {f b} {
-	def (first f) (\ (tail f) b)
-	}))
+(const {const_fn} (\ {f b} {
+	if (and (== (typeof f) qexpr) (== (typeof b) qexpr)) {
+		const (first f) (\ (tail f) b)
+	} {
+		error "Arguments must be q-expressions!"
+	}}))
 
 ; Unpack List for function
 (const_fn {unpack f l} {
 	eval (join (list f) l)
-	})
+})
 
 ; Pack List for Function
 (const_fn {pack f & xs}
@@ -38,32 +41,27 @@
 
 ; Demonstrates how to check the type of something,
 ; Used for optional static typing!
-(def {is_5_int}
-	(if (== (typeof 5) int) {
+(const_fn {is_5_int x} {
+	if (== (typeof 5) int) {
 		"5 is an integer"
-		} {
-			"5 is not an integer"
-			}))
+	} {
+		"5 is not an integer"
+	}})
 
-(fn {do & l} {
-	if (== l nil)
-		{nil}
-		{last l}})
-
-(fn {do_two l} {
+(const_fn {do & l} {
 	if (== l nil)
 		{nil}
 		{last l}})
 
 ; Library Implementation of Static Typing
 
-(fn {check_var_in_lambda l} {
-
-	})
+(const_fn {check_var_in_lambda l} {
+	{}
+})
 
 ; Extract first and second element, check them, give rest to check_fn_arg_types unless empty, then return 1/true
 ; if (== (typeof (get 1 args))) ; Check if it is a symbol, then just skip (not every arg needs a type)
-(fn {check_fn_arg_types args} {
+(const_fn {check_fn_arg_types args} {
 	if (== (typeof args) qexpr) {
 		if (!= (len args) 0) {
 			if (== (typeof (get 1 args)) string) {
@@ -76,25 +74,33 @@
 ; to see if it matches the correct types, returns errors if it doesn't, or
 ; eval the function body if it does
 
-(fn {remove_fn_types args} {
+(const_fn {remove_fn_types args} {
 	if (== (typeof args) qexpr) {
 		if (!= (len args) 0) {
 			(join (first args) (remove_fn_types (tail (tail args))))
 			} { {} }
 	} { error "Argument 1 must be a q-expression!" }})
 
-; @NO_ARG_CHECKING
-(fn {get_fn_arg_checking bare_args arg_types} {
-	{
-	 if (== (get 1 bare_args) (get 1 arg_types))
-	 }})
+(const_fn {get_fn_arg_types args} {
+	if (== (typeof args) qexpr) {
+		if (!= (len args) 0)
+			{(join (list (get 1 args)) (get_fn_arg_types (tail (tail args))))}
+			{ {} }
+	} { error "Argument 1 must be a q-expression with at least 1 item!" }})
 
-(fn {fn args l} {
+; @NO_ARG_CHECKING
+(const_fn {get_fn_arg_checking bare_args arg_types} {
+	{
+		if (== (get 1 bare_args) (get 1 arg_types))
+	}})
+
+(const {fn} (\ {args l} {
 	if (and (== (typeof args) qexpr) (== (typeof l) qexpr)) {
 		if (check_fn_arg_types (tail args)) {
 			do
-				(= {bare_args} (remove_fn_types (tail args)))
-				(= {arg_types} (get_fn_arg_types (tail args)))
+				(let {bare_args} (remove_fn_types (tail args)))
+				(let {arg_types} (get_fn_arg_types (tail args)))
 				(def (first args) (\ bare_args (join (get_fn_arg_checking bare_args arg_types) (list l) {{error "ERROR"}})))
 		} { error "All arguments must have a type!" }
-	} { error "Arguments 1 and 2 must be q-expressions!" }})
+	} { error "Arguments 1 and 2 must be q-expressions!" }
+}))
