@@ -4,7 +4,11 @@ dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
 	long max = 0;
-	sscanf(t->contents, "%ld..%ld", &min, &max); // TODO: Not working at the moment
+	sscanf(t->children[0]->contents, "%ld", &min);
+	sscanf(t->children[2]->contents, "%ld", &max);
+	if (min < 0 || max < 0) {
+		return dval_err((char*) "invalid range. Range cannot start from or end at a negative number!");
+	}
 	return errno != ERANGE ? dval_range(min, max) : dval_err((char*) "invalid range");
 }
 
@@ -59,7 +63,7 @@ dval* dval_read(mpc_ast_t* t) {
 	} else if (strstr(t->tag, "symbol")) {
 		return dval_sym(t->contents);
 	} else if (strstr(t->tag, "note")) {
-		return dval_err("Notes are not implemented yet!");
+		return dval_err((char*) "Notes are not implemented yet!");
 	} else if (strstr(t->tag, "character")) {
 		return dval_read_character(t);
 	}
