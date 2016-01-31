@@ -90,11 +90,10 @@
 
 ; @NO_ARG_CHECKING
 (const_fn {get_fn_arg_checking bare_args arg_types} {
-    do 
-    	()
-		({
-			if (== (typeof (get 0 bare_args)) (get 0 arg_types)) ; Could really use a for loop here!
-		})})
+			; '{} are special q-expressions that will be converted to regular q-expressions when returned/semi-evaluated,
+			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular expression!
+			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))} ; Using new Special Q-expressions and special s-expressions
+		})
 
 (const {fn} (\ {args l} {
 	if (and (== (typeof args) qexpr) (== (typeof l) qexpr)) {
@@ -102,7 +101,7 @@
 			do
 				(let {bare_args} (remove_fn_types (tail args)))
 				(let {arg_types} (get_fn_arg_types (tail args)))
-				(def (first args) (\ bare_args (join (get_fn_arg_checking bare_args arg_types) (list l) {{error "ERROR"}})))
+				(def (first args) (\ bare_args  (join (get_fn_arg_checking bare_args arg_types) (list l) {{error "ERROR"}})))
 		} { error "All arguments must have a type!" }
 	} { error "Arguments 1 and 2 must be q-expressions!" }
 }))
