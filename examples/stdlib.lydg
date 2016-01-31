@@ -13,6 +13,7 @@
 (const {err} "Error")
 (const {ls} (typeof []))
 (const {qexpr} (typeof {}))
+(const {symbol} (typeof (extract 0 {sym})))
 
 ; Function Definition With Error Checking
 (def {fn} (\ {f b} {
@@ -63,12 +64,12 @@
 ; if (== (typeof (get 1 args))) ; Check if it is a symbol, then just skip (not every arg needs a type)
 (const_fn {check_fn_arg_types args} {
 	if (== (typeof args) qexpr) {
-		if (!= (len args) 0) {
+		if (>= (len args) 1) {
 			if (== (typeof (get 1 args)) string) {
 				check_fn_arg_types (tail (tail args))
 			} { false }
-		} { true }
-	} { error "Argument 1 must be a q-expression!" }})
+		} (== (len args) 1) { error "For every argument, there must be a type." } { true }
+	} { error "Argument 1 must be a q-expression." }})
 
 ; TODO: add code to lambda (if fn function) to check the input of the lambda
 ; to see if it matches the correct types, returns errors if it doesn't, or
@@ -90,9 +91,9 @@
 
 ; @NO_ARG_CHECKING
 (const_fn {get_fn_arg_checking bare_args arg_types} {
-			; '{} are special q-expressions that will be converted to regular q-expressions when returned/semi-evaluated,
+			; '{} are special q-expressions that will be converted to regular q-expressions when returned/passed to a function,
 			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
-			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))} ; Using new Special Q-expressions and special s-expressions
+			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))}
 		})
 
 (const {fn} (\ {args l} {
