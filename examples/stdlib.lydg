@@ -90,9 +90,11 @@
 
 ; @NO_ARG_CHECKING
 (const_fn {get_fn_arg_checking bare_args arg_types} {
-	{
-		if (== (get 1 bare_args) (get 1 arg_types))
-	}})
+    do 
+    	()
+		({
+			if (== (typeof (get 0 bare_args)) (get 0 arg_types)) ; Could really use a for loop here!
+		})})
 
 (const {fn} (\ {args l} {
 	if (and (== (typeof args) qexpr) (== (typeof l) qexpr)) {

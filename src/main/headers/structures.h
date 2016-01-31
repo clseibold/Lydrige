@@ -66,7 +66,7 @@ struct dval {
 	dval* formals;
 	dval* body;
 
-	int count;
+	unsigned int count;
 	struct dval** cell;
 };
 

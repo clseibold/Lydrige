@@ -194,6 +194,11 @@ dval* builtin_typeof(denv* e, dval* a) {
 	return result;
 }
 
+dval* builtin_throw(denv* e, dval* a) {
+	dval_del(a);
+	return dval_sexpr();
+}
+
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
 dval* builtin_first(denv* e, dval* a) {
 	LASSERT_NUM("first", a, 1);
@@ -863,6 +868,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "extract", builtin_extract);
 	denv_add_builtin(e, (char*) "set", builtin_set);
 	denv_add_builtin(e, (char*) "typeof", builtin_typeof);
+	denv_add_builtin(e, (char*) "throw", builtin_throw);
 
 	denv_add_builtin(e, (char*) "+", builtin_add);
 	denv_add_builtin(e, (char*) "-", builtin_sub);
