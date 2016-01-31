@@ -91,7 +91,7 @@
 ; @NO_ARG_CHECKING
 (const_fn {get_fn_arg_checking bare_args arg_types} {
 			; '{} are special q-expressions that will be converted to regular q-expressions when returned/semi-evaluated,
-			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular expression!
+			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
 			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))} ; Using new Special Q-expressions and special s-expressions
 		})
 

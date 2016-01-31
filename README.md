@@ -47,6 +47,14 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
 * `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
+* `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined. You can see an example of this in the standard library (`./examples/stdlib.lydg`):
+  - ```clojure
+		(const_fn {get_fn_arg_checking bare_args arg_types} {
+			; '{} are special q-expressions that will be converted to regular q-expressions when returned/passed to a function,
+			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
+			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))}
+		})
+  	```
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
 * `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 (+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
