@@ -77,6 +77,8 @@ dval* dval_read(mpc_ast_t* t) {
 		x = dval_sexpr();
 	} else if (strstr(t->tag, "qexpr")) {
 		x = dval_qexpr();
+	} else if (strstr(t->tag, "slist")) {
+		return dval_err((char*) "Special Lists are not implemented yet!");
 	} else if (strstr(t->tag, "list")) {
 		x = dval_list();
 	}

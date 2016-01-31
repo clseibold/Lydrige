@@ -143,6 +143,14 @@ dval* dval_list(void) {
 	return v;
 }
 
+dval* dval_slist(void) {
+	dval* v = (dval*) malloc(sizeof(dval));
+	v->type = DVAL_LIST;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 dval* dval_func(dbuiltin func) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_FUNC;
@@ -188,7 +196,7 @@ void dval_del(dval* v) {
 	case DVAL_LIST:
 	case DVAL_QEXPR:
 	case DVAL_SEXPR:
-		for (int i = 0; i < v->count; i++) {
+		for (unsigned int i = 0; i < v->count; i++) {
 			dval_del(v->cell[i]);
 		}
 		free(v->cell);
@@ -268,7 +276,7 @@ dval* dval_copy(dval* v) {
 	case DVAL_QEXPR:
 		x->count = v->count;
 		x->cell = (dval**)malloc(sizeof(dval*) * v->count);
-		for (int i = 0; i < v->count; i++) {
+		for (unsigned int i = 0; i < v->count; i++) {
 			x->cell[i] = dval_copy(v->cell[i]);
 		}
 		break;
