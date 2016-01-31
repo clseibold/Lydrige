@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./build/exe/main/main

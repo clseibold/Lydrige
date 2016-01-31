@@ -8,7 +8,7 @@ Here is an example of the syntax of a simple print statement:
 `(print "This number evaluates to " (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
 
 ## Builtin Functions ##
-Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (+, -, *, /, %, ^ (power), ==, >, <, >=, <=, !=).
+Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (+, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=)
 * `list` - returns a q-expression with all of the given arguments inside.
 * `first` - returns the first item in a given q-expression or list literal.
 * `last` - returns the last item in a given q-expression or list literal.
@@ -45,7 +45,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `string` - quotes wrapped around one or more characters (ex: `"string"`)
 * `range` - A range of numbers. (ex: `5..20` is a range of numbers 5 through 20, but not including 20) (Not currently working)
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
-* `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
+* `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{'[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
 * `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined. You can see an example of this in the standard library (`./examples/stdlib.lydg`):
   - ```clojure
@@ -56,7 +56,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 		})
   	```
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
-* `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 (+ 1 1)}` returns `{3 2}`)
+* `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 '(+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
 
 ## Examples ##
