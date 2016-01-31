@@ -36,7 +36,7 @@ typedef struct denv denv;
 typedef union ddata ddata;
 typedef unsigned char byte;
 
-enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_LIST, DVAL_FUNC };
+enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SEXPR, DVAL_QEXPR, DVAL_SLIST, DVAL_LIST, DVAL_FUNC };
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
@@ -91,6 +91,7 @@ mpc_parser_t* Character;
 mpc_parser_t* Symbol;
 mpc_parser_t* Note;
 mpc_parser_t* List;
+mpc_parser_t* SList;
 mpc_parser_t* Sexpr;
 mpc_parser_t* Qexpr;
 mpc_parser_t* Line;
@@ -111,6 +112,7 @@ dval* dval_usym(char* s);
 dval* dval_sexpr(void);
 dval* dval_qexpr(void);
 dval* dval_list(void);
+dval* dval_slist(void);
 dval* dval_func(dbuiltin func);
 dval* dval_lambda(dval* formals, dval* body);
 

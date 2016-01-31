@@ -1,0 +1,16 @@
+apply plugin: "c"
+
+model {
+	components {
+		mpc(NativeLibrarySpec)
+		main(NativeExecutableSpec) {
+			sources.c {
+				lib library: "mpc", linkage: "static"
+			}
+			binaries.all {
+				cCompiler.args '-std=c99'
+				linker.args '-lm', '-lreadline'
+			}
+		}
+	}
+}

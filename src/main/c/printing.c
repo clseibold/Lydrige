@@ -6,7 +6,7 @@
 
 void dval_expr_print(dval* v, char open, char close) {
 	putchar(open);
-	for (int i = 0; i < v->count; i++) {
+	for (unsigned int i = 0; i < v->count; i++) {
 		dval_print(v->cell[i]);
 
 		if (i != (v->count - 1)) {

@@ -23,7 +23,7 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `let` - similar to def, but defines variable in local scope/current environment
 * `let_const` - defines variable in local scope/current environment. The variable is immutable. (will be implemented soon!)
 * `\` - creates a lambda with the first given q-expression as the argument names and the second q-expression as the body
-* `lambda` - alial to \
+* `lambda` - alias to \
 * `if` - if given integer is 1, the first given q-expression is evaluated, otherwise the second given q-expression is evaluated
 * `and` - returns 1 if all given integers/doubles are 1. Returns 0 if any given integer/double is 0.
 * `or` - returns 1 if given any given integer/double is 1. Returns 0 if no given integer/double is 1.
