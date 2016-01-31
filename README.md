@@ -45,12 +45,14 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `string` - quotes wrapped around one or more characters (ex: `"string"`)
 * `range` - A range of numbers. (ex: `5..20` is a range of numbers 5 through 20, but not including 20) (Not currently working)
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
+* `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
+* `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 (+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
 
 ## Examples ##
 There are examples of programs/functions written in this language in the examples directory. This directory also includes *stdlib.dnc*, which will be the Prelude.
 
 ## Compiling the Interpreter and Running Examples ##
-You can compile the interpreter by simply running make. The file outputs to *build/main*. All of the examples are copied directly into the build folder so you can easily run the files from the interpreter. You do this by typing `./main ./file.dnc`. If you just want to start the REPL, simply run the file without any arguments.
+Compile the interpreter by running `./gradlew build` in the terminal (Unix) or `gradlew.bat build` in the cmd (Windows). The compiled program is output to `./build/exe/main/main`.
