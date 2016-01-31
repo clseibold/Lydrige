@@ -145,6 +145,14 @@ dval* dval_qexpr(void) {
 	return v;
 }
 
+dval* dval_sqexpr(void) {
+	dval* v = (dval*)malloc(sizeof(dval));
+	v->type = DVAL_SQEXPR;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 dval* dval_list(void) {
 	dval* v = (dval*) malloc(sizeof(dval));
 	v->type = DVAL_LIST;
@@ -205,6 +213,7 @@ void dval_del(dval* v) {
 	case DDATA_STRING: free(v->content->str); free(v->content); break;
 	case DVAL_LIST:
 	case DVAL_SLIST:
+	case DVAL_SQEXPR:
 	case DVAL_QEXPR:
 	case DVAL_SSEXPR:
 	case DVAL_SEXPR:
@@ -287,6 +296,7 @@ dval* dval_copy(dval* v) {
 	case DVAL_SLIST:
 	case DVAL_SEXPR:
 	case DVAL_SSEXPR:
+	case DVAL_SQEXPR:
 	case DVAL_QEXPR:
 		x->count = v->count;
 		x->cell = (dval**)malloc(sizeof(dval*) * v->count);

@@ -56,6 +56,7 @@ void dval_print(dval* v) {
 	case DVAL_LIST:  dval_expr_print(v, (char*) "[", (char*) "]"); break;
 	case DVAL_SSEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
 	case DVAL_SEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
+	case DVAL_SQEXPR: dval_expr_print(v, (char*) "{", (char*) "}"); break;
 	case DVAL_QEXPR: dval_expr_print(v, (char*) "{", (char*) "}"); break;
 	case DVAL_FUNC:
 		if (v->builtin) {

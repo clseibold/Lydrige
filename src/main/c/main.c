@@ -47,11 +47,12 @@ int main(int argc, char** argv) {
 	Sexpr = mpc_new("sexpr");
 	SSexpr = mpc_new("ssexpr");
 	Qexpr = mpc_new("qexpr");
+	SQexpr = mpc_new("sqexpr");
 	Line = mpc_new("line");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
-		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <qexpr> | <slist> | <list> | <comment> ; \
+		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <sqexpr> | <qexpr> | <slist> | <list> | <comment> ; \
 		data		: <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
@@ -66,9 +67,10 @@ int main(int argc, char** argv) {
 		list		: '[' <expr>* ']' ; \
 		ssexpr		: \"\\'(\" <expr>* ')' ; \
 		sexpr		: '(' <expr>* ')' ; \
+		sqexpr		: \"\\'{\" <expr>* '}' ; \
 		qexpr		: '{' <expr>* '}' ; \
 		line		: /^/ <expr>* /$/ ; \
-		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, Qexpr, Line);
+		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Line);
 
 	//printf("%d", sizeof(dval));
 
@@ -110,6 +112,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(17, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, Qexpr, Line);
+	mpc_cleanup(18, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Line);
 	return 0;
 }

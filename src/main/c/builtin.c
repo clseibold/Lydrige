@@ -199,6 +199,15 @@ dval* builtin_throw(denv* e, dval* a) {
 	return dval_sexpr();
 }
 
+dval* builtin_to_list(denv* e, dval* a) {
+	LASSERT_NUM("to_list", a, 1);
+	LASSERT_TYPE("to_list", a, 0, DVAL_QEXPR);
+
+	dval* result = dval_take(a, 0);
+	result->type = DVAL_LIST;
+	return result;
+}
+
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
 dval* builtin_first(denv* e, dval* a) {
 	LASSERT_NUM("first", a, 1);
@@ -515,10 +524,11 @@ dval* builtin_put(denv* e, dval* a) {
 	return builtin_var(e, a, (char*) "let", 0);
 }
 
-dval* builtin_lambda(denv* e, dval* a) { // TODO: Allow List Literals
+dval* builtin_lambda(denv* e, dval* a) {
 	LASSERT_NUM((char*) "\\", a, 2);
 	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
-	LASSERT_TYPE((char*) "\\", a, 1, DVAL_QEXPR);
+	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
 	for (unsigned int i = 0; i < a->cell[0]->count; i++) {
 		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
@@ -825,6 +835,11 @@ dval* dval_eval_qexpr(denv* e, dval* v) {
 			if (v->cell[i]->type == DVAL_ERR) {
 				return dval_take(v, i);
 			}
+		} else if (v->cell[i]->type == DVAL_LIST || v->cell[i]->type == DVAL_SEXPR) {
+			v->cell[i] = dval_eval_qexpr(e, v->cell[i]);
+			if (v->cell[i]->type == DVAL_ERR) {
+				return dval_take(v, i);
+			}
 		}
 	}
 
@@ -865,6 +880,9 @@ dval* dval_eval(denv* e, dval* v) {
 	} else if (v->type == DVAL_SSEXPR) {
 		v->type = DVAL_SEXPR;
 		return dval_eval_sexpr(e, v);
+	} else if (v->type == DVAL_SQEXPR) {
+		v->type = DVAL_QEXPR;
+		return dval_eval_qexpr(e, v);
 	} else if (v->type == DVAL_QEXPR) {
 		return dval_eval_qexpr(e, v);
 	} else if (v->type == DVAL_SLIST) {
@@ -897,6 +915,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "set", builtin_set);
 	denv_add_builtin(e, (char*) "typeof", builtin_typeof);
 	denv_add_builtin(e, (char*) "throw", builtin_throw);
+	denv_add_builtin(e, (char*) "to_list", builtin_to_list); // TODO: to_qexpr
 
 	denv_add_builtin(e, (char*) "+", builtin_add);
 	denv_add_builtin(e, (char*) "-", builtin_sub);

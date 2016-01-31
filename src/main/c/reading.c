@@ -77,6 +77,8 @@ dval* dval_read(mpc_ast_t* t) {
 		x = dval_ssexpr();
 	} else if (strstr(t->tag, "sexpr")) {
 		x = dval_sexpr();
+	} else if (strstr(t->tag, "sqexpr")) {
+		x = dval_sqexpr();
 	} else if (strstr(t->tag, "qexpr")) {
 		x = dval_qexpr();
 	} else if (strstr(t->tag, "slist")) {
@@ -94,6 +96,7 @@ dval* dval_read(mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "'[") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "'{") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
 		x = dval_add(x, dval_read(t->children[i]));
