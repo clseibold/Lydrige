@@ -14,6 +14,7 @@ char* dtype_name(int t) {
 	case DVAL_LIST: return (char*) "List";
 	case DVAL_SLIST: return (char*) "Special List";
 	case DVAL_SEXPR: return (char*) "S-Expression";
+	case DVAL_SSEXPR: return (char*) "Special S-Expression";
 	case DVAL_QEXPR: return (char*) "Q-Expression";
 	default: return (char*) "Unknown";
 	}
@@ -128,6 +129,14 @@ dval* dval_sexpr(void) {
 	return v;
 }
 
+dval* dval_ssexpr(void) {
+	dval* v = (dval*)malloc(sizeof(dval));
+	v->type = DVAL_SSEXPR;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 dval* dval_qexpr(void) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_QEXPR;
@@ -197,6 +206,7 @@ void dval_del(dval* v) {
 	case DVAL_LIST:
 	case DVAL_SLIST:
 	case DVAL_QEXPR:
+	case DVAL_SSEXPR:
 	case DVAL_SEXPR:
 		for (unsigned int i = 0; i < v->count; i++) {
 			dval_del(v->cell[i]);
@@ -276,6 +286,7 @@ dval* dval_copy(dval* v) {
 	case DVAL_LIST:
 	case DVAL_SLIST:
 	case DVAL_SEXPR:
+	case DVAL_SSEXPR:
 	case DVAL_QEXPR:
 		x->count = v->count;
 		x->cell = (dval**)malloc(sizeof(dval*) * v->count);

@@ -52,8 +52,9 @@ void dval_print(dval* v) {
 		dval_print_char(v); break;
 	case DVAL_ERR: printf("Error: %s", v->content->str); break;
 	case DVAL_SYM: printf("%s", v->content->str); break;
-	case DVAL_SLIST: dval_expr_print(v, (char*) "'[", (char*) "]"); break;
+	case DVAL_SLIST: dval_expr_print(v, (char*) "[", (char*) "]"); break;
 	case DVAL_LIST:  dval_expr_print(v, (char*) "[", (char*) "]"); break;
+	case DVAL_SSEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
 	case DVAL_SEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
 	case DVAL_QEXPR: dval_expr_print(v, (char*) "{", (char*) "}"); break;
 	case DVAL_FUNC:
