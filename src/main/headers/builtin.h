@@ -59,6 +59,9 @@ dval* builtin_error(denv* e, dval* a);
 dval* builtin_exit(denv* e, dval* a);
 
 dval* dval_eval_sexpr(denv* e, dval* v);
+dval* dval_eval_list(denv* e, dval* v);
+dval* dval_eval_qexpr(denv* e, dval* v);
+dval* dval_eval_slist(denv* e, dval* v);
 dval* dval_eval(denv* e, dval* v);
 
 void denv_add_builtin(denv* e, char* name, dbuiltin func);

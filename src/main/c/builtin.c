@@ -628,7 +628,7 @@ dval* builtin_cmp(denv* e, dval* a, char* op) {
   * items. Note that is does not have to be all of them, just at least one.
   * Ex: `(== (typeof x) integer double)` returns 1 if x is either an integer or a double
   */
-dval* builtin_eq(denv* e, dval* a) { // TODO: Allow comparing more than two dvals
+dval* builtin_eq(denv* e, dval* a) {
 	return builtin_cmp(e, a, (char*)"==");
 }
 
@@ -820,12 +820,11 @@ dval* dval_eval_sexpr(denv* e, dval* v) {
 
 dval* dval_eval_qexpr(denv* e, dval* v) {
 	for (unsigned int i = 0; i < v->count; i++) {
-		if (v->cell[i]->type == DVAL_SLIST || v->cell[i]->type == DVAL_QEXPR) {
+		if (v->cell[i]->type == DVAL_SLIST || v->cell[i]->type == DVAL_SSEXPR || v->cell[i]->type == DVAL_QEXPR) {
 			v->cell[i] = dval_eval(e, v->cell[i]);
 			if (v->cell[i]->type == DVAL_ERR) {
 				return dval_take(v, i);
 			}
-			//v->cell[i]->type = DVAL_LIST;
 		}
 	}
 
@@ -862,6 +861,9 @@ dval* dval_eval(denv* e, dval* v) {
 		return x;
 	}
 	if (v->type == DVAL_SEXPR) {
+		return dval_eval_sexpr(e, v);
+	} else if (v->type == DVAL_SSEXPR) {
+		v->type = DVAL_SEXPR;
 		return dval_eval_sexpr(e, v);
 	} else if (v->type == DVAL_QEXPR) {
 		return dval_eval_qexpr(e, v);
