@@ -113,6 +113,7 @@ dval* dval_sexpr(void);
 dval* dval_qexpr(void);
 dval* dval_list(void);
 dval* dval_slist(void);
+dval* dval_slist(void);
 dval* dval_func(dbuiltin func);
 dval* dval_lambda(dval* formals, dval* body);
 

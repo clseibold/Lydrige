@@ -78,18 +78,19 @@ dval* dval_read(mpc_ast_t* t) {
 	} else if (strstr(t->tag, "qexpr")) {
 		x = dval_qexpr();
 	} else if (strstr(t->tag, "slist")) {
-		return dval_err((char*) "Special Lists are not implemented yet!");
+		x = dval_slist();
 	} else if (strstr(t->tag, "list")) {
 		x = dval_list();
 	}
 
 	for (int i = 0; i < t->children_num; i++) {
-		if (strcmp(t->children[i]->contents, "(") == 0) { continue; }
-		 else if (strcmp(t->children[i]->contents, ")") == 0) continue;
+		if (strcmp(t->children[i]->contents, "(") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ")") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "{") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "}") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "[") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "'[") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
 		x = dval_add(x, dval_read(t->children[i]));
