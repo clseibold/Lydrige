@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
 		comment		: /;[^\\r\\n]*/ ; \
 		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
 		note		: ':' <symbol> ; \
+		slist		: \"\\'[\" <expr>* ']' ; \
 		list		: '[' <expr>* ']' ; \
-		slist		: \"\'[\" <expr>* ']' ; \
 		sexpr		: '(' <expr>* ')' ; \
 		qexpr		: '{' <expr>* '}' ; \
 		line		: /^/ <expr>* /$/ ; \
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				//mpc_ast_print(r.output);
+				//mpc_ast_print((mpc_ast_t*)r.output);
 				dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
 				dval_println(x);
 				dval_del(x);

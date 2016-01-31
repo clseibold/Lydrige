@@ -4,8 +4,10 @@
 #include <ctype.h>
 #include <stdint.h>
 
-void dval_expr_print(dval* v, char open, char close) {
-	putchar(open);
+void dval_expr_print(dval* v, char* open, char* close) {
+	for (unsigned int i = 0; i < strlen(open); i++) {
+		putchar(open[i]);
+	}
 	for (unsigned int i = 0; i < v->count; i++) {
 		dval_print(v->cell[i]);
 
@@ -13,7 +15,9 @@ void dval_expr_print(dval* v, char open, char close) {
 			putchar(' ');
 		}
 	}
-	putchar(close);
+	for (unsigned int i = 0; i < strlen(open); i++) {
+		putchar(close[i]);
+	}
 }
 
 void dval_print_str(dval* v) {
@@ -48,9 +52,10 @@ void dval_print(dval* v) {
 		dval_print_char(v); break;
 	case DVAL_ERR: printf("Error: %s", v->content->str); break;
 	case DVAL_SYM: printf("%s", v->content->str); break;
-	case DVAL_LIST:  dval_expr_print(v, '[', ']'); break;
-	case DVAL_SEXPR: dval_expr_print(v, '(', ')'); break;
-	case DVAL_QEXPR: dval_expr_print(v, '{', '}'); break;
+	case DVAL_SLIST: dval_expr_print(v, (char*) "'[", (char*) "]"); break;
+	case DVAL_LIST:  dval_expr_print(v, (char*) "[", (char*) "]"); break;
+	case DVAL_SEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
+	case DVAL_QEXPR: dval_expr_print(v, (char*) "{", (char*) "}"); break;
 	case DVAL_FUNC:
 		if (v->builtin) {
 			printf("<builtin>");
