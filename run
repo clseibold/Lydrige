@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./build/exe/main/main
+./build/exe/main/release/main $@
