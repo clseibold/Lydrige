@@ -3,6 +3,7 @@
 (const {nil} {})
 (const {true} 1)
 (const {false} 0)
+(const {any} "Any")
 (const {func} "Function")
 (const {string} (typeof ""))
 (const {range} (typeof 4..5))
@@ -106,3 +107,8 @@
 		} { error "All arguments must have a type!" }
 	} { error "Arguments 1 and 2 must be q-expressions!" }
 }))
+
+; Open a new scope
+(fn {scope b qexpr} {
+	((\ {_} b) ())
+})
