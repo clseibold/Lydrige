@@ -15,7 +15,7 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `head` - returns all but the last item from a given q-expression or list literal in a new q-expression.
 * `tail` - returns all but the first item from a given q-expression or list literal in a new q-expression.
 * `eval` - evaluates a q-expression (by converting it into an s-expression).
-* `join` - joins two q-expressions together.
+* `join` - joins two q-expressions or lists together into a single q-expression.
 * `len` - returns the length of a given q-expression or list.
 * `typeof` - returns a string of the type of the given item.
 * `def` - defines a variable in global scope/root environment. The variable is mutable (simply use def again with same variable name).
