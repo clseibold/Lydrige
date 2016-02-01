@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	String = mpc_new("string");
 	Character = mpc_new("character");
 	Symbol = mpc_new("symbol");
-	Note = mpc_new("note");
+	Note = mpc_new("note"); // TODO
 	List = mpc_new("list");
 	SList = mpc_new("slist");
 	Sexpr = mpc_new("sexpr");

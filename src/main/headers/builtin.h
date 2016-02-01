@@ -22,6 +22,8 @@ dval* builtin_set(denv* e, dval* a);
 dval* builtin_typeof(denv* e, dval* a);
 dval* builtin_throw(denv* e, dval* a);
 dval* builtin_to_list(denv* e, dval* a);
+dval* builtin_to_qexpr(denv* e, dval* a);
+dval* builtin_while(denv* e, dval* a);
 dval* builtin_first(denv* e, dval* a);
 dval* builtin_last(denv* e, dval* a);
 dval* builtin_head(denv* e, dval* a);

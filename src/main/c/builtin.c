@@ -199,13 +199,57 @@ dval* builtin_throw(denv* e, dval* a) {
 	return dval_sexpr();
 }
 
-dval* builtin_to_list(denv* e, dval* a) {
+dval* builtin_to_list(denv* e, dval* a) {  // TODO: List in README.md
 	LASSERT_NUM("to_list", a, 1);
 	LASSERT_TYPE("to_list", a, 0, DVAL_QEXPR);
 
 	dval* result = dval_take(a, 0);
 	result->type = DVAL_LIST;
-	return result;
+	return dval_eval(e, result); // Should result be semi-evaluated
+}
+
+dval* builtin_to_qexpr(denv* e, dval* a) {
+	LASSERT_NUM("to_qexpr", a, 1);
+	LASSERT_TYPE("to_qexpr", a, 0, DVAL_LIST);
+
+	dval* result = dval_take(a, 0);
+	result->type = DVAL_QEXPR;
+	return dval_eval(e, result);
+}
+
+dval* builtin_while(denv* e, dval* a) {
+	LASSERT_NUM("while", a, 2);
+	LASSERT_MTYPE("while", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_MTYPE("while", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	return dval_err("While function not implemented yet!"); // Temporary, until this function is done!
+
+	dval* conditional = builtin_eval(e, dval_copy(a->cell[0]));
+	dval* body = dval_copy(a->cell[1]);
+	/*if (conditional->type != DDATA_INT) { // TODO: Not working. Keeps on giving error
+		dval_del(conditional);
+		dval_del(body);
+		dval_del(a);
+		return dval_err("Argument 1 must evaluate to a conditional/integer.");
+	}*/
+	while (conditional->content->integer) {
+		dval* eval = builtin_eval(e, body);
+		if (eval->type == DVAL_ERR) {
+			dval_del(conditional);
+			dval_del(body);
+			dval_del(a);
+			return eval;
+		}
+		// TODO: Add the returns to a q-expression that will be returned at the end of the while loop.
+		dval_del(conditional);
+		conditional = builtin_eval(e, dval_copy(a->cell[0]));
+	}
+
+	dval_del(conditional);
+	dval_del(body);
+	dval_del(a);
+	return dval_qexpr();
 }
 
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
@@ -359,10 +403,10 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	}
 }
 
-/* Returns Q-Expression or List Literal joining one or more of given Q-Expressions or List Literals */
-dval* builtin_join(denv* e, dval* a) { // TODO: Allow List Literal
+/* Returns Q-Expression joining one or more of given Q-Expressions or List Literals */
+dval* builtin_join(denv* e, dval* a) { // TODO: Allow Strings
 	for (unsigned int i = 0; i < a->count; i++) {
-		LASSERT_MTYPE("join", a, i, a->cell[i]->type == DVAL_QEXPR || a->cell[i]->type == DVAL_LIST, \
+		LASSERT_MTYPE("join", a, i, a->cell[i]->type == DVAL_QEXPR || a->cell[i]->type == DVAL_LIST,
 			"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 	}
 
@@ -373,12 +417,13 @@ dval* builtin_join(denv* e, dval* a) { // TODO: Allow List Literal
 	}
 
 	dval_del(a);
+	x->type = DVAL_QEXPR; // Make sure what is returned is a qexpr, not a list
 	return x;
 }
 
 dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	for (unsigned int i = 0; i < a->count; i++) {
-		LASSERT_MTYPE(op, a, i, a->cell[i]->type == DDATA_INT || a->cell[i]->type == DDATA_DOUBLE, \
+		LASSERT_MTYPE(op, a, i, a->cell[i]->type == DDATA_INT || a->cell[i]->type == DDATA_DOUBLE,
 			"%s or %s.", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE));
 	}
 
@@ -916,6 +961,9 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "typeof", builtin_typeof);
 	denv_add_builtin(e, (char*) "throw", builtin_throw);
 	denv_add_builtin(e, (char*) "to_list", builtin_to_list); // TODO: to_qexpr
+	denv_add_builtin(e, (char*) "to_qexpr", builtin_to_qexpr);
+
+	denv_add_builtin(e, (char*) "while", builtin_while); // TODO
 
 	denv_add_builtin(e, (char*) "+", builtin_add);
 	denv_add_builtin(e, (char*) "-", builtin_sub);
