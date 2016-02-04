@@ -840,7 +840,6 @@ dval* builtin_print(denv* e, dval* a) {
 }
 
 dval* builtin_error(denv* e, dval* a) {
-	if (== l nil)
 	LASSERT_NUM((char*) "error", a, 1);
 	LASSERT_TYPE((char*) "error", a, 0, DDATA_STRING);
 
