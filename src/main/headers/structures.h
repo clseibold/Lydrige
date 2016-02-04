@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../mpc/headers/mpc.h"
-#include "hashtable.h"
+#include <hashmap.h>
 
 #define LASSERT(args, cond, fmt, ...) \
 	if (!(cond)) { \
@@ -40,13 +40,6 @@ enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHA
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
-/*struct stack {
-	dval** items = malloc(181818 * sizeof(dval)); // Stack can contain max of 181818 items at one time
-	dval* add(dval* a) {
-
-	}
-} stack;*/
-
 union ddata {
 	long integer;
 	double doub;
@@ -74,7 +67,7 @@ struct dval {
 struct denv {
 	denv* par;
 	int count;
-	HASHTBL* hashtbl;
+	Hashmap *map;
 };
 
 static int running = 1;

@@ -27,10 +27,15 @@ denv* denv_new(void) {
 	denv* e = (denv*)malloc(sizeof(denv));
 	e->par = NULL;
 	e->count = 0;
-	if (!(e->hashtbl = hashtbl_create(1, NULL))) {
-		fprintf(stderr, "Error: hashtbl_create() failed\n");
+	e->map = Hashmap_create(NULL, NULL);
+	if (e->map == NULL) {
+		fprintf(stderr, "ERROR: Failed to create hashmap!");
 		exit(EXIT_FAILURE);
 	}
+	//if (!(e->hashtbl = hashtbl_create(1, NULL))) {
+	//	fprintf(stderr, "Error: hashtbl_create() failed\n");
+	//	exit(EXIT_FAILURE);
+	//}
 	return e;
 }
 
@@ -216,7 +221,7 @@ dval* dval_note(void) {
 
 /* Destructors */
 void denv_del(denv* e) {
-	hashtbl_destroy(e->hashtbl);
+	Hashmap_destroy(e->map);
 	free(e);
 }
 
@@ -234,10 +239,10 @@ void dval_del(dval* v) {
 	case DDATA_BYTE:
 	case DDATA_CHAR:
 	case DDATA_DOUBLE: free(v->content); break;
-	case DVAL_ERR:
-	case DVAL_SYM:
 	case DVAL_TYPE:
 		free(v->content); break;
+	case DVAL_ERR:
+	case DVAL_SYM:
 	case DDATA_STRING: free(v->content->str); free(v->content); break;
 	case DVAL_LIST:
 	case DVAL_SLIST:
@@ -340,9 +345,14 @@ dval* dval_copy(dval* v) {
 }
 
 denv* denv_copy(denv* e) { // There may be a problem with this
-	denv* n = (denv*)malloc(sizeof(denv));
-	n->par = e->par;
-	n->count = e->count;
-	n->hashtbl = hashtbl_copy(e->hashtbl);
-	return n;
+	// TODO: Get each node in hashmap and copy the value, put into new hashmap
+	denv* result = denv_new();
+	result->count = e->count;
+	if (result->par) {
+		result->par = e->par;
+	}
+	Hashmap_destroy(result->map);
+	result->map = Hashmap_copy(e->map);
+
+	return result;
 }
