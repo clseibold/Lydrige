@@ -11,11 +11,13 @@ char* dtype_name(int t) {
 	case DDATA_STRING: return (char*) "String";
 	case DVAL_ERR: return (char*) "Error";
 	case DVAL_SYM: return (char*) "Symbol";
+	case DVAL_TYPE: return (char*) "Type";
 	case DVAL_LIST: return (char*) "List";
 	case DVAL_SLIST: return (char*) "Special List";
 	case DVAL_SEXPR: return (char*) "S-Expression";
 	case DVAL_SSEXPR: return (char*) "Special S-Expression";
 	case DVAL_QEXPR: return (char*) "Q-Expression";
+	case DVAL_NOTE: return (char*) "Note";
 	default: return (char*) "Unknown";
 	}
 }
@@ -25,8 +27,6 @@ denv* denv_new(void) {
 	denv* e = (denv*)malloc(sizeof(denv));
 	e->par = NULL;
 	e->count = 0;
-	/*e->syms = NULL;
-	e->vals = NULL;*/
 	if (!(e->hashtbl = hashtbl_create(1, NULL))) {
 		fprintf(stderr, "Error: hashtbl_create() failed\n");
 		exit(EXIT_FAILURE);
@@ -105,11 +105,29 @@ dval* dval_err(char* fmt, ...) {
 }
 
 dval* dval_sym(char* s) {
+	if (strcmp(s, "int") == 0) return dval_type(DDATA_INT);
+	else if (strcmp(s, "double") == 0) return dval_type(DDATA_DOUBLE);
+	else if (strcmp(s, "byte") == 0) return dval_type(DDATA_BYTE);
+	else if (strcmp(s, "string") == 0) return dval_type(DDATA_STRING);
+	else if (strcmp(s, "char") == 0) return dval_type(DDATA_CHAR);
+	else if (strcmp(s, "err") == 0) return dval_type(DVAL_ERR);
+	else if (strcmp(s, "qexpr") == 0) return dval_type(DVAL_QEXPR);
+	else if (strcmp(s, "lst") == 0) return dval_type(DVAL_LIST);
+	else if (strcmp(s, "func") == 0) return dval_type(DVAL_FUNC);
+
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
 	v->content = (ddata*)malloc(sizeof(ddata));
 	v->content->str = (char*)malloc(strlen(s) + 1);
 	strcpy(v->content->str, s);
+	return v;
+}
+
+dval* dval_type(int type) {
+	dval* v = (dval*) malloc(sizeof(dval));
+	v->type = DVAL_TYPE;
+	v->content = (ddata*) malloc(sizeof(ddata));
+	v->content->type = type;
 	return v;
 }
 
@@ -188,6 +206,14 @@ dval* dval_lambda(dval* formals, dval* body) {
 	return v;
 }
 
+dval* dval_note(void) {
+	dval* v = (dval*) malloc(sizeof(dval));
+	v->type = DVAL_NOTE;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 /* Destructors */
 void denv_del(denv* e) {
 	hashtbl_destroy(e->hashtbl);
@@ -210,12 +236,15 @@ void dval_del(dval* v) {
 	case DDATA_DOUBLE: free(v->content); break;
 	case DVAL_ERR:
 	case DVAL_SYM:
+	case DVAL_TYPE:
+		free(v->content); break;
 	case DDATA_STRING: free(v->content->str); free(v->content); break;
 	case DVAL_LIST:
 	case DVAL_SLIST:
 	case DVAL_SQEXPR:
 	case DVAL_QEXPR:
 	case DVAL_SSEXPR:
+	case DVAL_NOTE:
 	case DVAL_SEXPR:
 		for (unsigned int i = 0; i < v->count; i++) {
 			dval_del(v->cell[i]);
@@ -282,6 +311,7 @@ dval* dval_copy(dval* v) {
 	case DDATA_DOUBLE:
 	case DDATA_INT:
 	case DDATA_CHAR:
+	case DVAL_TYPE:
 	case DDATA_STRING:
 		x->content = ddata_copy(x->type, v->content);
 		break;
@@ -297,6 +327,7 @@ dval* dval_copy(dval* v) {
 	case DVAL_SEXPR:
 	case DVAL_SSEXPR:
 	case DVAL_SQEXPR:
+	case DVAL_NOTE:
 	case DVAL_QEXPR:
 		x->count = v->count;
 		x->cell = (dval**)malloc(sizeof(dval*) * v->count);
@@ -312,8 +343,6 @@ denv* denv_copy(denv* e) { // There may be a problem with this
 	denv* n = (denv*)malloc(sizeof(denv));
 	n->par = e->par;
 	n->count = e->count;
-	//n->hashtbl = hashtbl_create(0, NULL);
-	// TODO: Go through each node in e's hashtable and insert into n's hashtable!
 	n->hashtbl = hashtbl_copy(e->hashtbl);
 	return n;
 }

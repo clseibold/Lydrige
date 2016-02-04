@@ -1,4 +1,5 @@
 build/
 .tags*
 *.gch
+*.swp
 .gradle/

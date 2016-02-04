@@ -36,7 +36,7 @@ typedef struct denv denv;
 typedef union ddata ddata;
 typedef unsigned char byte;
 
-enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_USYM, DVAL_SSEXPR, DVAL_SEXPR, DVAL_SQEXPR, DVAL_QEXPR, DVAL_SLIST, DVAL_LIST, DVAL_FUNC };
+enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_TYPE, DVAL_USYM, DVAL_SSEXPR, DVAL_SEXPR, DVAL_SQEXPR, DVAL_QEXPR, DVAL_SLIST, DVAL_LIST, DVAL_FUNC, DVAL_NOTE };
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
@@ -53,6 +53,7 @@ union ddata {
 	byte b : 8;
 	char character;
 	char* str;
+	int type;
 };
 
 struct dval {
@@ -110,6 +111,7 @@ dval* dval_string(char* str);
 dval* dval_char(char character);
 dval* dval_err(char* fmt, ...);
 dval* dval_sym(char* s);
+dval* dval_type(int type);
 dval* dval_usym(char* s);
 dval* dval_sexpr(void);
 dval* dval_ssexpr(void);
@@ -119,6 +121,7 @@ dval* dval_list(void);
 dval* dval_slist(void);
 dval* dval_func(dbuiltin func);
 dval* dval_lambda(dval* formals, dval* body);
+dval* dval_note(void);
 
 /* Destructors */
 void dval_del(dval* v);

@@ -64,8 +64,6 @@ dval* dval_read(mpc_ast_t* t) {
 		return dval_read_string(t);
 	} else if (strstr(t->tag, "symbol")) {
 		return dval_sym(t->contents);
-	} else if (strstr(t->tag, "note")) {
-		return dval_err((char*) "Notes are not implemented yet!");
 	} else if (strstr(t->tag, "character")) {
 		return dval_read_character(t);
 	}
@@ -85,6 +83,8 @@ dval* dval_read(mpc_ast_t* t) {
 		x = dval_slist();
 	} else if (strstr(t->tag, "list")) {
 		x = dval_list();
+	} else if (strstr(t->tag, "note")) {
+		x = dval_note();
 	}
 
 	for (int i = 0; i < t->children_num; i++) {
@@ -97,9 +97,16 @@ dval* dval_read(mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->contents, "'[") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "'{") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ":") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
-		x = dval_add(x, dval_read(t->children[i]));
+		dval* v = dval_read(t->children[i]);
+		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE) {
+			dval_del(v);
+			return dval_err("Only types are allowed in Notes!");
+		}
+		x = dval_add(x, v);
 	}
 
 	return x;

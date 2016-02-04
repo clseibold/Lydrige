@@ -3,16 +3,7 @@
 (const {nil} {})
 (const {true} 1)
 (const {false} 0)
-(const {func} "Function")
-(const {string} (typeof ""))
 (const {range} (typeof 4..5))
-(const {int} (typeof 0))
-(const {double} (typeof 0.0))
-(const {byte} (typeof 0x00))
-(const {char} (typeof 'c'))
-(const {err} "Error")
-(const {ls} (typeof []))
-(const {qexpr} (typeof {}))
 (const {symbol} (typeof (extract 0 {sym})))
 
 ; Function Definition With Error Checking
