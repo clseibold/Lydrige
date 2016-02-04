@@ -52,6 +52,8 @@ int dval_eq(dval* x, dval* y) {
 		return (strcmp(x->content->str, y->content->str) == 0);
 	case DVAL_ERR:
 		return (strcmp(x->content->str, y->content->str) == 0);
+	case DVAL_TYPE:
+		return (x->content->type == y->content->type);
 	case DVAL_SYM:
 		return (strcmp(x->content->str, y->content->str) == 0);
 	case DVAL_FUNC:
@@ -189,7 +191,7 @@ dval* builtin_set(denv* e, dval* a) {
 dval* builtin_typeof(denv* e, dval* a) {
 	LASSERT_NUM("typeof", a, 1);
 
-	dval* result = dval_string(dtype_name(a->cell[0]->type));
+	dval* result = dval_type(a->cell[0]->type);
 	dval_del(a);
 	return result;
 }
@@ -530,7 +532,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 
 	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
 	for (unsigned int i = 0; i < syms->count; i++) {
-		LASSERT(a, (syms->cell[i]->type == DVAL_SYM),
+		LASSERT(a, syms->cell[i]->type == DVAL_SYM,
 			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
 			dtype_name(syms->cell[i]->type),
 			dtype_name(DVAL_SYM));

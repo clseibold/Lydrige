@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	String = mpc_new("string");
 	Character = mpc_new("character");
 	Symbol = mpc_new("symbol");
-	Note = mpc_new("note"); // TODO
+	Note = mpc_new("note");
 	List = mpc_new("list");
 	SList = mpc_new("slist");
 	Sexpr = mpc_new("sexpr");
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
 		character	: /\'(\\\\.|[^\"])\'/ ; \
 		comment		: /;[^\\r\\n]*/ ; \
 		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
-		note		: ':' <symbol> ; \
+		note		: ':' <symbol> | ':' '(' <symbol>+ ')' ; \
 		slist		: \"\\'[\" <expr>* ']' ; \
 		list		: '[' <expr>* ']' ; \
 		ssexpr		: \"\\'(\" <expr>* ')' ; \

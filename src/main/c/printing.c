@@ -46,12 +46,15 @@ void dval_print(dval* v) {
 	case DDATA_BYTE:
 		printf("0x%X", v->content->b);
 		break;
+	case DVAL_TYPE:
+		printf("%s", dtype_name(v->content->type)); break;
 	case DDATA_STRING:
 		dval_print_str(v); break;
 	case DDATA_CHAR:
 		dval_print_char(v); break;
 	case DVAL_ERR: printf("Error: %s", v->content->str); break;
 	case DVAL_SYM: printf("%s", v->content->str); break;
+	case DVAL_NOTE: dval_expr_print(v, (char*) ": (", (char*) ")"); break;
 	case DVAL_SLIST: dval_expr_print(v, (char*) "[", (char*) "]"); break;
 	case DVAL_LIST:  dval_expr_print(v, (char*) "[", (char*) "]"); break;
 	case DVAL_SSEXPR: dval_expr_print(v, (char*) "(", (char*) ")"); break;
