@@ -63,7 +63,7 @@ dval* dval_read(mpc_ast_t* t) {
 	} else if (strstr(t->tag, "string")) {
 		return dval_read_string(t);
 	} else if (strstr(t->tag, "symbol")) {
-		return dval_sym(t->contents);
+		return dval_sym(t->contents, DVAL_SYM);
 	} else if (strstr(t->tag, "character")) {
 		return dval_read_character(t);
 	}

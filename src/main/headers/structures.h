@@ -54,6 +54,7 @@ struct dval {
 	union ddata* content;
 	long max; // Used for ranges
 	int constant; // Boolean of whether value is constant. Only used if symbol is associated with value.
+	int sym_type;
 
 	dbuiltin builtin;
 	denv* env;
@@ -103,7 +104,7 @@ dval* dval_byte(byte x);
 dval* dval_string(char* str);
 dval* dval_char(char character);
 dval* dval_err(char* fmt, ...);
-dval* dval_sym(char* s);
+dval* dval_sym(char* s, int type);
 dval* dval_type(int type);
 dval* dval_usym(char* s);
 dval* dval_sexpr(void);

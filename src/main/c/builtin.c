@@ -365,10 +365,10 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	while (a->count) {
 		if (f->formals->count == 0) {
-
+			char* func_name = f->content->str;
 			dval_del(a);
 			dval_del(f);
-			return dval_err((char*)"Function 'UNKNOWN' passed too many arguments. Got %i, Expected %i.", given, total); // TODO
+			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.",func_name, given, total);
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
@@ -382,13 +382,15 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 			}
 
 			dval* nsym = dval_pop(f->formals, 0);
-			denv_put(f->env, nsym, builtin_list(e, a), 0); // TODO: do differently?
+			denv_put(f->env, nsym, builtin_list(e, a), 0);
 			dval_del(sym); dval_del(nsym);
 			break;
 		}
 
 		dval* val = dval_pop(a, 0);
-		denv_put(f->env, sym, val, 0); // TODO: do differently?
+		// Check if val is the correct type here:
+		//
+		denv_put(f->env, sym, val, 0);
 
 		dval_del(sym); dval_del(val);
 	}
@@ -584,20 +586,35 @@ dval* builtin_put(denv* e, dval* a) {
 	return builtin_var(e, a, (char*) "let", 0);
 }
 
+// (\ {sym: type sym:type} {code})
 dval* builtin_lambda(denv* e, dval* a) {
 	LASSERT_NUM((char*) "\\", a, 2);
 	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
 	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
-	for (unsigned int i = 0; i < a->cell[0]->count; i++) {
+	if (a->cell[0]->count % 2 != 0) {
+		dval_del(a);
+		return dval_err("Every argument must have a type!");
+	}
+
+	dval* formals = dval_qexpr();
+
+	for (unsigned int i = 0; i < a->cell[0]->count; i+=2) {
 		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
 			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
+		LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
+			(char*) "Symbol %s must have a type. Got %s, Expected %s.",
+			a->cell[0]->cell[i]->content->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
+
+		dval* v = dval_copy(a->cell[0]->cell[i]);
+		v->sym_type = a->cell[0]->cell[i]->content->type;
+		dval_add(formals, v);
+		v = NULL;
 	}
 
-	dval* formals = dval_pop(a, 0);
-	dval* body = dval_pop(a, 0);
+	dval* body = dval_pop(a, 1);
 	dval_del(a);
 
 	return dval_lambda(formals, body);
@@ -954,7 +971,7 @@ dval* dval_eval(denv* e, dval* v) { // v is deleted!
 }
 
 void denv_add_builtin(denv* e, char* name, dbuiltin func) {
-	dval* k = dval_sym(name);
+	dval* k = dval_sym(name, DVAL_FUNC);
 	dval* v = dval_func(func);
 	denv_put(e, k, v, 0);
 	dval_del(k); dval_del(v);
