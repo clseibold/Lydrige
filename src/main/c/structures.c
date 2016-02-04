@@ -109,7 +109,7 @@ dval* dval_err(char* fmt, ...) {
 	return v;
 }
 
-dval* dval_sym(char* s) {
+dval* dval_sym(char* s, int type) {
 	if (strcmp(s, "int") == 0) return dval_type(DDATA_INT);
 	else if (strcmp(s, "double") == 0) return dval_type(DDATA_DOUBLE);
 	else if (strcmp(s, "byte") == 0) return dval_type(DDATA_BYTE);
@@ -122,6 +122,7 @@ dval* dval_sym(char* s) {
 
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
+	v->sym_type = type;
 	v->content = (ddata*)malloc(sizeof(ddata));
 	v->content->str = (char*)malloc(strlen(s) + 1);
 	strcpy(v->content->str, s);
