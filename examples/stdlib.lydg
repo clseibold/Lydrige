@@ -97,3 +97,8 @@
 		} { error "All arguments must have a type!" }
 	} { error "Arguments 1 and 2 must be q-expressions!" }
 }))
+
+; Open a new scope
+(fn {scope b qexpr} {
+	((\ {_} b) ())
+})

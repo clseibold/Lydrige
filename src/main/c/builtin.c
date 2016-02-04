@@ -219,36 +219,43 @@ dval* builtin_to_qexpr(denv* e, dval* a) {
 	return dval_eval(e, result);
 }
 
-dval* builtin_while(denv* e, dval* a) {
+dval* builtin_while(denv* e, dval* a) { // TODO: cleanup 
 	LASSERT_NUM("while", a, 2);
 	LASSERT_MTYPE("while", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 	LASSERT_MTYPE("while", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	return dval_err("While function not implemented yet!"); // Temporary, until this function is done!
 
-	dval* conditional = builtin_eval(e, dval_copy(a->cell[0]));
-	dval* body = dval_copy(a->cell[1]);
-	/*if (conditional->type != DDATA_INT) { // TODO: Not working. Keeps on giving error
+	dval* conditional = dval_pop(a, 0);
+	conditional->type = DVAL_SEXPR;
+	dval* cond = dval_eval(e, dval_copy(conditional));
+	//dval* conditional = builtin_eval(e, dval_copy(a->cell[0]));
+	dval* body = dval_pop(a, 0);
+	body->type = DVAL_SEXPR;
+	if (cond->type != DDATA_INT) {
 		dval_del(conditional);
+		dval_del(cond);
 		dval_del(body);
 		dval_del(a);
 		return dval_err("Argument 1 must evaluate to a conditional/integer.");
-	}*/
-	while (conditional->content->integer) {
-		dval* eval = builtin_eval(e, body);
+	}
+	while (cond->content->integer) { // Not stopping correctly
+		dval* eval = dval_eval(e, dval_copy(body));
 		if (eval->type == DVAL_ERR) {
 			dval_del(conditional);
+			dval_del(cond);
 			dval_del(body);
 			dval_del(a);
 			return eval;
 		}
 		// TODO: Add the returns to a q-expression that will be returned at the end of the while loop.
-		dval_del(conditional);
-		conditional = builtin_eval(e, dval_copy(a->cell[0]));
+		dval_del(eval);
+		dval_del(cond);
+		cond = dval_eval(e, dval_copy(conditional));
 	}
 
 	dval_del(conditional);
+	dval_del(cond);
 	dval_del(body);
 	dval_del(a);
 	return dval_qexpr();
@@ -347,7 +354,7 @@ dval* builtin_inner_eval(denv* e, dval* a) {
 
 dval* dval_call(denv* e, dval* f, dval* a) {
 	if (f->builtin) {
-		return f->builtin(e, a);
+		return f->builtin(e, a); // Delete f here???
 	}
 
 	int given = a->count;
@@ -357,6 +364,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		if (f->formals->count == 0) {
 
 			dval_del(a);
+			dval_del(f);
 			return dval_err((char*)"Function 'UNKNOWN' passed too many arguments. Got %i, Expected %i.", given, total); // TODO
 		}
 
@@ -365,6 +373,8 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		if (strcmp(sym->content->str, "&") == 0) {
 			if (f->formals->count != 1) {
 				dval_del(a);
+				dval_del(f);
+				dval_del(sym);
 				return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
 			}
 
@@ -397,8 +407,8 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	}
 
 	if (f->formals->count == 0) {
-		f->env->par = e;
-		return builtin_eval(f->env, dval_add(dval_sexpr(), dval_copy(f->body)));
+		f->env->par = e; // What is this used for???
+		return builtin_eval(f->env, dval_add(dval_sexpr(), dval_copy(f->body))); // dval_del(f)???
 	}
 	else {
 		return dval_copy(f);
@@ -830,6 +840,7 @@ dval* builtin_print(denv* e, dval* a) {
 }
 
 dval* builtin_error(denv* e, dval* a) {
+	if (== l nil)
 	LASSERT_NUM((char*) "error", a, 1);
 	LASSERT_TYPE((char*) "error", a, 0, DDATA_STRING);
 
@@ -916,7 +927,7 @@ dval* dval_eval_list(denv* e, dval* v) {
 	return v;
 }
 
-dval* dval_eval(denv* e, dval* v) {
+dval* dval_eval(denv* e, dval* v) { // v is deleted!
 	if (v->type == DVAL_SYM) {
 		dval* x = denv_get(e, v);
 		dval_del(v);
