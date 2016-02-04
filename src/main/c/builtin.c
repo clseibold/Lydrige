@@ -1,4 +1,5 @@
 #include "../headers/builtin.h"
+#include <bstrlib.h>
 
 /* Returns extracted element at index i, shifts list elements backwards to fill in where element was at */
 dval* dval_pop(dval* v, int i) {
@@ -81,7 +82,7 @@ int dval_eq(dval* x, dval* y) {
 
 dval* denv_get(denv* e, dval* k) {
 	dval* d;
-	if ((d = (dval*)hashtbl_get(e->hashtbl, k->content->str))) {
+	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str)))) {
 		return dval_copy(d);
 	}
 
@@ -95,12 +96,15 @@ dval* denv_get(denv* e, dval* k) {
 
 void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: does this work correctly?
 	dval* t;
-	if (hashtbl_get(e->hashtbl, k->content->str)) { // If already defined in hashtable
-		if (((dval*)hashtbl_get(e->hashtbl, k->content->str))->constant == 0) { // If not constant (in hashtable)
-			hashtbl_remove(e->hashtbl, k->content->str); // Remove from hashtable
+	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str));
+	if (item != NULL) { // If already defined in hashtable
+		if (item->constant == 0) { // If not constant (in hashtable)
+			dval* deleted = (dval*)Hashmap_delete(e->map, bfromcstr(k->content->str));
+			dval_del(deleted); // Note that `deleted` is the same as `item`!
+			item = NULL;
 			t = dval_copy(v); // Copy value into t
 			t->constant = constant; // set constant
-			hashtbl_insert(e->hashtbl, k->content->str, t); // insert new value
+			Hashmap_set(e->map, bfromcstr(k->content->str), t); // TODO: Check for errors!
 			return;
 		} else {
 			printf("Error: Cannot edit '%s'. It is a constant\n", k->content->str);
@@ -108,10 +112,9 @@ void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: does this work
 		}
 	} else { // Not in hashtable yet!
 		e->count++;
-		hashtbl_resize(e->hashtbl, e->hashtbl->size + 1); // Add one space to hashtable
 		t = dval_copy(v); // Copy value into t
 		t->constant = constant; // set constant
-		hashtbl_insert(e->hashtbl, k->content->str, t); // insert into table
+		Hashmap_set(e->map, bfromcstr(k->content->str), t);
 		return;
 	}
 }
@@ -554,7 +557,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 	for (unsigned int i = 0; i < syms->count; i++) { // For each of the symbols
 		if (strcmp(func, "def") == 0) {
 			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
-		}else if (strcmp(func, "let") == 0) {
+		} else if (strcmp(func, "let") == 0) {
 			denv_put(e, syms->cell[i], a->cell[i + 1], constant);
 		}
 	}

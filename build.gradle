@@ -8,12 +8,15 @@ model {
 	}
 	components {
 		mpc(NativeLibrarySpec)
+		hashmap(NativeLibrarySpec)
 		main(NativeExecutableSpec) {
 			sources.c {
 				lib library: "mpc", linkage: "static"
+				lib library: "hashmap", linkage: "static"
 			}
 			binaries.all {
-				cCompiler.args '-std=c99'
+				cCompiler.define "NDEBUG"
+				cCompiler.args '-g'
 				linker.args '-lm', '-lreadline'
 			}
 		}

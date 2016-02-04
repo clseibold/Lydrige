@@ -23,7 +23,6 @@ void add_history(char* unused) {}
 #include <readline/history.h>
 #endif
 
-#include "../headers/hashtable.h"
 #include "../../mpc/headers/mpc.h"
 #include "../headers/structures.h"
 #include "../headers/reading.h"

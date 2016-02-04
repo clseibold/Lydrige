@@ -4,6 +4,9 @@
 #include "../headers/dbg.h"
 #include "../headers/bstrlib.h"
 
+const uint32_t FNV_PRIME = 16777619;
+const uint32_t FNV_OFFSET_BASIS = 2166136261;
+
 static int default_compare(void *a, void *b) {
     return bstrcmp((bstring)a, (bstring)b);
 }
@@ -19,9 +22,9 @@ static uint32_t default_hash(void *a) {
     uint32_t i = 0;
 
     for (hash = i = 0; i < len; ++i) {
-	hash += key[i];
-	hash += (hash << 10);
-	hash ^= (hash >> 6);
+		hash += key[i];
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
     }
 
     hash += (hash << 3);
@@ -31,12 +34,24 @@ static uint32_t default_hash(void *a) {
     return hash;
 }
 
+static uint32_t fnv1a_hash(void *a) {
+	bstring s = (bstring) a;
+	uint32_t hash = FNV_OFFSET_BASIS;
+
+	for (int i = 0; i < blength(s); i++) {
+		hash ^= bchare(s, i, 0);
+		hash *= FNV_PRIME;
+	}
+
+	return hash;
+}
+
 Hashmap *Hashmap_create(Hashmap_compare compare, Hashmap_hash hash) {
     Hashmap *map = calloc(1, sizeof(Hashmap));
     check_mem(map);
 
     map->compare = compare == NULL ? default_compare : compare;
-    map->hash = hash == NULL ? default_hash : hash;
+    map->hash = hash == NULL ? fnv1a_hash : hash; // Replaced defalt_hash with fnv1a_hash
     map->buckets = DArray_create(sizeof(DArray *), DEFAULT_NUMBER_OF_BUCKETS);
     map->buckets->end = map->buckets->max; // fake out expanding it
     check_mem(map->buckets);
@@ -45,7 +60,7 @@ Hashmap *Hashmap_create(Hashmap_compare compare, Hashmap_hash hash) {
 
 error:
     if (map) {
-	Hashmap_destroy(map);
+		Hashmap_destroy(map);
     }
 
     return NULL;
@@ -95,10 +110,10 @@ static inline DArray *Hashmap_find_bucket(Hashmap *map, void *key, int create, u
     DArray *bucket = DArray_get(map->buckets, bucket_n);
 
     if (!bucket && create) {
-	// new bucket, set it up
-	bucket = DArray_create(sizeof(void *), DEFAULT_NUMBER_OF_BUCKETS);
-	check_mem(bucket);
-	DArray_set(map->buckets, bucket_n, bucket);
+		// new bucket, set it up
+		bucket = DArray_create(sizeof(void *), DEFAULT_NUMBER_OF_BUCKETS);
+		check_mem(bucket);
+		DArray_set(map->buckets, bucket_n, bucket);
     }
 
     return bucket;
@@ -127,11 +142,11 @@ static inline int Hashmap_get_node(Hashmap *map, uint32_t hash, DArray *bucket, 
     int i = 0;
 
     for (i = 0; i < DArray_end(bucket); i++) {
-	debug("Try: %d", i);
-	HashmapNode *node = DArray_get(bucket, i);
-	if (node->hash == hash && map->compare(node->key, key) == 0) {
-	    return i;
-	}
+		//debug("Try: %d", i);
+		HashmapNode *node = DArray_get(bucket, i);
+		if (node->hash == hash && map->compare(node->key, key) == 0) {
+		    return i;
+		}
     }
 
     return -1;
@@ -160,14 +175,14 @@ int Hashmap_traverse(Hashmap *map, Hashmap_traverse_cb traverse_cb) {
     int rc = 0;
 
     for (i = 0; i < DArray_count(map->buckets); i++) {
-	DArray *bucket = DArray_get(map->buckets, i);
-	if (bucket) {
-	    for (j = 0; j < DArray_count(bucket); j++) {
-		HashmapNode *node = DArray_get(bucket, j);
-		rc = traverse_cb(node);
-		if (rc != 0) return rc;
-	    }
-	}
+		DArray *bucket = DArray_get(map->buckets, i);
+		if (bucket) {
+		    for (j = 0; j < DArray_count(bucket); j++) {
+				HashmapNode *node = DArray_get(bucket, j);
+				rc = traverse_cb(node);
+				if (rc != 0) return rc;
+		    }
+		}
     }
 
     return 0;
@@ -193,4 +208,20 @@ void *Hashmap_delete(Hashmap *map, void *key) {
     }
 
     return data;
+}
+
+Hashmap *Hashmap_copy(Hashmap *map) { // TODO: Improve this!
+	Hashmap *result = Hashmap_create(map->compare, map->hash);
+	for (int i = 0; i < DArray_count(map->buckets); i++) {
+		DArray *bucket = DArray_get(map->buckets, i);
+		if (bucket) {
+			for (int j = 0; j < DArray_count(bucket); j++) {
+				HashmapNode *node = DArray_get(bucket, j);
+				if (node->key && node->data) {
+					Hashmap_set(result, node->key, node->data);
+				}
+			}
+		}
+	}
+	return result;
 }
