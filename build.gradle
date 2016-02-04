@@ -7,16 +7,41 @@ model {
 		release
 	}
 	components {
-		mpc(NativeLibrarySpec)
-		hashmap(NativeLibrarySpec)
+		mpc(NativeLibrarySpec) {
+			binaries.all {
+				if (buildType == buildTypes.release) {
+					cCompiler.args '-O3'
+					cCompiler.define 'NDEBUG'
+				}
+				if (buildType == buildTypes.debug) {
+					cCompiler.args '-g', '-Og'
+				}
+			}
+		}
+		hashmap(NativeLibrarySpec) {
+			binaries.all {
+				if (buildType == buildTypes.release) {
+					cCompiler.args '-O3'
+					cCompiler.define "NDEBUG"
+				}
+				if (buildType == buildTypes.debug) {
+					cCompiler.args '-g', '-Og'
+				}
+			}
+		}
 		main(NativeExecutableSpec) {
 			sources.c {
 				lib library: "mpc", linkage: "static"
 				lib library: "hashmap", linkage: "static"
 			}
 			binaries.all {
-				cCompiler.define "NDEBUG"
-				cCompiler.args '-g'
+				if (buildType == buildTypes.debug) {
+					cCompiler.args '-Og', '-g'
+				}
+				if (buildType == buildTypes.release) {
+					cCompiler.args '-O3'
+					cCompiler.define "NDEBUG"
+				}
 				linker.args '-lm', '-lreadline'
 			}
 		}
