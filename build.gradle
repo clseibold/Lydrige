@@ -10,22 +10,22 @@ model {
 		mpc(NativeLibrarySpec) {
 			binaries.all {
 				if (buildType == buildTypes.release) {
-					cCompiler.args '-O3'
+					cCompiler.args '-O3', '-std=c99'
 					cCompiler.define 'NDEBUG'
 				}
 				if (buildType == buildTypes.debug) {
-					cCompiler.args '-g', '-Og'
+					cCompiler.args '-g', '-Og', '-std=c99'
 				}
 			}
 		}
 		hashmap(NativeLibrarySpec) {
 			binaries.all {
 				if (buildType == buildTypes.release) {
-					cCompiler.args '-O3'
+					cCompiler.args '-O3', '-std=c99'
 					cCompiler.define "NDEBUG"
 				}
 				if (buildType == buildTypes.debug) {
-					cCompiler.args '-g', '-Og'
+					cCompiler.args '-g', '-Og', '-std=c99'
 				}
 			}
 		}
@@ -36,10 +36,10 @@ model {
 			}
 			binaries.all {
 				if (buildType == buildTypes.debug) {
-					cCompiler.args '-Og', '-g'
+					cCompiler.args '-Og', '-g', '-std=c99'
 				}
 				if (buildType == buildTypes.release) {
-					cCompiler.args '-O3'
+					cCompiler.args '-O3', '-std=c99'
 					cCompiler.define "NDEBUG"
 				}
 				linker.args '-lm', '-lreadline'
