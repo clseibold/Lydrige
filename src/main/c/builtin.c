@@ -586,17 +586,12 @@ dval* builtin_put(denv* e, dval* a) {
 	return builtin_var(e, a, (char*) "let", 0);
 }
 
-// (\ {sym: type sym:type} {code})
 dval* builtin_lambda(denv* e, dval* a) {
 	LASSERT_NUM((char*) "\\", a, 2);
 	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
 	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-
-	if (a->cell[0]->count % 2 != 0) {
-		dval_del(a);
-		return dval_err("Every argument must have a type!");
-	}
+    LASSERT_NOT_EMPTY((char*) "\\", a, 0);
 
 	dval* formals = dval_qexpr();
 
@@ -604,18 +599,55 @@ dval* builtin_lambda(denv* e, dval* a) {
 		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
 			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
-		LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
-			(char*) "Symbol %s must have a type. Got %s, Expected %s.",
-			a->cell[0]->cell[i]->content->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
+        if (strcmp(a->cell[0]->cell[i]->content->str, "&") != 0) {
+            if (i == a->cell[0]->count - 1) {
+                //dval_del(a); TODO
+                dval_del(formals);
+                return dval_err("Symbol %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->content->str, dtype_name(DVAL_NOTE));
+            }
+            if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
+                dval* result = dval_pop(a->cell[0], i+1);
+                dval_del(a);
+                dval_del(formals);
+                return result;
+            }
+            LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
+                (char*) "Symbol %s must have a type. Got %s, Expected %s.",
+                a->cell[0]->cell[i]->content->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
+        } else {
+            if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
+                dval_del(a);
+                dval_del(formals);
+                return dval_err("An argument that takes multiple parameters must have a name!");
+            } else if (i + 1 == a->cell[0]->count - 1) {
+                // dval_del(a); TODO
+                dval_del(formals);
+                return dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->content->str);
+            }
+        }
 
 		dval* v = dval_copy(a->cell[0]->cell[i]);
-		v->sym_type = a->cell[0]->cell[i]->content->type;
+        if (strcmp(v->content->str, "&") == 0) {
+            if (i < a->cell[0]->count-3) {
+                // dval_del(a); TODO
+                dval_del(formals);
+                return dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->content->str);
+            }
+            i--;
+            // TODO: The type allowed in the list should be the type given for the argument (in its note).
+            // Using type `any` will allow any type for the list.
+        } else {
+		  v->sym_type = a->cell[0]->cell[i]->content->type;
+        }
 		dval_add(formals, v);
 		v = NULL;
 	}
 
 	dval* body = dval_pop(a, 1);
 	dval_del(a);
+
+    // TODO: Go through all of the items in the second q-expr (function body) and make sure that they all can evaluate to something (obviously skipping over the ones that use the function arguments)!
+    // If not, give an error!
 
 	return dval_lambda(formals, body);
 }

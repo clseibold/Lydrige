@@ -1,0 +1,41 @@
+; Atoms
+(const {ok} ())
+(const {nil} {})
+(const {true} 1)
+(const {false} 0)
+
+; Function Definition With Error Checking
+(const {fn} (\ {f: qexpr b: qexpr} {
+  def (first f) (\ (tail f) b)
+}))
+
+; Constant Function Definition
+(const {const_fn} (\ {f: qexpr b: qexpr} {
+  const (first f) (\ (tail f) b)
+}))
+
+; Unpack List for function
+(const_fn {unpack f: func l: qexpr} {
+	eval (join (list f) l)
+})
+
+; Pack List for Function
+(const_fn {pack f: func &xs: int}
+	{f xs})
+
+(const_fn {do &l: sexpr} {
+	if (== l nil)
+		{nil}
+		{last l}})
+
+; Open a new scope
+(const_fn {scope b: qexpr} {
+	((\ {_: int} b) ())
+})
+
+;(fn {flip f a b} {f b a})
+(const_fn {map f: func l: qexpr} {
+	if (== l nil)
+		{nil}
+		{join (list (f (get 0 l))) (map f (tail l))}
+})

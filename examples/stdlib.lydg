@@ -3,53 +3,32 @@
 (const {nil} {})
 (const {true} 1)
 (const {false} 0)
-(const {range} (typeof 4..5))
-(const {symbol} (typeof (extract 0 {sym})))
 
 ; Function Definition With Error Checking
-(def {fn} (\ {f b} {
-	if (and (== (typeof f) qexpr) (== (typeof b) qexpr)) {
-		def (first f) (\ (tail f) b)
-	} {
-		error "Arguments must be q-expressions!"
-	}}))
+(def {fn} (\ {f: qexpr b: qexpr} {
+  def (first f) (\ (tail f) b)
+}))
 
 ; Constant Function Definition
-(const {const_fn} (\ {f b} {
-	if (and (== (typeof f) qexpr) (== (typeof b) qexpr)) {
-		const (first f) (\ (tail f) b)
-	} {
-		error "Arguments must be q-expressions!"
-	}}))
+(const {const_fn} (\ {f: qexpr b: qexpr} {
+  const (first f) (\ (tail f) b)
+}))
 
 ; Unpack List for function
-(const_fn {unpack f l} {
+(const_fn {unpack f: func l: qexpr} {
 	eval (join (list f) l)
 })
 
 ; Pack List for Function
-(const_fn {pack f & xs}
-	{f xs})
+;(const_fn {pack f & xs}
+;	{f xs})
 
-; Demonstrates how to check the type of something,
-; Used for optional static typing!
-(const_fn {is_5_int x} {
-	if (== (typeof 5) int) {
-		"5 is an integer"
-	} {
-		"5 is not an integer"
-	}})
-
-(const_fn {do & l} {
-	if (== l nil)
-		{nil}
-		{last l}})
+;(const_fn {do & l} {
+;	if (== l nil)
+;		{nil}
+;		{last l}})
 
 ; Library Implementation of Static Typing
-
-(const_fn {check_var_in_lambda l} {
-	{}
-})
 
 ; Extract first and second element, check them, give rest to check_fn_arg_types unless empty, then return 1/true
 ; if (== (typeof (get 1 args))) ; Check if it is a symbol, then just skip (not every arg needs a type)
