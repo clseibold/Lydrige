@@ -104,7 +104,7 @@ dval* dval_read(mpc_ast_t* t) {
 		dval* v = dval_read(t->children[i]);
 		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE) {
 			dval_del(v);
-			return dval_err("Only types are allowed in Notes!");
+			return dval_err("Only types are allowed in Notes! Found %s.", dtype_name(v->type));
 		}
 		x = dval_add(x, v);
 	}

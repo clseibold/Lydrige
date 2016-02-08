@@ -3,3 +3,4 @@ build/
 *.gch
 *.swp
 .gradle/
+.vscode/

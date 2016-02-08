@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		string		: /\"(\\\\.|[^\"])*\"/ ; \
 		character	: /\'(\\\\.|[^\"])\'/ ; \
 		comment		: /;[^\\r\\n]*/ ; \
-		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&\\.^]+/ ; \
+		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!\\.^]+/ | '&' ; \
 		note		: ':' <symbol> | ':' '(' <symbol>+ ')' ; \
 		slist		: \"\\'[\" <expr>* ']' ; \
 		list		: '[' <expr>* ']' ; \
@@ -70,8 +70,6 @@ int main(int argc, char** argv) {
 		qexpr		: '{' <expr>* '}' ; \
 		line		: /^/ <expr>* /$/ ; \
 		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Line);
-
-	//printf("%d", sizeof(dval));
 
 	denv* e = denv_new();
 	denv_add_builtins(e);
