@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 	denv_add_builtins(e);
 
 	if (argc == 1) {
-		puts("DanicLisp Version 0.5.0");
+		puts("Lydrige REPL - Version 0.5.0");
 		puts("Press Ctrl+c to Exit\n");
 
 		while (running) {
