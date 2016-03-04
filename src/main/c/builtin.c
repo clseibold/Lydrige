@@ -89,12 +89,12 @@ dval* denv_get(denv* e, dval* k) {
 	if (e->par) {
 		return denv_get(e->par, k);
 	}
-	// TODO: Return unbound symbol type!
+	// TODO: Return unbound symbol type?
 	return dval_err((char*)"Unbound symbol '%s'", k->content->str);
 	// dval_usym(k->sym);
 }
 
-void denv_put(denv* e, dval* k, dval* v, int constant) { // TODO: does this work correctly?
+void denv_put(denv* e, dval* k, dval* v, int constant) {
 	dval* t;
 	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str));
 	if (item != NULL) { // If already defined in hashtable
@@ -232,7 +232,6 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 	dval* conditional = dval_pop(a, 0);
 	conditional->type = DVAL_SEXPR;
 	dval* cond = dval_eval(e, dval_copy(conditional));
-	//dval* conditional = builtin_eval(e, dval_copy(a->cell[0]));
 	dval* body = dval_pop(a, 0);
 	body->type = DVAL_SEXPR;
 	if (cond->type != DDATA_INT) {
@@ -242,16 +241,21 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 		dval_del(a);
 		return dval_err("Argument 1 must evaluate to a conditional/integer.");
 	}
-	while (cond->content->integer) { // Not stopping correctly
+	
+	dval* result = dval_qexpr();
+	
+	while (cond->content->integer) {
 		dval* eval = dval_eval(e, dval_copy(body));
 		if (eval->type == DVAL_ERR) {
 			dval_del(conditional);
 			dval_del(cond);
 			dval_del(body);
+			dval_del(result);
 			dval_del(a);
 			return eval;
 		}
-		// TODO: Add the returns to a q-expression that will be returned at the end of the while loop.
+		dval_add(result, dval_copy(eval));
+
 		dval_del(eval);
 		dval_del(cond);
 		cond = dval_eval(e, dval_copy(conditional));
@@ -261,7 +265,7 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 	dval_del(cond);
 	dval_del(body);
 	dval_del(a);
-	return dval_qexpr();
+	return result;
 }
 
 /* Returns Q-Expression of first element given a Q-Expression or List Literal */
@@ -357,7 +361,7 @@ dval* builtin_inner_eval(denv* e, dval* a) {
 
 dval* dval_call(denv* e, dval* f, dval* a) {
 	if (f->builtin) {
-		return f->builtin(e, a); // Delete f here???
+		return f->builtin(e, a); // TODO: When does `f` get deleted?
 	}
 
 	int given = a->count;
@@ -543,7 +547,7 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 }
 
 dval* builtin_var(denv* e, dval* a, char* func, int constant) {
-	LASSERT_TYPE(func, a, 0, DVAL_QEXPR); // Allow List Literals???
+	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
 
 	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
 	for (unsigned int i = 0; i < syms->count; i++) {
@@ -556,7 +560,12 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 	LASSERT(a, (syms->count == a->count - 1),
 		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
 
-	for (unsigned int i = 0; i < syms->count; i++) { // For each of the symbols
+	for (unsigned int i = 0; i < syms->count; i++) {
+		if (a->cell[i+1]->type == DVAL_ERR) {
+			dval* err = dval_copy(a->cell[i+1]);
+			dval_del(a);
+			return err;
+		}
 		if (strcmp(func, "def") == 0) {
 			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
 		} else if (strcmp(func, "let") == 0) {
@@ -601,9 +610,11 @@ dval* builtin_lambda(denv* e, dval* a) {
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
         if (strcmp(a->cell[0]->cell[i]->content->str, "&") != 0) {
             if (i == a->cell[0]->count - 1) {
-                //dval_del(a); TODO
+            	char *symbol_name = a->cell[0]->cell[i]->content->str;
+            	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->content->str, dtype_name(DVAL_NOTE));
+                dval_del(a);
                 dval_del(formals);
-                return dval_err("Symbol %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->content->str, dtype_name(DVAL_NOTE));
+                return err;
             }
             if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
                 dval* result = dval_pop(a->cell[0], i+1);
@@ -612,7 +623,7 @@ dval* builtin_lambda(denv* e, dval* a) {
                 return result;
             }
             LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
-                (char*) "Symbol %s must have a type. Got %s, Expected %s.",
+                (char*) "Argument %s must have a type. Got %s, Expected %s.",
                 a->cell[0]->cell[i]->content->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
         } else {
             if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
@@ -620,18 +631,20 @@ dval* builtin_lambda(denv* e, dval* a) {
                 dval_del(formals);
                 return dval_err("An argument that takes multiple parameters must have a name!");
             } else if (i + 1 == a->cell[0]->count - 1) {
-                // dval_del(a); TODO
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->content->str);
+                dval_del(a);
                 dval_del(formals);
-                return dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->content->str);
+                return err;
             }
         }
 
 		dval* v = dval_copy(a->cell[0]->cell[i]);
         if (strcmp(v->content->str, "&") == 0) {
             if (i < a->cell[0]->count-3) {
-                // dval_del(a); TODO
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->content->str);
+                dval_del(a);
                 dval_del(formals);
-                return dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->content->str);
+                return err;
             }
             i--;
             // TODO: The type allowed in the list should be the type given for the argument (in its note).
@@ -1027,7 +1040,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "to_list", builtin_to_list); // TODO: to_qexpr
 	denv_add_builtin(e, (char*) "to_qexpr", builtin_to_qexpr);
 
-	denv_add_builtin(e, (char*) "while", builtin_while); // TODO
+	denv_add_builtin(e, (char*) "while",builtin_while); // TODO
 
 	denv_add_builtin(e, (char*) "+", builtin_add);
 	denv_add_builtin(e, (char*) "-", builtin_sub);
