@@ -1,5 +1,7 @@
 #include "../headers/structures.h"
 
+int running = 1;
+
 char* dtype_name(int t) {
 	switch (t) {
 	case DVAL_FUNC: return (char*) "Function";

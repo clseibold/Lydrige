@@ -71,19 +71,19 @@ void Hashmap_destroy(Hashmap *map) {
     int j = 0;
 
     if (map) {
-	if (map->buckets) {
-	    for (i = 0; i < DArray_count(map->buckets); i++) {
-		DArray *bucket = DArray_get(map->buckets, i);
-		if (bucket) {
-		    for (j = 0; j < DArray_count(bucket); j++) {
-			free(DArray_get(bucket, j));
-		    }
-		    DArray_destroy(bucket);
-		}
-	    }
-	    DArray_destroy(map->buckets);
-	}
-	free(map);
+        if (map->buckets) {
+            for (i = 0; i < DArray_count(map->buckets); i++) {
+                DArray *bucket = DArray_get(map->buckets, i);
+                if (bucket) {
+                    for (j = 0; j < DArray_count(bucket); j++) {
+                        free(DArray_get(bucket, j));
+                    }
+                    DArray_destroy(bucket);
+                }
+            }
+            DArray_destroy(map->buckets);
+        }
+        free(map);
     }
 }
 

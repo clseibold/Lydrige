@@ -28,6 +28,7 @@
   LASSERT(args, args->cell[index]->count != 0, \
     "Function '%s' passed {} or [] for argument %i.", func, index);
 
+int running;
 struct dval;
 struct denv;
 union ddata;
@@ -70,8 +71,6 @@ struct denv {
 	int count;
 	Hashmap *map;
 };
-
-static int running = 1;
 
 /* Parsers */
 mpc_parser_t* Expr;

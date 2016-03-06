@@ -56,9 +56,10 @@ dval* builtin_or(denv* e, dval* a);
 dval* builtin_min(denv* e, dval* a); // TODO
 dval* builtin_if(denv* e, dval* a);
 dval* builtin_load(denv* e, dval* a);
-dval* builtin_concatenate(denv* e, dval* a); // TODO
+//dval* builtin_concatenate(denv* e, dval* a); // TODO
 dval* builtin_print(denv* e, dval* a);
 dval* builtin_error(denv* e, dval* a);
+dval* builtin_read(denv* e, dval* a);
 dval* builtin_exit(denv* e, dval* a);
 
 dval* dval_eval_sexpr(denv* e, dval* v);
