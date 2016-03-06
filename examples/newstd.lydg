@@ -23,10 +23,10 @@
 (const_fn {pack f: func &xs: int}
 	{f xs})
 
-(const_fn {do &l: sexpr} {
-	if (== l nil)
-		{nil}
-		{last l}})
+;(const_fn {do &l: sexpr} {
+;	if (== l nil)
+;		{nil}
+;		{last l}})
 
 ; Open a new scope
 (const_fn {scope b: qexpr} {

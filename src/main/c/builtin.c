@@ -83,15 +83,14 @@ int dval_eq(dval* x, dval* y) {
 dval* denv_get(denv* e, dval* k) {
 	dval* d;
 	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str)))) {
-		return dval_copy(d);
+        dval* result = dval_copy(d);
+		return result;
 	}
 
 	if (e->par) {
 		return denv_get(e->par, k);
 	}
-	// TODO: Return unbound symbol type?
 	return dval_err((char*)"Unbound symbol '%s'", k->content->str);
-	// dval_usym(k->sym);
 }
 
 void denv_put(denv* e, dval* k, dval* v, int constant) {
@@ -222,7 +221,7 @@ dval* builtin_to_qexpr(denv* e, dval* a) {
 	return dval_eval(e, result);
 }
 
-dval* builtin_while(denv* e, dval* a) { // TODO: cleanup 
+dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 	LASSERT_NUM("while", a, 2);
 	LASSERT_MTYPE("while", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
@@ -241,9 +240,9 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 		dval_del(a);
 		return dval_err("Argument 1 must evaluate to a conditional/integer.");
 	}
-	
+
 	dval* result = dval_qexpr();
-	
+
 	while (cond->content->integer) {
 		dval* eval = dval_eval(e, dval_copy(body));
 		if (eval->type == DVAL_ERR) {
@@ -372,7 +371,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 			char* func_name = f->content->str;
 			dval_del(a);
 			dval_del(f);
-			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.",func_name, given, total);
+			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.", func_name, given, total);
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
@@ -386,14 +385,16 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 			}
 
 			dval* nsym = dval_pop(f->formals, 0);
-			denv_put(f->env, nsym, builtin_list(e, a), 0);
-			dval_del(sym); dval_del(nsym);
+            dval* list = builtin_list(e, a);
+			denv_put(f->env, nsym, list, 0);
+			dval_del(sym); dval_del(nsym); dval_del(list);
 			break;
 		}
 
 		dval* val = dval_pop(a, 0);
+        
 		// Check if val is the correct type here:
-		//
+        
 		denv_put(f->env, sym, val, 0);
 
 		dval_del(sym); dval_del(val);
@@ -411,16 +412,19 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		dval* sym = dval_pop(f->formals, 0);
 		dval* val = dval_qexpr();
 
-		denv_put(f->env, sym, val, 0); // TODO: do differently?
+		denv_put(f->env, sym, val, 0);
 		dval_del(sym); dval_del(val);
 	}
 
+    dval* result;
 	if (f->formals->count == 0) {
-		f->env->par = e; // What is this used for???
-		return builtin_eval(f->env, dval_add(dval_sexpr(), dval_copy(f->body))); // dval_del(f)???
+		f->env->par = e;
+        result = builtin_eval(f->env, dval_add(dval_sexpr(), dval_copy(f->body)));
+		return result;
 	}
 	else {
-		return dval_copy(f);
+        result = dval_copy(f);
+		return result;
 	}
 }
 
@@ -914,9 +918,22 @@ dval* builtin_error(denv* e, dval* a) {
 	return err;
 }
 
+dval* builtin_read(denv* e, dval* a) {
+    LASSERT_NUM((char*) "read", a, 1);
+    LASSERT_TYPE((char*) "read", a, 0, DDATA_STRING);
+    
+    printf("%s", a->cell[0]->content->str);
+	char str[255];
+	gets(str);
+	dval* result = dval_string(&str);
+
+	dval_del(a);
+	return result;
+}
+
 dval* builtin_exit(denv* e, dval* a) {
 	running = 0;
-	return dval_int(1);
+	return dval_string("Program ran successfully!");
 }
 
 dval* dval_eval_sexpr(denv* e, dval* v) {
@@ -1039,6 +1056,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "throw", builtin_throw);
 	denv_add_builtin(e, (char*) "to_list", builtin_to_list); // TODO: to_qexpr
 	denv_add_builtin(e, (char*) "to_qexpr", builtin_to_qexpr);
+	denv_add_builtin(e, (char*) "read", builtin_read);
 
 	denv_add_builtin(e, (char*) "while",builtin_while); // TODO
 
