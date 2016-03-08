@@ -889,7 +889,10 @@ dval* builtin_read(denv* e, dval* a) {
     
     printf("%s", a->cell[0]->str);
 	char str[255];
-	gets(str);
+	fgets(str, 255, stdin);
+	char* pos;
+	if ((pos=strchr(str, '\n')) != NULL)
+		*pos = '\0';
 	dval* result = dval_string(&str);
 
 	dval_del(a);
