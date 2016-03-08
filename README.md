@@ -2,6 +2,13 @@
 ## Introduction ##
 Lydrige is an interpreted programming language built off of and expanded from the interpreter from the BuildYourOwnLisp book (by Mr Daniel Holden). Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple higher level language inspired by Lisp. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions. You can see future ideas and plans in the [ideas.md file](https://github.com/christianap/Lydrige/blob/master/ideas.md "ideas.md file").
 
+## Contents ##
+* Basic Syntax
+* Builtin Functions
+* Data Types
+* Examples
+* Compiling the Interpreter and Running Examples
+
 ## Basic Syntax ##
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
 Here is an example of the syntax of a simple print statement:
@@ -48,19 +55,19 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{'[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
 * `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined. You can see an example of this in the standard library (`./examples/stdlib.lydg`):
-  - ```clojure
-		(const_fn {get_fn_arg_checking bare_args arg_types} {
-			; '{} are special q-expressions that will be converted to regular q-expressions when returned/passed to a function,
-			;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
-			'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))}
-		})
-  	```
+```clojure
+	(const_fn {get_fn_arg_checking bare_args arg_types} {
+		; '{} are special q-expressions that will be converted to regular q-expressions when returned/passed to a function,
+		;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
+		'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))}
+	})
+```
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
 * `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 '(+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
 
 ## Examples ##
-There are examples of programs/functions written in this language in the examples directory. This directory also includes *stdlib.dnc*, which will be the Prelude.
+There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which will be the Prelude for the language (use the one prefixed with *new-*, the other one is an older version).
 
 ## Compiling the Interpreter and Running Examples ##
 Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/stdlib.lydg`.
