@@ -30,334 +30,6 @@ dval* dval_join(dval* x, dval* y) {
 	return x;
 }
 
-/** Determines whether two dvals are equal.
-  * If they are not, a zero is returned.
-  */
-int dval_eq(dval* x, dval* y) {
-	if (x->type != y->type) {
-		return 0;
-	}
-
-	switch (x->type) {
-	case DDATA_RANGE:
-		return (x->integer == y->integer && x->max == y->max);
-	case DDATA_INT:
-		return (x->integer == y->integer);
-	case DDATA_DOUBLE:
-		return (x->doub == y->doub);
-	case DDATA_BYTE:
-		return (x->b == y->b);
-	case DDATA_CHAR:
-		return (x->character == y->character);
-	case DDATA_STRING:
-		return (strcmp(x->str, y->str) == 0);
-	case DVAL_ERR:
-		return (strcmp(x->str, y->str) == 0);
-	case DVAL_TYPE:
-		return (x->ttype == y->ttype);
-	case DVAL_SYM:
-		return (strcmp(x->str, y->str) == 0);
-	case DVAL_FUNC:
-		if (x->builtin || y->builtin) {
-			return x->builtin == y->builtin;
-		}
-		else {
-			return dval_eq(x->formals, y->formals) && dval_eq(x->body, y->body);
-		}
-	case DVAL_LIST:
-	case DVAL_QEXPR:
-	case DVAL_SEXPR:
-		if (x->count != y->count) {
-			return 0;
-		}
-		for (unsigned int i = 0; i < x->count; i++) {
-			if (!dval_eq(x->cell[i], y->cell[i])) {
-				return 0;
-			}
-		}
-		return 1;
-	}
-	return 0;
-}
-
-dval* denv_get(denv* e, dval* k) {
-	dval* d;
-	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->str)))) {
-        dval* result = dval_copy(d);
-		return result;
-	}
-
-	if (e->par) {
-		return denv_get(e->par, k);
-	}
-	return dval_err((char*)"Unbound symbol '%s'", k->str);
-}
-
-void denv_put(denv* e, dval* k, dval* v, int constant) {
-	dval* t;
-	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->str));
-	if (item != NULL) { // If already defined in hashtable
-		if (item->constant == 0) { // If not constant (in hashtable)
-			dval* deleted = (dval*)Hashmap_delete(e->map, bfromcstr(k->str));
-			dval_del(deleted); // Note that `deleted` is the same as `item`!
-			item = NULL;
-			t = dval_copy(v); // Copy value into t
-			t->constant = constant; // set constant
-			Hashmap_set(e->map, bfromcstr(k->str), t); // TODO: Check for errors!
-			return;
-		} else {
-			printf("Error: Cannot edit '%s'. It is a constant\n", k->str);
-			return;
-		}
-	} else { // Not in hashtable yet!
-		e->count++;
-		t = dval_copy(v); // Copy value into t
-		t->constant = constant; // set constant
-		Hashmap_set(e->map, bfromcstr(k->str), t);
-		return;
-	}
-}
-
-void denv_def(denv* e, dval* k, dval* v, int constant) {
-	while (e->par) { // Find root environment
-		e = e->par;
-	}
-	denv_put(e, k, v, constant);
-}
-
-/* Returns length of given Q-Expression */
-dval* builtin_len(denv* e, dval* a) {
-	LASSERT_NUM("len", a, 1);
-	LASSERT_MTYPE("len", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-
-	dval* x = dval_int(a->cell[0]->count);
-	dval_del(a);
-	return x;
-}
-
-/** Returns the item at given index from given q-expression or list.
-  * The q-expression or list is deleted.
-  */
-dval* builtin_get(denv* e, dval* a) { // Make work for strings
-	LASSERT_NUM("get", a, 2);
-	LASSERT_TYPE("get", a, 0, DDATA_INT);
-	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->integer >= 0,
-		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
-		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
-
-	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->integer));
-	dval_del(a);
-	return result;
-}
-
-/** Very similar to the `get` function, except, what is returned is not automatically semi-evaluated.
- */
-dval* builtin_extract(denv* e, dval* a) {
-	LASSERT_NUM("get", a, 2);
-	LASSERT_TYPE("get", a, 0, DDATA_INT);
-	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->integer >= 0,
-		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
-		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
-
-	dval* result = dval_pop(a->cell[1], a->cell[0]->integer);
-	dval_del(a);
-	return result;
-}
-
-/** Sets the item at given index from given q-expression or list to a given value and returns
-  *   the new list as a q-expression. Ex: `set index qexpr/list value`
-  */
-dval* builtin_set(denv* e, dval* a) {
-	LASSERT_NUM("set", a, 3);
-	LASSERT_TYPE("set", a, 0, DDATA_INT);
-	LASSERT_MTYPE("set", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->integer >= 0,
-		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
-		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
-
-	dval* result = dval_pop(a, 1);
-	result->cell[a->cell[0]->integer] = dval_pop(a, 1);
-	dval_del(a);
-	return result;
-}
-
-dval* builtin_typeof(denv* e, dval* a) {
-	LASSERT_NUM("typeof", a, 1);
-
-	dval* result = dval_type(a->cell[0]->type);
-	dval_del(a);
-	return result;
-}
-
-dval* builtin_throw(denv* e, dval* a) {
-	dval_del(a);
-	return dval_sexpr();
-}
-
-dval* builtin_to_list(denv* e, dval* a) {  // TODO: List in README.md
-	LASSERT_NUM("to_list", a, 1);
-	LASSERT_TYPE("to_list", a, 0, DVAL_QEXPR);
-
-	dval* result = dval_take(a, 0);
-	result->type = DVAL_LIST;
-	return dval_eval(e, result); // Should result be semi-evaluated
-}
-
-dval* builtin_to_qexpr(denv* e, dval* a) {
-	LASSERT_NUM("to_qexpr", a, 1);
-	LASSERT_TYPE("to_qexpr", a, 0, DVAL_LIST);
-
-	dval* result = dval_take(a, 0);
-	result->type = DVAL_QEXPR;
-	return dval_eval(e, result);
-}
-
-dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
-	LASSERT_NUM("while", a, 2);
-	LASSERT_MTYPE("while", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_MTYPE("while", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-
-	dval* conditional = dval_pop(a, 0);
-	conditional->type = DVAL_SEXPR;
-	dval* cond = dval_eval(e, dval_copy(conditional));
-	dval* body = dval_pop(a, 0);
-	body->type = DVAL_SEXPR;
-	if (cond->type != DDATA_INT) {
-		dval_del(conditional);
-		dval_del(cond);
-		dval_del(body);
-		dval_del(a);
-		return dval_err("Argument 1 must evaluate to a conditional/integer.");
-	}
-
-	dval* result = dval_qexpr();
-
-	while (cond->integer) {
-		dval* eval = dval_eval(e, dval_copy(body));
-		if (eval->type == DVAL_ERR) {
-			dval_del(conditional);
-			dval_del(cond);
-			dval_del(body);
-			dval_del(result);
-			dval_del(a);
-			return eval;
-		}
-		dval_add(result, dval_copy(eval));
-
-		dval_del(eval);
-		dval_del(cond);
-		cond = dval_eval(e, dval_copy(conditional));
-	}
-
-	dval_del(conditional);
-	dval_del(cond);
-	dval_del(body);
-	dval_del(a);
-	return result;
-}
-
-/* Returns Q-Expression of first element given a Q-Expression or List Literal */
-dval* builtin_first(denv* e, dval* a) {
-	LASSERT_NUM("first", a, 1);
-	LASSERT_MTYPE("first", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_NOT_EMPTY("first", a, 0);
-
-	// Take first argument
-	dval* v = dval_take(a, 0);
-
-	// Delete all elements that are not the first and return
-	while (v->count > 1) {
-		dval_del(dval_pop(v, 1));
-	}
-	return v;
-}
-
-/* Returns Q-Expression of last element given a Q-Expression */
-dval* builtin_last(denv* e, dval* a) {
-	LASSERT_NUM("last", a, 1);
-	LASSERT_MTYPE("last", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_NOT_EMPTY("last", a, 0);
-
-	// Take first argument
-	dval* v = dval_take(a, 0);
-
-	// Delete all elements that are not the last and return
-	while (v->count > 1) {
-		dval_del(dval_pop(v, 0));
-	}
-	return v;
-}
-
-/* Returns Q-Expression with first element removed given a Q-Expression */
-dval* builtin_head(denv* e, dval* a) {
-	LASSERT_NUM("head", a, 1);
-	LASSERT_MTYPE("head", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_NOT_EMPTY("head", a, 0);
-
-	// Take first argument
-	dval* v = dval_take(a, 0);
-
-	dval_del(dval_pop(v, v->count - 1));
-	return v;
-}
-
-/* Returns Q-Expression with last element removed given a Q-Expression*/
-dval* builtin_tail(denv* e, dval* a) {
-	LASSERT_NUM((char*) "tail", a, 1);
-	LASSERT_MTYPE("tail", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST, \
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT_NOT_EMPTY("tail", a, 0);
-
-	dval* v = dval_take(a, 0);
-	dval_del(dval_pop(v, 0));
-	return v;
-}
-
-/* Returns a Q-Expression of given S-Expression */
-dval* builtin_list(denv* e, dval* a) {
-	a->type = DVAL_QEXPR;
-	return a;
-}
-
-/* Evaluates a Q-Expression or List Literal as if it were an S-Expression */
-dval* builtin_eval(denv* e, dval* a) {
-	LASSERT_NUM("eval", a, 1);
-	LASSERT_MTYPE("eval", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-
-	dval* x = dval_take(a, 0);
-	x->type = DVAL_SEXPR;
-	return dval_eval(e, x);
-}
-
-/** Evaluates the insides of a q-expression and returns the new q-expression.
-  * Acts as if the q-expression is a list literal.
-  */
-dval* builtin_inner_eval(denv* e, dval* a) {
-	LASSERT_NUM("inner_eval", a, 1);
-	LASSERT_TYPE("inner_eval", a, 0, DVAL_QEXPR);
-
-	dval* x = dval_take(a, 0);
-	for (unsigned int i = 0; i < x->count; i++) {
-		x->cell[i] = dval_eval(e, x->cell[i]);
-	}
-	return x;
-}
-
 dval* dval_call(denv* e, dval* f, dval* a) {
 	if (f->builtin) {
 		return f->builtin(e, a); // TODO: When does `f` get deleted?
@@ -428,6 +100,140 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	}
 }
 
+dval* denv_get(denv* e, dval* k) {
+	dval* d;
+	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->str)))) {
+        dval* result = dval_copy(d);
+		return result;
+	}
+
+	if (e->par) {
+		return denv_get(e->par, k);
+	}
+	return dval_err((char*)"Unbound symbol '%s'", k->str);
+}
+
+/** Determines whether two dvals are equal.
+  * If they are not, a zero is returned.
+  */
+int dval_eq(dval* x, dval* y) {
+	if (x->type != y->type) {
+		return 0;
+	}
+
+	switch (x->type) {
+	case DDATA_RANGE:
+		return (x->integer == y->integer && x->max == y->max);
+	case DDATA_INT:
+		return (x->integer == y->integer);
+	case DDATA_DOUBLE:
+		return (x->doub == y->doub);
+	case DDATA_BYTE:
+		return (x->b == y->b);
+	case DDATA_CHAR:
+		return (x->character == y->character);
+	case DDATA_STRING:
+		return (strcmp(x->str, y->str) == 0);
+	case DVAL_ERR:
+		return (strcmp(x->str, y->str) == 0);
+	case DVAL_TYPE:
+		return (x->ttype == y->ttype);
+	case DVAL_SYM:
+		return (strcmp(x->str, y->str) == 0);
+	case DVAL_FUNC:
+		if (x->builtin || y->builtin) {
+			return x->builtin == y->builtin;
+		}
+		else {
+			return dval_eq(x->formals, y->formals) && dval_eq(x->body, y->body);
+		}
+	case DVAL_LIST:
+	case DVAL_QEXPR:
+	case DVAL_SEXPR:
+		if (x->count != y->count) {
+			return 0;
+		}
+		for (unsigned int i = 0; i < x->count; i++) {
+			if (!dval_eq(x->cell[i], y->cell[i])) {
+				return 0;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void denv_put(denv* e, dval* k, dval* v, int constant) {
+	dval* t;
+	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->str));
+	if (item != NULL) { // If already defined in hashtable
+		if (item->constant == 0) { // If not constant (in hashtable)
+			dval* deleted = (dval*)Hashmap_delete(e->map, bfromcstr(k->str));
+			dval_del(deleted); // Note that `deleted` is the same as `item`!
+			item = NULL;
+			t = dval_copy(v); // Copy value into t
+			t->constant = constant; // set constant
+			Hashmap_set(e->map, bfromcstr(k->str), t); // TODO: Check for errors!
+			return;
+		} else {
+			printf("Error: Cannot edit '%s'. It is a constant\n", k->str);
+			return;
+		}
+	} else { // Not in hashtable yet!
+		e->count++;
+		t = dval_copy(v); // Copy value into t
+		t->constant = constant; // set constant
+		Hashmap_set(e->map, bfromcstr(k->str), t);
+		return;
+	}
+}
+
+void denv_def(denv* e, dval* k, dval* v, int constant) {
+	while (e->par) { // Find root environment
+		e = e->par;
+	}
+	denv_put(e, k, v, constant);
+}
+
+/* Evaluates a Q-Expression or List Literal as if it were an S-Expression */
+dval* builtin_eval(denv* e, dval* a) {
+	LASSERT_NUM("eval", a, 1);
+	LASSERT_MTYPE("eval", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+
+	dval* x = dval_take(a, 0);
+	x->type = DVAL_SEXPR;
+	return dval_eval(e, x);
+}
+
+/** Evaluates the insides of a q-expression and returns the new q-expression.
+  * Acts as if the q-expression is a list literal.
+  */
+dval* builtin_inner_eval(denv* e, dval* a) {
+	LASSERT_NUM("inner_eval", a, 1);
+	LASSERT_TYPE("inner_eval", a, 0, DVAL_QEXPR);
+
+	dval* x = dval_take(a, 0);
+	for (unsigned int i = 0; i < x->count; i++) {
+		x->cell[i] = dval_eval(e, x->cell[i]);
+	}
+	return x;
+}
+
+/* Returns length of given Q-Expression */
+dval* builtin_len(denv* e, dval* a) {
+	LASSERT_NUM("len", a, 1);
+	LASSERT_MTYPE("len", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+
+	dval* x = dval_int(a->cell[0]->count);
+	dval_del(a);
+	return x;
+}
+
+/*dval* builtin_min(denv* e, dval* a) { // TODO
+}*/
+
 /* Returns Q-Expression joining one or more of given Q-Expressions or List Literals */
 dval* builtin_join(denv* e, dval* a) { // TODO: Allow Strings
 	for (unsigned int i = 0; i < a->count; i++) {
@@ -444,6 +250,234 @@ dval* builtin_join(denv* e, dval* a) { // TODO: Allow Strings
 	dval_del(a);
 	x->type = DVAL_QEXPR; // Make sure what is returned is a qexpr, not a list
 	return x;
+}
+
+/*dval* builtin_concatenate(denv* e, dval* a) { // TODO
+	for (int i = 0; i < a->count; i++) {
+		LASSERT_TYPE("..", a, i, DDATA_STRING);
+	}
+}*/
+
+/* Returns Q-Expression of first element given a Q-Expression or List Literal */
+dval* builtin_first(denv* e, dval* a) {
+	LASSERT_NUM("first", a, 1);
+	LASSERT_MTYPE("first", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("first", a, 0);
+
+	// Take first argument
+	dval* v = dval_take(a, 0);
+
+	// Delete all elements that are not the first and return
+	while (v->count > 1) {
+		dval_del(dval_pop(v, 1));
+	}
+	return v;
+}
+
+/* Returns Q-Expression of last element given a Q-Expression */
+dval* builtin_last(denv* e, dval* a) {
+	LASSERT_NUM("last", a, 1);
+	LASSERT_MTYPE("last", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("last", a, 0);
+
+	// Take first argument
+	dval* v = dval_take(a, 0);
+
+	// Delete all elements that are not the last and return
+	while (v->count > 1) {
+		dval_del(dval_pop(v, 0));
+	}
+	return v;
+}
+
+/* Returns Q-Expression with first element removed given a Q-Expression */
+dval* builtin_head(denv* e, dval* a) {
+	LASSERT_NUM("head", a, 1);
+	LASSERT_MTYPE("head", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("head", a, 0);
+
+	// Take first argument
+	dval* v = dval_take(a, 0);
+
+	dval_del(dval_pop(v, v->count - 1));
+	return v;
+}
+
+/* Returns Q-Expression with last element removed given a Q-Expression*/
+dval* builtin_tail(denv* e, dval* a) {
+	LASSERT_NUM((char*) "tail", a, 1);
+	LASSERT_MTYPE("tail", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST, \
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_NOT_EMPTY("tail", a, 0);
+
+	dval* v = dval_take(a, 0);
+	dval_del(dval_pop(v, 0));
+	return v;
+}
+
+/** Returns the item at given index from given q-expression or list.
+  * The q-expression or list is deleted.
+  */
+dval* builtin_get(denv* e, dval* a) { // Make work for strings
+	LASSERT_NUM("get", a, 2);
+	LASSERT_TYPE("get", a, 0, DDATA_INT);
+	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+
+	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->integer));
+	dval_del(a);
+	return result;
+}
+
+/** Very similar to the `get` function, except, what is returned is not automatically semi-evaluated.
+ */
+dval* builtin_extract(denv* e, dval* a) {
+	LASSERT_NUM("get", a, 2);
+	LASSERT_TYPE("get", a, 0, DDATA_INT);
+	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+
+	dval* result = dval_pop(a->cell[1], a->cell[0]->integer);
+	dval_del(a);
+	return result;
+}
+
+/** Sets the item at given index from given q-expression or list to a given value and returns
+  *   the new list as a q-expression. Ex: `set index qexpr/list value`
+  */
+dval* builtin_set(denv* e, dval* a) {
+	LASSERT_NUM("set", a, 3);
+	LASSERT_TYPE("set", a, 0, DDATA_INT);
+	LASSERT_MTYPE("set", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT(a, a->cell[0]->integer >= 0,
+		"Index must be zero or positive.");
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
+		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
+
+	dval* result = dval_pop(a, 1);
+	result->cell[a->cell[0]->integer] = dval_pop(a, 1);
+	dval_del(a);
+	return result;
+}
+
+dval* builtin_throw(denv* e, dval* a) {
+	dval_del(a);
+	return dval_sexpr();
+}
+
+/* Returns type of given dval as type dval */
+dval* builtin_typeof(denv* e, dval* a) {
+	LASSERT_NUM("typeof", a, 1);
+
+	dval* result = dval_type(a->cell[0]->type);
+	dval_del(a);
+	return result;
+}
+
+/* Returns a Q-Expression of given S-Expression */
+dval* builtin_list(denv* e, dval* a) {
+	a->type = DVAL_QEXPR;
+	return a;
+}
+
+dval* builtin_to_list(denv* e, dval* a) {  // TODO: List in README.md
+	LASSERT_NUM("to_list", a, 1);
+	LASSERT_TYPE("to_list", a, 0, DVAL_QEXPR);
+
+	dval* result = dval_take(a, 0);
+	result->type = DVAL_LIST;
+	return dval_eval(e, result); // Should result be semi-evaluated
+}
+
+dval* builtin_to_qexpr(denv* e, dval* a) {
+	LASSERT_NUM("to_qexpr", a, 1);
+	LASSERT_TYPE("to_qexpr", a, 0, DVAL_LIST);
+
+	dval* result = dval_take(a, 0);
+	result->type = DVAL_QEXPR;
+	return dval_eval(e, result);
+}
+
+dval* builtin_lambda(denv* e, dval* a) {
+	LASSERT_NUM((char*) "\\", a, 2);
+	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
+	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+    LASSERT_NOT_EMPTY((char*) "\\", a, 0);
+
+	dval* formals = dval_qexpr();
+
+	for (unsigned int i = 0; i < a->cell[0]->count; i+=2) {
+		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
+			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
+			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
+        if (strcmp(a->cell[0]->cell[i]->str, "&") != 0) {
+            if (i == a->cell[0]->count - 1) {
+            	char *symbol_name = a->cell[0]->cell[i]->str;
+            	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
+                dval_del(a);
+                dval_del(formals);
+                return err;
+            }
+            if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
+                dval* result = dval_pop(a->cell[0], i+1);
+                dval_del(a);
+                dval_del(formals);
+                return result;
+            }
+            LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
+                (char*) "Argument %s must have a type. Got %s, Expected %s.",
+                a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
+        } else {
+            if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
+                dval_del(a);
+                dval_del(formals);
+                return dval_err("An argument that takes multiple parameters must have a name!");
+            } else if (i + 1 == a->cell[0]->count - 1) {
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->str);
+                dval_del(a);
+                dval_del(formals);
+                return err;
+            }
+        }
+
+		dval* v = dval_copy(a->cell[0]->cell[i]); // TODO: Switch to dval_pop???
+        if (strcmp(v->str, "&") == 0) {
+            if (i < a->cell[0]->count-3) {
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->str);
+                dval_del(a);
+                dval_del(formals);
+                return err;
+            }
+            i--;
+            // TODO: The type allowed in the list should be the type given for the argument (in its note).
+            // Using type `any` will allow any type for the list.
+        } else {
+		  v->sym_type = a->cell[0]->cell[i]->ttype;
+        }
+		dval_add(formals, v);
+		v = NULL;
+	}
+
+	dval* body = dval_pop(a, 1);
+	dval_del(a);
+
+    // TODO: Go through all of the items in the second q-expr (function body) and make sure that they all can evaluate to something (obviously skipping over the ones that use the function arguments)!
+    // If not, give an error!
+
+	return dval_lambda(formals, body);
 }
 
 dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
@@ -550,125 +584,6 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	return x;
 }
 
-dval* builtin_var(denv* e, dval* a, char* func, int constant) {
-	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
-
-	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
-	for (unsigned int i = 0; i < syms->count; i++) {
-		LASSERT(a, syms->cell[i]->type == DVAL_SYM,
-			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
-			dtype_name(syms->cell[i]->type),
-			dtype_name(DVAL_SYM));
-	}
-
-	LASSERT(a, (syms->count == a->count - 1),
-		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
-
-	for (unsigned int i = 0; i < syms->count; i++) {
-		if (a->cell[i+1]->type == DVAL_ERR) {
-			dval* err = dval_copy(a->cell[i+1]); // TODO: switch to dval_pop???
-			dval_del(a);
-			return err;
-		}
-		if (strcmp(func, "def") == 0) {
-			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
-		} else if (strcmp(func, "let") == 0) {
-			denv_put(e, syms->cell[i], a->cell[i + 1], constant);
-		}
-	}
-
-	dval* result = dval_qexpr();
-	result->count = a->count - 1;
-	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
-	for (unsigned int i = 0; i < result->count; i++) {
-		result->cell[i] = dval_copy(a->cell[i + 1]); // TODO: Switch to dval_pop???
-	}
-	dval_del(a);
-	return result;
-}
-
-dval* builtin_def(denv* e, dval* a) {
-	return builtin_var(e, a, (char*)"def", 0);
-}
-
-dval* builtin_const(denv* e, dval* a) {
-	return builtin_var(e, a, (char*) "def", 1);
-}
-
-dval* builtin_put(denv* e, dval* a) {
-	return builtin_var(e, a, (char*) "let", 0);
-}
-
-dval* builtin_lambda(denv* e, dval* a) {
-	LASSERT_NUM((char*) "\\", a, 2);
-	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
-	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
-		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-    LASSERT_NOT_EMPTY((char*) "\\", a, 0);
-
-	dval* formals = dval_qexpr();
-
-	for (unsigned int i = 0; i < a->cell[0]->count; i+=2) {
-		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
-			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
-			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
-        if (strcmp(a->cell[0]->cell[i]->str, "&") != 0) {
-            if (i == a->cell[0]->count - 1) {
-            	char *symbol_name = a->cell[0]->cell[i]->str;
-            	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
-                dval_del(a);
-                dval_del(formals);
-                return err;
-            }
-            if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
-                dval* result = dval_pop(a->cell[0], i+1);
-                dval_del(a);
-                dval_del(formals);
-                return result;
-            }
-            LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
-                (char*) "Argument %s must have a type. Got %s, Expected %s.",
-                a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
-        } else {
-            if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
-                dval_del(a);
-                dval_del(formals);
-                return dval_err("An argument that takes multiple parameters must have a name!");
-            } else if (i + 1 == a->cell[0]->count - 1) {
-            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->str);
-                dval_del(a);
-                dval_del(formals);
-                return err;
-            }
-        }
-
-		dval* v = dval_copy(a->cell[0]->cell[i]); // TODO: Switch to dval_pop???
-        if (strcmp(v->str, "&") == 0) {
-            if (i < a->cell[0]->count-3) {
-            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->str);
-                dval_del(a);
-                dval_del(formals);
-                return err;
-            }
-            i--;
-            // TODO: The type allowed in the list should be the type given for the argument (in its note).
-            // Using type `any` will allow any type for the list.
-        } else {
-		  v->sym_type = a->cell[0]->cell[i]->ttype;
-        }
-		dval_add(formals, v);
-		v = NULL;
-	}
-
-	dval* body = dval_pop(a, 1);
-	dval_del(a);
-
-    // TODO: Go through all of the items in the second q-expr (function body) and make sure that they all can evaluate to something (obviously skipping over the ones that use the function arguments)!
-    // If not, give an error!
-
-	return dval_lambda(formals, body);
-}
-
 dval* builtin_add(denv* e, dval* a) {
 	return builtin_op(e, a, (char*)"+");
 }
@@ -691,6 +606,81 @@ dval* builtin_mod(denv* e, dval* a) {
 
 dval* builtin_pow(denv* e, dval* a) {
 	return builtin_op(e, a, (char*)"^");
+}
+
+dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
+	LASSERT_NUM("while", a, 2);
+	LASSERT_MTYPE("while", a, 0, a->cell[0]->type == DVAL_QEXPR || a->cell[0]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	LASSERT_MTYPE("while", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+
+	dval* conditional = dval_pop(a, 0);
+	conditional->type = DVAL_SEXPR;
+	dval* cond = dval_eval(e, dval_copy(conditional));
+	dval* body = dval_pop(a, 0);
+	body->type = DVAL_SEXPR;
+	if (cond->type != DDATA_INT) {
+		dval_del(conditional);
+		dval_del(cond);
+		dval_del(body);
+		dval_del(a);
+		return dval_err("Argument 1 must evaluate to a conditional/integer.");
+	}
+
+	dval* result = dval_qexpr();
+
+	while (cond->integer) {
+		dval* eval = dval_eval(e, dval_copy(body));
+		if (eval->type == DVAL_ERR) {
+			dval_del(conditional);
+			dval_del(cond);
+			dval_del(body);
+			dval_del(result);
+			dval_del(a);
+			return eval;
+		}
+		dval_add(result, dval_copy(eval));
+
+		dval_del(eval);
+		dval_del(cond);
+		cond = dval_eval(e, dval_copy(conditional));
+	}
+
+	dval_del(conditional);
+	dval_del(cond);
+	dval_del(body);
+	dval_del(a);
+	return result;
+}
+
+dval* builtin_if(denv* e, dval* a) { // Make work with bytes?
+	if (a->count % 2 == 0) { // TODO: Make better later
+		return dval_err((char*) "Must have a q-expression for each s-expression conditional, except for the else q-expression. The else q-expression is required.");
+	}
+	for (unsigned int i = 0; i < a->count-1; i += 2) {
+		if (i == a->count - 1) break;
+		LASSERT_MTYPE("if", a, i, a->cell[i]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE,
+			"%s, %s, or %s", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE));
+		LASSERT_MTYPE("if", a, i+1, a->cell[i+1]->type == DVAL_QEXPR || a->cell[i+1]->type == DVAL_LIST,
+			"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+	}
+	LASSERT_MTYPE("if", a, a->count-1, a->cell[a->count-1]->type == DVAL_QEXPR || a->cell[a->count-1]->type == DVAL_LIST,
+		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
+
+	dval* x;
+	for (unsigned int i = 0; i < a->count-1; i+=2) {
+		a->cell[i+1]->type = DVAL_SEXPR;
+		if (a->cell[i]->integer) {
+			x = dval_eval(e, dval_pop(a, i + 1));
+			dval_del(a);
+			return x;
+		}
+	}
+	a->cell[a->count-1]->type = DVAL_SEXPR;
+	x = dval_eval(e, dval_pop(a, a->count-1));
+	dval_del(a);
+	return x;
 }
 
 dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, strings, and characters!
@@ -823,79 +813,54 @@ dval* builtin_or(denv* e, dval* a) {
 	return x;
 }
 
-/*dval* builtin_min(denv* e, dval* a) { // TODO
+dval* builtin_var(denv* e, dval* a, char* func, int constant) {
+	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
 
-
-}*/
-
-dval* builtin_if(denv* e, dval* a) { // Make work with bytes?
-	if (a->count % 2 == 0) { // TODO: Make better later
-		return dval_err((char*) "Must have a q-expression for each s-expression conditional, except for the else q-expression. The else q-expression is required.");
+	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
+	for (unsigned int i = 0; i < syms->count; i++) {
+		LASSERT(a, syms->cell[i]->type == DVAL_SYM,
+			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
+			dtype_name(syms->cell[i]->type),
+			dtype_name(DVAL_SYM));
 	}
-	for (unsigned int i = 0; i < a->count-1; i += 2) {
-		if (i == a->count - 1) break;
-		LASSERT_MTYPE("if", a, i, a->cell[i]->type == DDATA_INT || a->cell[0]->type == DDATA_DOUBLE || a->cell[0]->type == DDATA_BYTE,
-			"%s, %s, or %s", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE), dtype_name(DDATA_BYTE));
-		LASSERT_MTYPE("if", a, i+1, a->cell[i+1]->type == DVAL_QEXPR || a->cell[i+1]->type == DVAL_LIST,
-			"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	}
-	LASSERT_MTYPE("if", a, a->count-1, a->cell[a->count-1]->type == DVAL_QEXPR || a->cell[a->count-1]->type == DVAL_LIST,
-		"%s or %s.", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 
-	dval* x;
-	for (unsigned int i = 0; i < a->count-1; i+=2) {
-		a->cell[i+1]->type = DVAL_SEXPR;
-		if (a->cell[i]->integer) {
-			x = dval_eval(e, dval_pop(a, i + 1));
+	LASSERT(a, (syms->count == a->count - 1),
+		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
+
+	for (unsigned int i = 0; i < syms->count; i++) {
+		if (a->cell[i+1]->type == DVAL_ERR) {
+			dval* err = dval_copy(a->cell[i+1]); // TODO: switch to dval_pop???
 			dval_del(a);
-			return x;
+			return err;
+		}
+		if (strcmp(func, "def") == 0) {
+			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
+		} else if (strcmp(func, "let") == 0) {
+			denv_put(e, syms->cell[i], a->cell[i + 1], constant);
 		}
 	}
-	a->cell[a->count-1]->type = DVAL_SEXPR;
-	x = dval_eval(e, dval_pop(a, a->count-1));
+
+	dval* result = dval_qexpr();
+	result->count = a->count - 1;
+	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
+	for (unsigned int i = 0; i < result->count; i++) {
+		result->cell[i] = dval_copy(a->cell[i + 1]); // TODO: Switch to dval_pop???
+	}
 	dval_del(a);
-	return x;
+	return result;
 }
 
-dval* builtin_load(denv* e, dval* a) {
-	LASSERT_NUM((char*) "load", a, 1);
-	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
-
-	mpc_result_t r;
-	if (mpc_parse_contents(a->cell[0]->str, Line, &r)) {
-		dval* expr = dval_read((mpc_ast_t*)r.output);
-		mpc_ast_delete((mpc_ast_t*)r.output);
-
-		while (expr->count) {
-			dval* x = dval_eval(e, dval_pop(expr, 0));
-			if (x->type == DVAL_ERR) {
-				dval_println(x);
-			}
-			dval_del(x);
-		}
-
-		dval_del(expr);
-		dval_del(a);
-
-		return dval_sexpr();
-	} else {
-		char* err_msg = mpc_err_string(r.error);
-		mpc_err_delete(r.error);
-
-		dval* err = dval_err((char*)"Could not load Library %s", err_msg);
-		free(err_msg);
-		dval_del(a);
-
-		return err;
-	}
+dval* builtin_def(denv* e, dval* a) {
+	return builtin_var(e, a, (char*)"def", 0);
 }
 
-/*dval* builtin_concatenate(denv* e, dval* a) { // TODO
-	for (int i = 0; i < a->count; i++) {
-		LASSERT_TYPE("..", a, i, DDATA_STRING);
-	}
+dval* builtin_put(denv* e, dval* a) {
+	return builtin_var(e, a, (char*) "let", 0);
+}
 
-}*/
+dval* builtin_const(denv* e, dval* a) {
+	return builtin_var(e, a, (char*) "def", 1);
+}
 
 dval* builtin_print(denv* e, dval* a) {
 	for (unsigned int i = 0; i < a->count; i++) {
@@ -929,6 +894,39 @@ dval* builtin_read(denv* e, dval* a) {
 
 	dval_del(a);
 	return result;
+}
+
+dval* builtin_load(denv* e, dval* a) {
+	LASSERT_NUM((char*) "load", a, 1);
+	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
+
+	mpc_result_t r;
+	if (mpc_parse_contents(a->cell[0]->str, Line, &r)) {
+		dval* expr = dval_read((mpc_ast_t*)r.output);
+		mpc_ast_delete((mpc_ast_t*)r.output);
+
+		while (expr->count) {
+			dval* x = dval_eval(e, dval_pop(expr, 0));
+			if (x->type == DVAL_ERR) {
+				dval_println(x);
+			}
+			dval_del(x);
+		}
+
+		dval_del(expr);
+		dval_del(a);
+
+		return dval_sexpr();
+	} else {
+		char* err_msg = mpc_err_string(r.error);
+		mpc_err_delete(r.error);
+
+		dval* err = dval_err((char*)"Could not load Library %s", err_msg);
+		free(err_msg);
+		dval_del(a);
+
+		return err;
+	}
 }
 
 dval* builtin_exit(denv* e, dval* a) {
@@ -985,6 +983,17 @@ dval* dval_eval_qexpr(denv* e, dval* v) {
 	return v;
 }
 
+dval* dval_eval_list(denv* e, dval* v) {
+	for (unsigned int i = 0; i < v->count; i++) {
+		v->cell[i] = dval_eval(e, v->cell[i]);
+		if (v->cell[i]->type == DVAL_ERR) {
+			return dval_take(v, i);
+		}
+	}
+
+	return v;
+}
+
 dval* dval_eval_slist(denv* e, dval* v) {
 	for (unsigned int i = 0; i < v->count; i++) {
 		v->cell[i] = dval_eval(e, v->cell[i]);
@@ -994,17 +1003,6 @@ dval* dval_eval_slist(denv* e, dval* v) {
 	}
 
 	v->type = DVAL_LIST;
-	return v;
-}
-
-dval* dval_eval_list(denv* e, dval* v) {
-	for (unsigned int i = 0; i < v->count; i++) {
-		v->cell[i] = dval_eval(e, v->cell[i]);
-		if (v->cell[i]->type == DVAL_ERR) {
-			return dval_take(v, i);
-		}
-	}
-
 	return v;
 }
 

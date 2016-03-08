@@ -103,8 +103,8 @@ dval* dval_sym(char* s, int type);
 dval* dval_type(int type);
 dval* dval_sexpr(void);
 dval* dval_ssexpr(void);
-dval* dval_sqexpr(void);
 dval* dval_qexpr(void);
+dval* dval_sqexpr(void);
 dval* dval_list(void);
 dval* dval_slist(void);
 dval* dval_func(dbuiltin func);
@@ -112,8 +112,8 @@ dval* dval_lambda(dval* formals, dval* body);
 dval* dval_note(void);
 
 /* Destructors */
-void dval_del(dval* v);
 void denv_del(denv* e);
+void dval_del(dval* v);
 
 dval* dval_add(dval* v, dval* x);
 
