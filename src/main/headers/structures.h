@@ -31,13 +31,11 @@
 int running;
 struct dval;
 struct denv;
-union ddata;
 typedef struct dval dval;
 typedef struct denv denv;
-typedef union ddata ddata;
 typedef unsigned char byte;
 
-enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_TYPE, DVAL_USYM, DVAL_SSEXPR, DVAL_SEXPR, DVAL_SQEXPR, DVAL_QEXPR, DVAL_SLIST, DVAL_LIST, DVAL_FUNC, DVAL_NOTE };
+enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHAR, DVAL_ERR, DVAL_SYM, DVAL_TYPE, DVAL_SSEXPR, DVAL_SEXPR, DVAL_SQEXPR, DVAL_QEXPR, DVAL_SLIST, DVAL_LIST, DVAL_FUNC, DVAL_NOTE };
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
@@ -103,7 +101,6 @@ dval* dval_char(char character);
 dval* dval_err(char* fmt, ...);
 dval* dval_sym(char* s, int type);
 dval* dval_type(int type);
-dval* dval_usym(char* s);
 dval* dval_sexpr(void);
 dval* dval_ssexpr(void);
 dval* dval_sqexpr(void);
