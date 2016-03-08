@@ -40,23 +40,23 @@ int dval_eq(dval* x, dval* y) {
 
 	switch (x->type) {
 	case DDATA_RANGE:
-		return (x->content->integer == y->content->integer && x->max == y->max);
+		return (x->integer == y->integer && x->max == y->max);
 	case DDATA_INT:
-		return (x->content->integer == y->content->integer);
+		return (x->integer == y->integer);
 	case DDATA_DOUBLE:
-		return (x->content->doub == y->content->doub);
+		return (x->doub == y->doub);
 	case DDATA_BYTE:
-		return (x->content->b == y->content->b);
+		return (x->b == y->b);
 	case DDATA_CHAR:
-		return (x->content->character == y->content->character);
+		return (x->character == y->character);
 	case DDATA_STRING:
-		return (strcmp(x->content->str, y->content->str) == 0);
+		return (strcmp(x->str, y->str) == 0);
 	case DVAL_ERR:
-		return (strcmp(x->content->str, y->content->str) == 0);
+		return (strcmp(x->str, y->str) == 0);
 	case DVAL_TYPE:
-		return (x->content->type == y->content->type);
+		return (x->ttype == y->ttype);
 	case DVAL_SYM:
-		return (strcmp(x->content->str, y->content->str) == 0);
+		return (strcmp(x->str, y->str) == 0);
 	case DVAL_FUNC:
 		if (x->builtin || y->builtin) {
 			return x->builtin == y->builtin;
@@ -82,7 +82,7 @@ int dval_eq(dval* x, dval* y) {
 
 dval* denv_get(denv* e, dval* k) {
 	dval* d;
-	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str)))) {
+	if ((d = (dval*)Hashmap_get(e->map, bfromcstr(k->str)))) {
         dval* result = dval_copy(d);
 		return result;
 	}
@@ -90,30 +90,30 @@ dval* denv_get(denv* e, dval* k) {
 	if (e->par) {
 		return denv_get(e->par, k);
 	}
-	return dval_err((char*)"Unbound symbol '%s'", k->content->str);
+	return dval_err((char*)"Unbound symbol '%s'", k->str);
 }
 
 void denv_put(denv* e, dval* k, dval* v, int constant) {
 	dval* t;
-	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->content->str));
+	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->str));
 	if (item != NULL) { // If already defined in hashtable
 		if (item->constant == 0) { // If not constant (in hashtable)
-			dval* deleted = (dval*)Hashmap_delete(e->map, bfromcstr(k->content->str));
+			dval* deleted = (dval*)Hashmap_delete(e->map, bfromcstr(k->str));
 			dval_del(deleted); // Note that `deleted` is the same as `item`!
 			item = NULL;
 			t = dval_copy(v); // Copy value into t
 			t->constant = constant; // set constant
-			Hashmap_set(e->map, bfromcstr(k->content->str), t); // TODO: Check for errors!
+			Hashmap_set(e->map, bfromcstr(k->str), t); // TODO: Check for errors!
 			return;
 		} else {
-			printf("Error: Cannot edit '%s'. It is a constant\n", k->content->str);
+			printf("Error: Cannot edit '%s'. It is a constant\n", k->str);
 			return;
 		}
 	} else { // Not in hashtable yet!
 		e->count++;
 		t = dval_copy(v); // Copy value into t
 		t->constant = constant; // set constant
-		Hashmap_set(e->map, bfromcstr(k->content->str), t);
+		Hashmap_set(e->map, bfromcstr(k->str), t);
 		return;
 	}
 }
@@ -144,12 +144,12 @@ dval* builtin_get(denv* e, dval* a) { // Make work for strings
 	LASSERT_TYPE("get", a, 0, DDATA_INT);
 	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer >= 0,
 		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
-	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->content->integer));
+	dval* result = dval_eval(e, dval_pop(a->cell[1], a->cell[0]->integer));
 	dval_del(a);
 	return result;
 }
@@ -161,12 +161,12 @@ dval* builtin_extract(denv* e, dval* a) {
 	LASSERT_TYPE("get", a, 0, DDATA_INT);
 	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer >= 0,
 		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
-	dval* result = dval_pop(a->cell[1], a->cell[0]->content->integer);
+	dval* result = dval_pop(a->cell[1], a->cell[0]->integer);
 	dval_del(a);
 	return result;
 }
@@ -179,13 +179,13 @@ dval* builtin_set(denv* e, dval* a) {
 	LASSERT_TYPE("set", a, 0, DDATA_INT);
 	LASSERT_MTYPE("set", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-	LASSERT(a, a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer >= 0,
 		"Index must be zero or positive.");
-	LASSERT(a, a->cell[0]->content->integer < a->cell[1]->count && a->cell[0]->content->integer >= 0,
+	LASSERT(a, a->cell[0]->integer < a->cell[1]->count && a->cell[0]->integer >= 0,
 		"Index out of bounds. Max index allowed: %i", a->cell[1]->count - 1);
 
 	dval* result = dval_pop(a, 1);
-	result->cell[a->cell[0]->content->integer] = dval_pop(a, 1);
+	result->cell[a->cell[0]->integer] = dval_pop(a, 1);
 	dval_del(a);
 	return result;
 }
@@ -243,7 +243,7 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 
 	dval* result = dval_qexpr();
 
-	while (cond->content->integer) {
+	while (cond->integer) {
 		dval* eval = dval_eval(e, dval_copy(body));
 		if (eval->type == DVAL_ERR) {
 			dval_del(conditional);
@@ -368,7 +368,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	while (a->count) {
 		if (f->formals->count == 0) {
-			char* func_name = f->content->str;
+			char* func_name = f->str;
 			dval_del(a);
 			dval_del(f);
 			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.", func_name, given, total);
@@ -376,7 +376,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 		dval* sym = dval_pop(f->formals, 0);
 
-		if (strcmp(sym->content->str, "&") == 0) {
+		if (strcmp(sym->str, "&") == 0) {
 			if (f->formals->count != 1) {
 				dval_del(a);
 				dval_del(f);
@@ -402,7 +402,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 	dval_del(a);
 
-	if (f->formals->count > 0 && strcmp(f->formals->cell[0]->content->str, "&") == 0) {
+	if (f->formals->count > 0 && strcmp(f->formals->cell[0]->str, "&") == 0) {
 		if (f->formals->count != 2) {
 			return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
 		}
@@ -457,10 +457,10 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 
 	if ((strcmp(op, "-") == 0) && a->count == 0) {
 		if (xIsDoub) {
-			x->content->doub = x->content->doub != 0 ? -x->content->doub : x->content->doub;
+			x->doub = x->doub != 0 ? -x->doub : x->doub;
 		}
 		else {
-			x->content->integer = x->content->integer != 0 ? -x->content->integer : x->content->integer;
+			x->integer = x->integer != 0 ? -x->integer : x->integer;
 		}
 	}
 
@@ -470,77 +470,77 @@ dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 
 		if (xIsDoub) {
 			if (yIsDoub) {
-				if (strcmp(op, "+") == 0) { x->content->doub += y->content->doub; }
-				if (strcmp(op, "-") == 0) { x->content->doub -= y->content->doub; }
-				if (strcmp(op, "*") == 0) { x->content->doub *= y->content->doub; }
+				if (strcmp(op, "+") == 0) { x->doub += y->doub; }
+				if (strcmp(op, "-") == 0) { x->doub -= y->doub; }
+				if (strcmp(op, "*") == 0) { x->doub *= y->doub; }
 				if (strcmp(op, "/") == 0) {
-					if (y->content->doub == 0) {
+					if (y->doub == 0) {
 						dval_del(x); dval_del(y);
 						x = dval_err((char*)"Division By Zero!"); break;
 					}
-					x->content->doub /= y->content->doub;
+					x->doub /= y->doub;
 				}
 				if (strcmp(op, "%") == 0) {
 					x = dval_err((char*)"Must use integers with modulus function.");
 				}
-				if (strcmp(op, "^") == 0) x->content->doub = pow(x->content->doub, y->content->doub);
+				if (strcmp(op, "^") == 0) x->doub = pow(x->doub, y->doub);
 			}
 			else {
-				if (strcmp(op, "+") == 0) { x->content->doub += (double)(y->content->integer); }
-				if (strcmp(op, "-") == 0) { x->content->doub -= (double)(y->content->integer); }
-				if (strcmp(op, "*") == 0) { x->content->doub *= (double)(y->content->integer); }
+				if (strcmp(op, "+") == 0) { x->doub += (double)(y->integer); }
+				if (strcmp(op, "-") == 0) { x->doub -= (double)(y->integer); }
+				if (strcmp(op, "*") == 0) { x->doub *= (double)(y->integer); }
 				if (strcmp(op, "/") == 0) {
-					if (y->content->integer == 0) {
+					if (y->integer == 0) {
 						dval_del(x); dval_del(y);
 						x = dval_err((char*)"Division By Zero!"); break;
 					}
-					x->content->doub /= (double)(y->content->integer);
+					x->doub /= (double)(y->integer);
 				}
 				if (strcmp(op, "%") == 0) {
 					x = dval_err((char*)"Must use integers with modulus function.");
 				}
-				if (strcmp(op, "^") == 0) x->content->doub = pow(x->content->doub, (double)y->content->integer);
+				if (strcmp(op, "^") == 0) x->doub = pow(x->doub, (double)y->integer);
 			}
 		}
 		else {
 			if (yIsDoub) {
-				double xNum = (double)(x->content->integer);
-				if (strcmp(op, "+") == 0) { x->content->doub = xNum + y->content->doub; }
-				if (strcmp(op, "-") == 0) { x->content->doub = xNum - y->content->doub; }
-				if (strcmp(op, "*") == 0) { x->content->doub = xNum * y->content->doub; }
+				double xNum = (double)(x->integer);
+				if (strcmp(op, "+") == 0) { x->doub = xNum + y->doub; }
+				if (strcmp(op, "-") == 0) { x->doub = xNum - y->doub; }
+				if (strcmp(op, "*") == 0) { x->doub = xNum * y->doub; }
 				if (strcmp(op, "/") == 0) {
-					if (y->content->doub == 0) {
+					if (y->doub == 0) {
 						dval_del(x); dval_del(y);
 						x = dval_err((char*)"Division By Zero!"); break;
 					}
-					x->content->doub = xNum / y->content->doub;
+					x->doub = xNum / y->doub;
 				}
 				if (strcmp(op, "%") == 0) {
 					x = dval_err((char*)"Must use integers with modulus function.");
 				}
-				if (strcmp(op, "^") == 0) x->content->doub = pow(xNum, y->content->doub);
+				if (strcmp(op, "^") == 0) x->doub = pow(xNum, y->doub);
 				x->type = DDATA_DOUBLE;
 				xIsDoub = 1;
 			}
 			else {
-				if (strcmp(op, "+") == 0) { x->content->integer += y->content->integer; }
-				if (strcmp(op, "-") == 0) { x->content->integer -= y->content->integer; }
-				if (strcmp(op, "*") == 0) { x->content->integer *= y->content->integer; }
+				if (strcmp(op, "+") == 0) { x->integer += y->integer; }
+				if (strcmp(op, "-") == 0) { x->integer -= y->integer; }
+				if (strcmp(op, "*") == 0) { x->integer *= y->integer; }
 				if (strcmp(op, "/") == 0) {
-					if (y->content->integer == 0) {
+					if (y->integer == 0) {
 						dval_del(x); dval_del(y);
 						x = dval_err((char*)"Division By Zero!"); break;
 					}
-					x->content->integer /= y->content->integer;
+					x->integer /= y->integer;
 				}
 				if (strcmp(op, "%") == 0) {
-					if (y->content->integer == 0) {
+					if (y->integer == 0) {
 						dval_del(x); dval_del(y);
 						x = dval_err((char*)"Modulus By Zero!"); break;
 					}
-					x->content->integer %= y->content->integer;
+					x->integer %= y->integer;
 				}
-				if (strcmp(op, "^") == 0) x->content->integer = pow(x->content->integer, y->content->integer);
+				if (strcmp(op, "^") == 0) x->integer = pow(x->integer, y->integer);
 			}
 		}
 		dval_del(y);
@@ -566,7 +566,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 
 	for (unsigned int i = 0; i < syms->count; i++) {
 		if (a->cell[i+1]->type == DVAL_ERR) {
-			dval* err = dval_copy(a->cell[i+1]);
+			dval* err = dval_copy(a->cell[i+1]); // TODO: switch to dval_pop???
 			dval_del(a);
 			return err;
 		}
@@ -581,7 +581,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 	result->count = a->count - 1;
 	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
 	for (unsigned int i = 0; i < result->count; i++) {
-		result->cell[i] = dval_copy(a->cell[i + 1]);
+		result->cell[i] = dval_copy(a->cell[i + 1]); // TODO: Switch to dval_pop???
 	}
 	dval_del(a);
 	return result;
@@ -612,10 +612,10 @@ dval* builtin_lambda(denv* e, dval* a) {
 		LASSERT(a, (a->cell[0]->cell[i]->type == DVAL_SYM),
 			(char*) "Cannot define non-symbol. Got %s, Expected %s.",
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
-        if (strcmp(a->cell[0]->cell[i]->content->str, "&") != 0) {
+        if (strcmp(a->cell[0]->cell[i]->str, "&") != 0) {
             if (i == a->cell[0]->count - 1) {
-            	char *symbol_name = a->cell[0]->cell[i]->content->str;
-            	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->content->str, dtype_name(DVAL_NOTE));
+            	char *symbol_name = a->cell[0]->cell[i]->str;
+            	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
                 dval_del(a);
                 dval_del(formals);
                 return err;
@@ -628,24 +628,24 @@ dval* builtin_lambda(denv* e, dval* a) {
             }
             LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
                 (char*) "Argument %s must have a type. Got %s, Expected %s.",
-                a->cell[0]->cell[i]->content->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
+                a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i+1]->type), dtype_name(DVAL_NOTE));
         } else {
             if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
                 dval_del(a);
                 dval_del(formals);
                 return dval_err("An argument that takes multiple parameters must have a name!");
             } else if (i + 1 == a->cell[0]->count - 1) {
-            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->content->str);
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must have a type!", a->cell[0]->cell[i+1]->str);
                 dval_del(a);
                 dval_del(formals);
                 return err;
             }
         }
 
-		dval* v = dval_copy(a->cell[0]->cell[i]);
-        if (strcmp(v->content->str, "&") == 0) {
+		dval* v = dval_copy(a->cell[0]->cell[i]); // TODO: Switch to dval_pop???
+        if (strcmp(v->str, "&") == 0) {
             if (i < a->cell[0]->count-3) {
-            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->content->str);
+            	dval* err = dval_err("An argument that takes multiple parameters (`& %s`) must be the last argument in the list!", a->cell[0]->cell[i+1]->str);
                 dval_del(a);
                 dval_del(formals);
                 return err;
@@ -654,7 +654,7 @@ dval* builtin_lambda(denv* e, dval* a) {
             // TODO: The type allowed in the list should be the type given for the argument (in its note).
             // Using type `any` will allow any type for the list.
         } else {
-		  v->sym_type = a->cell[0]->cell[i]->content->type;
+		  v->sym_type = a->cell[0]->cell[i]->ttype;
         }
 		dval_add(formals, v);
 		v = NULL;
@@ -704,8 +704,8 @@ dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, s
 
 	int r;
 
-	double num0 = a->cell[0]->type == DDATA_DOUBLE ? a->cell[0]->content->doub : a->cell[0]->content->integer; // TODO: Make this work with bytes!
-	double num1 = a->cell[1]->type == DDATA_DOUBLE ? a->cell[1]->content->doub : a->cell[1]->content->integer;
+	double num0 = a->cell[0]->type == DDATA_DOUBLE ? a->cell[0]->doub : a->cell[0]->integer; // TODO: Make this work with bytes!
+	double num1 = a->cell[1]->type == DDATA_DOUBLE ? a->cell[1]->doub : a->cell[1]->integer;
 
 	if (strcmp(op, ">") == 0) {
 		r = num0 > num1;
@@ -781,7 +781,7 @@ dval* builtin_not(denv* e, dval* a) {
 	LASSERT_TYPE("!", a, 0, DDATA_INT);
 
 	dval* x;
-	if (a->cell[0]->content->integer) {
+	if (a->cell[0]->integer) {
 		x = dval_int(0);
 	}
 	else {
@@ -797,10 +797,10 @@ dval* builtin_and(denv* e, dval* a) {
 		LASSERT_TYPE((char*) "and", a, i, DDATA_INT);
 	}
 
-	int current = a->cell[0]->content->integer;
+	int current = a->cell[0]->integer;
 	if (current) {
 		for (unsigned int i = 1; i < a->count; i++) {
-			current = (current && a->cell[i]->content->integer);
+			current = (current && a->cell[i]->integer);
 		}
 	}
 	dval* x = dval_int(current);
@@ -813,9 +813,9 @@ dval* builtin_or(denv* e, dval* a) {
 		LASSERT_TYPE((char*) "or", a, i, DDATA_INT);
 	}
 
-	int current = a->cell[0]->content->integer;
+	int current = a->cell[0]->integer;
 	for (unsigned int i = 1; i < a->count; i++) {
-		current = (current || a->cell[i]->content->integer);
+		current = (current || a->cell[i]->integer);
 	}
 
 	dval* x = dval_int(current);
@@ -845,7 +845,7 @@ dval* builtin_if(denv* e, dval* a) { // Make work with bytes?
 	dval* x;
 	for (unsigned int i = 0; i < a->count-1; i+=2) {
 		a->cell[i+1]->type = DVAL_SEXPR;
-		if (a->cell[i]->content->integer) {
+		if (a->cell[i]->integer) {
 			x = dval_eval(e, dval_pop(a, i + 1));
 			dval_del(a);
 			return x;
@@ -862,7 +862,7 @@ dval* builtin_load(denv* e, dval* a) {
 	LASSERT_TYPE((char*) "load", a, 0, DDATA_STRING);
 
 	mpc_result_t r;
-	if (mpc_parse_contents(a->cell[0]->content->str, Line, &r)) {
+	if (mpc_parse_contents(a->cell[0]->str, Line, &r)) {
 		dval* expr = dval_read((mpc_ast_t*)r.output);
 		mpc_ast_delete((mpc_ast_t*)r.output);
 
@@ -912,7 +912,7 @@ dval* builtin_error(denv* e, dval* a) {
 	LASSERT_NUM((char*) "error", a, 1);
 	LASSERT_TYPE((char*) "error", a, 0, DDATA_STRING);
 
-	dval* err = dval_err(a->cell[0]->content->str);
+	dval* err = dval_err(a->cell[0]->str);
 
 	dval_del(a);
 	return err;
@@ -922,7 +922,7 @@ dval* builtin_read(denv* e, dval* a) {
     LASSERT_NUM((char*) "read", a, 1);
     LASSERT_TYPE((char*) "read", a, 0, DDATA_STRING);
     
-    printf("%s", a->cell[0]->content->str);
+    printf("%s", a->cell[0]->str);
 	char str[255];
 	gets(str);
 	dval* result = dval_string(&str);

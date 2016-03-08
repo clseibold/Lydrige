@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 		puts("Press Ctrl+c to Exit\n");
 
 		while (running) {
-			char* input = readline("DanicL -> ");
+			char* input = readline("Lydrige -> ");
 			add_history(input);
 
 			mpc_result_t r;

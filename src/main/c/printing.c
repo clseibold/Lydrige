@@ -21,39 +21,39 @@ void dval_expr_print(dval* v, char* open, char* close) {
 }
 
 void dval_print_str(dval* v) {
-	// char* escaped = (char*)malloc(strlen(v->content->str) + 1);
-	// strcpy(escaped, v->content->str);
+	// char* escaped = (char*)malloc(strlen(v->str) + 1);
+	// strcpy(escaped, v->str);
 	// escaped = (char*)mpcf_escape(escaped);
-	printf("%s", v->content->str);
+	printf("%s", v->str);
 	//free(escaped);
 }
 
 void dval_print_char(dval* v) {
-	putchar(v->content->character);
+	putchar(v->character);
 }
 
 void dval_print(dval* v) {
 	switch (v->type) {
 	case DDATA_RANGE:
-		printf("%ld..%ld", v->content->integer, v->max);
+		printf("%ld..%ld", v->integer, v->max);
 		break;
 	case DDATA_INT:
-		printf("%ld", v->content->integer);
+		printf("%ld", v->integer);
 		break;
 	case DDATA_DOUBLE:
-		printf("%f", v->content->doub);
+		printf("%f", v->doub);
 		break;
 	case DDATA_BYTE:
-		printf("0x%X", v->content->b);
+		printf("0x%X", v->b);
 		break;
 	case DVAL_TYPE:
-		printf("%s", dtype_name(v->content->type)); break;
+		printf("%s", dtype_name(v->ttype)); break;
 	case DDATA_STRING:
 		dval_print_str(v); break;
 	case DDATA_CHAR:
 		dval_print_char(v); break;
-	case DVAL_ERR: printf("Error: %s", v->content->str); break;
-	case DVAL_SYM: printf("%s", v->content->str); break;
+	case DVAL_ERR: printf("Error: %s", v->str); break;
+	case DVAL_SYM: printf("%s", v->str); break;
 	case DVAL_NOTE: dval_expr_print(v, (char*) ": (", (char*) ")"); break;
 	case DVAL_SLIST: dval_expr_print(v, (char*) "[", (char*) "]"); break;
 	case DVAL_LIST:  dval_expr_print(v, (char*) "[", (char*) "]"); break;
