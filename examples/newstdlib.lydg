@@ -39,3 +39,23 @@
 		{nil}
 		{join (list (f (get 0 l))) (map f (tail l))}
 })
+
+(const_fn {ifok a: any} {
+		if (== a ok)
+		{true} {false}
+	}) ; TODO - implement any in interpreter
+
+(const_fn {ifnok a: any} {
+		if (!= a ok)
+		{true} {false}
+	})
+
+(const_fn {iferr a: any} {
+		if (== (typeof a) err)
+		{true} {false}
+	})
+
+(const_fn {iferrdo a: any f: func} {
+		if (== (typeof a) err)
+		{f a}
+	})

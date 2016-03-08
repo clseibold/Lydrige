@@ -12,8 +12,8 @@ dval* dval_join(dval* x, dval* y);
 dval* dval_call(denv* e, dval* f, dval* a);
 dval* denv_get(denv* e, dval* k);
 int dval_eq(dval* x, dval* y);
-void denv_put(denv* e, dval* k, dval* v, int constant);
-void denv_def(denv* e, dval* k, dval* v, int constant);
+dval* denv_put(denv* e, dval* k, dval* v, int constant);
+dval* denv_def(denv* e, dval* k, dval* v, int constant);
 
 dval* builtin_eval(denv* e, dval* a);
 dval* builtin_inner_eval(denv* e, dval* a);

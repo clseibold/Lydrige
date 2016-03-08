@@ -58,7 +58,14 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 
 			dval* nsym = dval_pop(f->formals, 0);
             dval* list = builtin_list(e, a);
-			denv_put(f->env, nsym, list, 0);
+			dval* err = denv_put(f->env, nsym, list, 0);
+			if (err->type == DVAL_ERR) { // TODO
+				dval_del(sym); dval_del(nsym); dval_del(list);
+				dval_del(a); dval_del(f);
+				return err;
+			} else {
+				dval_del(err);
+			}
 			dval_del(sym); dval_del(nsym); dval_del(list);
 			break;
 		}
@@ -67,7 +74,13 @@ dval* dval_call(denv* e, dval* f, dval* a) {
         
 		// Check if val is the correct type here:
         
-		denv_put(f->env, sym, val, 0);
+		dval* err = denv_put(f->env, sym, val, 0);
+		if (err->type == DVAL_ERR) {
+			dval_del(sym); dval_del(val); dval_del(a);
+			return err;
+		} else {
+			dval_del(err);
+		}
 
 		dval_del(sym); dval_del(val);
 	}
@@ -84,7 +97,14 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		dval* sym = dval_pop(f->formals, 0);
 		dval* val = dval_qexpr();
 
-		denv_put(f->env, sym, val, 0);
+		dval* err = denv_put(f->env, sym, val, 0);
+		if (err->type == DVAL_ERR) {
+			dval_del(sym); dval_del(val);
+			dval_del(a);
+			return err;
+		} else {
+			dval_del(err);
+		}
 		dval_del(sym); dval_del(val);
 	}
 
@@ -163,7 +183,7 @@ int dval_eq(dval* x, dval* y) {
 	return 0;
 }
 
-void denv_put(denv* e, dval* k, dval* v, int constant) {
+dval* denv_put(denv* e, dval* k, dval* v, int constant) {
 	dval* t;
 	dval* item = (dval*)Hashmap_get(e->map, bfromcstr(k->str));
 	if (item != NULL) { // If already defined in hashtable
@@ -174,25 +194,24 @@ void denv_put(denv* e, dval* k, dval* v, int constant) {
 			t = dval_copy(v); // Copy value into t
 			t->constant = constant; // set constant
 			Hashmap_set(e->map, bfromcstr(k->str), t); // TODO: Check for errors!
-			return;
+			return dval_sexpr();
 		} else {
-			printf("Error: Cannot edit '%s'. It is a constant\n", k->str);
-			return;
+			return dval_err("Cannot edit '%s'. It is a constant", k->str);;
 		}
 	} else { // Not in hashtable yet!
 		e->count++;
 		t = dval_copy(v); // Copy value into t
 		t->constant = constant; // set constant
 		Hashmap_set(e->map, bfromcstr(k->str), t);
-		return;
+		return dval_sexpr();
 	}
 }
 
-void denv_def(denv* e, dval* k, dval* v, int constant) {
+dval* denv_def(denv* e, dval* k, dval* v, int constant) {
 	while (e->par) { // Find root environment
 		e = e->par;
 	}
-	denv_put(e, k, v, constant);
+	return denv_put(e, k, v, constant);
 }
 
 /* Evaluates a Q-Expression or List Literal as if it were an S-Expression */
@@ -467,6 +486,7 @@ dval* builtin_lambda(denv* e, dval* a) {
         } else {
 		  v->sym_type = a->cell[0]->cell[i]->ttype;
         }
+        // TODO: Check if argument name is already defined as a constant, do not allow this!
 		dval_add(formals, v);
 		v = NULL;
 	}
@@ -475,7 +495,8 @@ dval* builtin_lambda(denv* e, dval* a) {
 	dval_del(a);
 
     // TODO: Go through all of the items in the second q-expr (function body) and make sure that they all can evaluate to something (obviously skipping over the ones that use the function arguments)!
-    // If not, give an error!
+    // If not, give an error! Should modulus/division by zero from an argument be required to be handled by the function,
+    //   or should we just leave it as an error when the function gets called (basically, skip over it when checking the function definition for errors)?
 
 	return dval_lambda(formals, body);
 }
@@ -813,7 +834,7 @@ dval* builtin_or(denv* e, dval* a) {
 	return x;
 }
 
-dval* builtin_var(denv* e, dval* a, char* func, int constant) {
+dval* builtin_var(denv* e, dval* a, char* func, int constant) { // TODO
 	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
 
 	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
@@ -834,9 +855,21 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 			return err;
 		}
 		if (strcmp(func, "def") == 0) {
-			denv_def(e, syms->cell[i], a->cell[i + 1], constant);
+			dval* err = denv_def(e, syms->cell[i], a->cell[i + 1], constant);
+			if (err->type == DVAL_ERR) {
+				// Delete necessary stuff and return the error!
+				dval_del(a);
+				return err;
+			}
 		} else if (strcmp(func, "let") == 0) {
-			denv_put(e, syms->cell[i], a->cell[i + 1], constant);
+			dval* err = denv_put(e, syms->cell[i], a->cell[i + 1], constant);
+			if (err->type == DVAL_ERR) {
+				// Delete necessary stuff and return the error!
+				dval_del(a);
+				return err;
+			} else {
+				dval_del(err);
+			}
 		}
 	}
 
@@ -1036,7 +1069,7 @@ dval* dval_eval(denv* e, dval* v) { // v is deleted!
 void denv_add_builtin(denv* e, char* name, dbuiltin func) {
 	dval* k = dval_sym(name, DVAL_FUNC);
 	dval* v = dval_func(func);
-	denv_put(e, k, v, 0);
+	dval_del(denv_put(e, k, v, 1)); // TODO: Check for error here (of already defined builtin function).
 	dval_del(k); dval_del(v);
 }
 

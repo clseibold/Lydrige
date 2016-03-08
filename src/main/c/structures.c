@@ -20,6 +20,7 @@ char* dtype_name(int t) {
 	case DVAL_SSEXPR: return (char*) "Special S-Expression";
 	case DVAL_QEXPR: return (char*) "Q-Expression";
 	case DVAL_NOTE: return (char*) "Note";
+	case DDATA_ANY: return (char*) "Any"; // TODO: Do not allow people to use 'any' unless in declarations!!!
 	default: return (char*) "Unknown";
 	}
 }
@@ -114,6 +115,7 @@ dval* dval_sym(char* s, int type) {
 	else if (strcmp(s, "qexpr") == 0) return dval_type(DVAL_QEXPR);
 	else if (strcmp(s, "lst") == 0) return dval_type(DVAL_LIST);
 	else if (strcmp(s, "func") == 0) return dval_type(DVAL_FUNC);
+	else if (strcmp(s, "any") == 0) return dval_type(DDATA_ANY);
 
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
