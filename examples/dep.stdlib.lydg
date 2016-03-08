@@ -1,3 +1,5 @@
+; NOTE: This is an older version of the standard library for the langage! Please use newstdlib.lydg instead.
+
 ; Atoms
 (const {ok} ())
 (const {nil} {})

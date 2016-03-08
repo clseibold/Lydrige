@@ -64,7 +64,7 @@ dval* builtin_or(denv* e, dval* a);
 dval* builtin_var(denv* e, dval* a, char* func, int constant);
 dval* builtin_def(denv* e, dval* a);
 dval* builtin_put(denv* e, dval* a);
-dval* builtin_const(denv* e, dva* a);
+dval* builtin_const(denv* e, dval* a);
 
 dval* builtin_print(denv* e, dval* a);
 dval* builtin_error(denv* e, dval* a);

@@ -4,6 +4,6 @@
 (print (typeof x))
 (def {name} (read "Enter your name: "))
 (print "Hello" name "!")
-(load "./examples/newstd.lydg")
+(load "./examples/newstdlib.lydg")
 (fn {test x: int y: string} {print x y})
 (test 5 "string")
