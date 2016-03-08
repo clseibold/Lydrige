@@ -75,34 +75,53 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		puts("Lydrige REPL - Version 0.5.0");
 		puts("Press Ctrl+c to Exit\n");
+		// Load prelude here!
+		dval* pargs = dval_add(dval_sexpr(), dval_string("./examples/newstdlib.lydg"));
+		dval* prelude = builtin_load(e, pargs); 
+		if (prelude->type == DVAL_ERR) {
+			dval_println(prelude);
+			dval_del(prelude);
+		} else {
+			while (running) {
+				char* input = readline("Lydrige -> ");
+				add_history(input);
 
-		while (running) {
-			char* input = readline("Lydrige -> ");
-			add_history(input);
+				mpc_result_t r;
+				if (mpc_parse("<stdin>", input, Line, &r)) {
+					//mpc_ast_print((mpc_ast_t*)r.output);
+					dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
+					dval_println(x);
+					dval_del(x);
+					mpc_ast_delete((mpc_ast_t*)r.output);
+				}
+				else {
+					mpc_err_print(r.error);
+					mpc_err_delete(r.error);
+				}
 
-			mpc_result_t r;
-			if (mpc_parse("<stdin>", input, Line, &r)) {
-				//mpc_ast_print((mpc_ast_t*)r.output);
-				dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
-				dval_println(x);
-				dval_del(x);
-				mpc_ast_delete((mpc_ast_t*)r.output);
+				free(input);
 			}
-			else {
-				mpc_err_print(r.error);
-				mpc_err_delete(r.error);
-			}
-
-			free(input);
+			dval_del(prelude);
 		}
 	} else if (argc >= 2) {
-		for (int i = 1; i < argc; i++) {
-			dval* args = dval_add(dval_sexpr(), dval_string(argv[i]));
-			dval* x = builtin_load(e, args);
-			if (x->type == DVAL_ERR) {
-				dval_println(x);
+		// Load prelude here!
+		dval* pargs = dval_add(dval_sexpr(), dval_string("./examples/newstdlib.lydg"));
+		dval* prelude = builtin_load(e, pargs); 
+		if (prelude->type == DVAL_ERR) {
+			dval_println(prelude);
+			dval_del(prelude);
+		} else {
+			for (int i = 1; i < argc; i++) {
+				dval* args = dval_add(dval_sexpr(), dval_string(argv[i]));
+				dval* x = builtin_load(e, args);
+				if (x->type == DVAL_ERR) {
+					dval_println(x);
+					dval_del(x);
+					break;
+				}
+				dval_del(x);
 			}
-			dval_del(x);
+			dval_del(prelude);
 		}
 	}
 
