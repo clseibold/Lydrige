@@ -41,18 +41,16 @@ enum { DDATA_RANGE, DDATA_INT, DDATA_DOUBLE, DDATA_BYTE, DDATA_STRING, DDATA_CHA
 
 typedef dval*(*dbuiltin)(denv*, dval*);
 
-union ddata {
-	long integer;
-	double doub;
-	byte b : 8;
-	char character;
-	char* str;
-	int type;
-};
-
 struct dval {
 	int type;
-	union ddata* content;
+	union {
+		long integer;
+		double doub;
+		byte b : 8;
+		char character;
+		char* str;
+		int ttype; // TODO: Merge this with sym_type, they should be the same var!
+	};
 	long max; // Used for ranges
 	int constant; // Boolean of whether value is constant. Only used if symbol is associated with value.
 	int sym_type;
@@ -123,6 +121,6 @@ void denv_del(denv* e);
 dval* dval_add(dval* v, dval* x);
 
 /* Copying */
-union ddata* ddata_copy(int type, union ddata* d);
+dval* ddata_copy(int type, dval* d, dval* x);
 dval* dval_copy(dval* v);
 denv* denv_copy(denv* e);

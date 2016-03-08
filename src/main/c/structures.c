@@ -44,8 +44,7 @@ denv* denv_new(void) {
 dval* dval_range(long min, long max) {
 	dval* v = (dval*) malloc(sizeof(dval));
 	v->type = DDATA_RANGE;
-	v->content = (ddata*) malloc(sizeof(ddata));
-	v->content->integer = min;
+	v->integer = min;
 	v->max = max;
 
 	return v;
@@ -54,8 +53,7 @@ dval* dval_range(long min, long max) {
 dval* dval_int(long x) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_INT;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->integer = x;
+	v->integer = x;
 
 	return v;
 }
@@ -63,33 +61,29 @@ dval* dval_int(long x) {
 dval* dval_double(double x) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_DOUBLE;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->doub = x;
+	v->doub = x;
 	return v;
 }
 
 dval* dval_byte(byte x) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_BYTE;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->b = x;
+	v->b = x;
 	return v;
 }
 
 dval* dval_string(char* str) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_STRING;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->str = (char*)malloc(strlen(str) + 1);
-	strcpy(v->content->str, str);
+	v->str = (char*)malloc(strlen(str) + 1);
+	strcpy(v->str, str);
 	return v;
 }
 
 dval* dval_char(char character) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DDATA_CHAR;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->character = character;
+	v->character = character;
 	return v;
 }
 
@@ -99,12 +93,11 @@ dval* dval_err(char* fmt, ...) {
 
 	va_list va;
 	va_start(va, fmt);
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->str = (char*)malloc(512);
+	v->str = (char*)malloc(512);
 
-	vsnprintf(v->content->str, 511, fmt, va);
+	vsnprintf(v->str, 511, fmt, va);
 
-	v->content->str = (char*)realloc(v->content->str, strlen(v->content->str) + 1);
+	v->str = (char*)realloc(v->str, strlen(v->str) + 1);
 
 	va_end(va);
 
@@ -125,25 +118,15 @@ dval* dval_sym(char* s, int type) {
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
 	v->sym_type = type;
-	v->content = (ddata*)malloc(sizeof(ddata));
-	v->content->str = (char*)malloc(strlen(s) + 1);
-	strcpy(v->content->str, s);
+	v->str = (char*)malloc(strlen(s) + 1);
+	strcpy(v->str, s);
 	return v;
 }
 
 dval* dval_type(int type) {
 	dval* v = (dval*) malloc(sizeof(dval));
 	v->type = DVAL_TYPE;
-	v->content = (ddata*) malloc(sizeof(ddata));
-	v->content->type = type;
-	return v;
-}
-
-dval* dval_usym(char* s) {
-	dval* v = (dval*)malloc(sizeof(dval));
-	v->type = DVAL_USYM;
-	v->content->str = (char*)malloc(strlen(s) + 1);
-	strcpy(v->content->str, s);
+	v->ttype = type;
 	return v;
 }
 
@@ -237,16 +220,9 @@ void dval_del(dval* v) {
 			dval_del(v->body);
 		}
 		break;
-	case DDATA_RANGE:
-	case DDATA_INT:
-	case DDATA_BYTE:
-	case DDATA_CHAR:
-	case DDATA_DOUBLE: free(v->content); break;
-	case DVAL_TYPE:
-		free(v->content); break;
 	case DVAL_ERR:
 	case DVAL_SYM:
-	case DDATA_STRING: free(v->content->str); free(v->content); break;
+	case DDATA_STRING: free(v->str); break;
 	case DVAL_LIST:
 	case DVAL_SLIST:
 	case DVAL_SQEXPR:
@@ -271,10 +247,8 @@ dval* dval_add(dval* v, dval* x) {
 	return v;
 }
 
-/* Returns copy of given ddata */
-union ddata* ddata_copy(int type, union ddata* d) {
-	union ddata* x = (ddata*)malloc(sizeof(ddata));
-
+/* Modifies x to have the same ddata content as d */
+dval* ddata_copy(int type, dval* d, dval* x) {
 	switch (type) {
 	case DDATA_RANGE:
 		x->integer = d->integer; break;
@@ -291,6 +265,8 @@ union ddata* ddata_copy(int type, union ddata* d) {
 	case DDATA_STRING:
 		x->str = (char*)malloc(strlen(d->str) + 1);
 		strcpy(x->str, d->str); break;
+	case DVAL_TYPE:
+		x->ttype = d->ttype; break;
 	}
 
 	return x;
@@ -321,13 +297,13 @@ dval* dval_copy(dval* v) {
 	case DDATA_CHAR:
 	case DVAL_TYPE:
 	case DDATA_STRING:
-		x->content = ddata_copy(x->type, v->content);
+		x = ddata_copy(x->type, v, x);
 		break;
 	case DVAL_ERR:
-		x->content = ddata_copy(x->type, v->content);
+		x = ddata_copy(x->type, v, x);
 		break;
 	case DVAL_SYM:
-		x->content = ddata_copy(x->type, v->content);
+		x = ddata_copy(x->type, v, x);
 		x->constant = v->constant;
 		break;
 	case DVAL_LIST:

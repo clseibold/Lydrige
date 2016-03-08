@@ -53,7 +53,7 @@ dval* builtin_ne(denv* e, dval* a);
 dval* builtin_not(denv* e, dval* a);
 dval* builtin_and(denv* e, dval* a);
 dval* builtin_or(denv* e, dval* a);
-dval* builtin_min(denv* e, dval* a); // TODO
+//dval* builtin_min(denv* e, dval* a); // TODO
 dval* builtin_if(denv* e, dval* a);
 dval* builtin_load(denv* e, dval* a);
 //dval* builtin_concatenate(denv* e, dval* a); // TODO
