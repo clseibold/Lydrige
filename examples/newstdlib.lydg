@@ -33,7 +33,8 @@
 	((\ {_: int} b) ())
 })
 
-;(fn {flip f a b} {f b a})
+(fn {flip f: func a: any b: any} {f b a})
+
 (const_fn {map f: func l: qexpr} {
 	if (== l nil)
 		{nil}

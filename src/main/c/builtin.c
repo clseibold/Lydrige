@@ -30,9 +30,10 @@ dval* dval_join(dval* x, dval* y) {
 	return x;
 }
 
-dval* dval_call(denv* e, dval* f, dval* a) {
+// TODO: This can be simplified greatly because most error checking for functions happens upon definition
+dval* dval_call(denv* e, dval* f, dval* a) { // TODO: Look more into this for memory leaks and errors
 	if (f->builtin) {
-		return f->builtin(e, a); // TODO: When does `f` get deleted?
+		return f->builtin(e, a);
 	}
 
 	int given = a->count;
@@ -41,27 +42,25 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 	while (a->count) {
 		if (f->formals->count == 0) {
 			char* func_name = f->str;
-			dval_del(a);
-			dval_del(f);
-			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.", func_name, given, total);
+			//dval_del(a);
+			return dval_err((char*)"Function '%s' passed too many arguments. Got %i, Expected %i.", func_name, given, total); // KEEP
 		}
 
 		dval* sym = dval_pop(f->formals, 0);
 
 		if (strcmp(sym->str, "&") == 0) {
 			if (f->formals->count != 1) {
-				dval_del(a);
-				dval_del(f);
+				//dval_del(a);
 				dval_del(sym);
-				return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
+				return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol."); // NOT NEEDED??
 			}
 
 			dval* nsym = dval_pop(f->formals, 0);
             dval* list = builtin_list(e, a);
 			dval* err = denv_put(f->env, nsym, list, 0);
-			if (err->type == DVAL_ERR) { // TODO
+			if (err->type == DVAL_ERR) {
 				dval_del(sym); dval_del(nsym); dval_del(list);
-				dval_del(a); dval_del(f);
+				//dval_del(a);
 				return err;
 			} else {
 				dval_del(err);
@@ -76,7 +75,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
         
 		dval* err = denv_put(f->env, sym, val, 0);
 		if (err->type == DVAL_ERR) {
-			dval_del(sym); dval_del(val); dval_del(a);
+			dval_del(sym); dval_del(val); //dval_del(a);
 			return err;
 		} else {
 			dval_del(err);
@@ -85,11 +84,11 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		dval_del(sym); dval_del(val);
 	}
 
-	dval_del(a);
+	//dval_del(a);
 
 	if (f->formals->count > 0 && strcmp(f->formals->cell[0]->str, "&") == 0) {
 		if (f->formals->count != 2) {
-			return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol.");
+			return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol."); // NOT NEEDED??
 		}
 
 		dval_del(dval_pop(f->formals, 0));
@@ -100,7 +99,7 @@ dval* dval_call(denv* e, dval* f, dval* a) {
 		dval* err = denv_put(f->env, sym, val, 0);
 		if (err->type == DVAL_ERR) {
 			dval_del(sym); dval_del(val);
-			dval_del(a);
+			//dval_del(a);
 			return err;
 		} else {
 			dval_del(err);
