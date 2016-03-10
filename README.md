@@ -29,8 +29,8 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `const` - similar to def, but defines variable as immutable. If variable already existed (and not immutable), the value is change and is made immutable.
 * `let` - similar to def, but defines variable in local scope/current environment
 * `let_const` - defines variable in local scope/current environment. The variable is immutable. (will be implemented soon!)
-* `\` - creates a lambda with the first given q-expression as the argument names and the second q-expression as the body
-* `lambda` - alias to \
+* `l` - creates a lambda with the first given q-expression as the argument names and the second q-expression as the body
+* `lambda` - alias to l
 * `if` - if given integer is 1, the first given q-expression is evaluated, otherwise the second given q-expression is evaluated
 * `and` - returns 1 if all given integers/doubles are 1. Returns 0 if any given integer/double is 0.
 * `or` - returns 1 if given any given integer/double is 1. Returns 0 if no given integer/double is 1.
@@ -40,7 +40,7 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `exit` - exits the REPL (currently not working)
 * `inner_eval` - acts as if the given q-expression is a list literal. The items are evaluated, but the expression itself is not.
 * `get` - gets item from given q-expression or list literal at given index. (ex: `get 0 {2 3 4 5}` will return `2` , `get 0 {unbound}` will return an error)
-* `extract` - very similar to the `get` function, except does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (get 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
+* `extract` - very similar to the `get` function, except does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (extract 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
 * `set` - returns a new q-expression with the item at the given index of give q-expression or list literal to a given value.
 
 ## Data Types ##
