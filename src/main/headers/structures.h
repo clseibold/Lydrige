@@ -53,10 +53,10 @@ struct dval {
 	int constant; // Boolean of whether value is constant. Only used if symbol is associated with value.
 	int sym_type;
 
-	dbuiltin builtin;
-	denv* env;
-	dval* formals;
-	dval* body;
+	dbuiltin builtin; // Function pointer to builtin function
+	denv* env; // Environment of function
+	dval* formals; // Function arguments
+	dval* body; // Function body
 
 	unsigned int count;
 	struct dval** cell;

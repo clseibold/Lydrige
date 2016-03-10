@@ -112,8 +112,7 @@ dval* dval_call(denv* e, dval* f, dval* a) { // TODO: Look more into this for me
 		f->env->par = e;
         result = builtin_eval(f->env, dval_add(dval_sexpr(), dval_copy(f->body)));
 		return result;
-	}
-	else {
+	} else {
         result = dval_copy(f);
 		return result;
 	}
@@ -429,11 +428,10 @@ dval* builtin_to_qexpr(denv* e, dval* a) {
 }
 
 dval* builtin_lambda(denv* e, dval* a) {
-	LASSERT_NUM((char*) "\\", a, 2);
-	LASSERT_TYPE((char*) "\\", a, 0, DVAL_QEXPR);
-	LASSERT_MTYPE("\\", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+	LASSERT_NUM((char*) "l", a, 2);
+	LASSERT_TYPE((char*) "l", a, 0, DVAL_QEXPR);
+	LASSERT_MTYPE("l", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
-    LASSERT_NOT_EMPTY((char*) "\\", a, 0);
 
 	dval* formals = dval_qexpr();
 
@@ -489,7 +487,7 @@ dval* builtin_lambda(denv* e, dval* a) {
 		dval_add(formals, v);
 		v = NULL;
 	}
-
+	
 	dval* body = dval_pop(a, 1);
 	dval_del(a);
 
@@ -894,9 +892,10 @@ dval* builtin_const(denv* e, dval* a) {
 	return builtin_var(e, a, (char*) "def", 1);
 }
 
+// Note that the 'print' function automatically evaluates what was given to it (including functions, especially ones that don't have arguments).
 dval* builtin_print(denv* e, dval* a) {
 	for (unsigned int i = 0; i < a->count; i++) {
-		dval_print(a->cell[i]); putchar(' ');
+		dval_print(dval_eval(e, a->cell[i])); putchar(' ');
 	}
 
 	putchar('\n');
@@ -1061,6 +1060,8 @@ dval* dval_eval(denv* e, dval* v) { // v is deleted!
 		return dval_eval_slist(e, v);
 	} else if (v->type == DVAL_LIST) {
 		return dval_eval_list(e, v);
+	} else if (v->type == DVAL_FUNC) {
+		return dval_call(e, v, dval_sexpr());
 	}
 	return v;
 }
@@ -1103,7 +1104,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "def", builtin_def);
 	denv_add_builtin(e, (char*) "const", builtin_const);
 	denv_add_builtin(e, (char*) "let", builtin_put);
-	denv_add_builtin(e, (char*) "\\", builtin_lambda);
+	denv_add_builtin(e, (char*) "l", builtin_lambda);
 	denv_add_builtin(e, (char*) "lambda", builtin_lambda);
 
 	denv_add_builtin(e, (char*) "if", builtin_if);

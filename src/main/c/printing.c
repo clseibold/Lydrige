@@ -66,8 +66,8 @@ void dval_print(dval* v) {
 			printf("<builtin>");
 		}
 		else {
-			printf("(\\ "); dval_print(v->formals);
-			putchar(' '); dval_print(v->body); putchar(')');
+			dval_print(v->formals);
+			printf(" -> "); dval_print(v->body);
 		}
 		break;
 	}
