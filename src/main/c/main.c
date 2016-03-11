@@ -128,6 +128,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(18, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
+	mpc_cleanup(19, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
 	return 0;
 }
