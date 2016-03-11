@@ -99,6 +99,7 @@ dval* dval_read(mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->contents, "'{") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ":") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ";") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
 		dval* v = dval_read(t->children[i]);

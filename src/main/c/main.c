@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
 	SSexpr = mpc_new("ssexpr");
 	Qexpr = mpc_new("qexpr");
 	SQexpr = mpc_new("sqexpr");
+	Statement = mpc_new("statement");
 	Line = mpc_new("line");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
@@ -66,8 +67,9 @@ int main(int argc, char** argv) {
 		sexpr		: '(' <expr>* ')' ; \
 		sqexpr		: \"\\'{\" <expr>* '}' ; \
 		qexpr		: '{' <expr>* '}' ; \
-		line		: /^/ <expr>* /$/ ; \
-		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Line);
+		statement	: <expr>+ ';' ; \
+		line		: /^/ <expr>* /$/ | /^/ <statement>* /$/ ; \
+		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Statement, Line);
 
 	denv* e = denv_new();
 	denv_add_builtins(e);
@@ -126,6 +128,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(18, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Line);
+	mpc_cleanup(18, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
 	return 0;
 }
