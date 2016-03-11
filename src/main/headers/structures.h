@@ -86,6 +86,7 @@ mpc_parser_t* SSexpr;
 mpc_parser_t* Sexpr;
 mpc_parser_t* SQexpr;
 mpc_parser_t* Qexpr;
+mpc_parser_t* Statement;
 mpc_parser_t* Line;
 
 char* dtype_name(int t);
