@@ -10,3 +10,4 @@ def {x} (l {} {5});
 print x;
 if (== (typeof x) func) {print "x is a function"} {print "x is not a function"};
 if (== (typeof (x)) int) {print "(x) is an integer"} {print "(x) is not an integer"};
+print "this is "; print "a test";

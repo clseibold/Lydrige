@@ -1,25 +1,25 @@
-; Atoms
+# Atoms
 (const {ok} ())
 (const {nil} {})
 (const {true} 1)
 (const {false} 0)
 
-; Function Definition
+# Function Definition
 (const {fn} (l {f: qexpr b: qexpr} {
 	def (first f) (l (tail f) b)
 }))
 
-; Constant Function Definition
+# Constant Function Definition
 (const {const_fn} (l {f: qexpr b: qexpr} {
 	const (first f) (l (tail f) b)
 }))
 
-; Unpack List for function
+# Unpack List for function
 (const_fn {unpack f: func q: qexpr} {
 	eval (join (list f) q)
 })
 
-; Pack List for Function
+# Pack List for Function
 (const_fn {pack f: func &xs: int}
 	{f xs})
 
@@ -28,7 +28,7 @@
 		{nil}
 		{last l}})
 
-; Open a new scope
+# Open a new scope
 (const_fn {scope b: qexpr} {
 	(l {_: any} b) ()
 })
@@ -44,7 +44,7 @@
 (const_fn {ifok a: any} {
 		if (== a ok)
 		{true} {false}
-	}) ; TODO - implement any in interpreter
+	}) # TODO - implement any in interpreter
 
 (const_fn {ifnok a: any} {
 		if (!= a ok)
