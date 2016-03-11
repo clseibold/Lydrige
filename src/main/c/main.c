@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
 
 				mpc_result_t r;
 				if (mpc_parse("<stdin>", input, Line, &r)) {
-					mpc_ast_print((mpc_ast_t*)r.output);
+					//mpc_ast_print((mpc_ast_t*)r.output);
 					dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
 					dval_println(x);
 					dval_del(x);
