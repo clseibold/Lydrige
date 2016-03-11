@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
 		sexpr		: '(' <expr>* ')' ; \
 		sqexpr		: \"\\'{\" <expr>* '}' ; \
 		qexpr		: '{' <expr>* '}' ; \
-		statement	: <expr>+ ';' ; \
+		statement	: <expr>+ ';' | <comment> ; \
 		line		: /^/ <expr>* /$/ | /^/ <statement>* /$/ ; \
 		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Statement, Line);
 

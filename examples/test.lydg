@@ -10,3 +10,4 @@
 (print x)
 (if (== (typeof x) func) {print "x is a function"} {print "x is not a function"})
 (if (== (typeof (x)) int) {print "(x) is an integer"} {print "(x) is not an integer"})
+# (print 5; print 73;) # This is not allowed!!!
