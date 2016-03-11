@@ -69,7 +69,9 @@ dval* dval_read(mpc_ast_t* t) {
 	}
 
 	dval* x = NULL;
-	if (strcmp(t->tag, ">") == 0) {
+	if (strcmp(t->tag, ">") == 0) { // Not working correctly in REPL. Should not make sexpr if statements are being used!
+		x = dval_sexpr();
+	} else if (strstr(t->tag, "statement")) {
 		x = dval_sexpr();
 	} else if (strstr(t->tag, "ssexpr")) {
 		x = dval_ssexpr();
