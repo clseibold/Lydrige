@@ -71,6 +71,7 @@ struct denv {
 /* Parsers */
 mpc_parser_t* Expr;
 mpc_parser_t* Data;
+mpc_parser_t* Lambda;
 mpc_parser_t* Double;
 mpc_parser_t* Range;
 mpc_parser_t* Integer;
