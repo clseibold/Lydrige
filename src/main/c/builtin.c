@@ -936,7 +936,7 @@ dval* builtin_load(denv* e, dval* a) {
 
 	mpc_result_t r;
 	if (mpc_parse_contents(a->cell[0]->str, Line, &r)) {
-		dval* expr = dval_read((mpc_ast_t*)r.output);
+		dval* expr = dval_read(e, (mpc_ast_t*)r.output);
 		mpc_ast_delete((mpc_ast_t*)r.output);
 
 		while (expr->count) {
