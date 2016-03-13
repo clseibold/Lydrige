@@ -41,17 +41,17 @@ const_fn {map f: func q: qexpr} {
 		{join (list (f (get 0 l))) (map f (tail q))}
 };
 
-const_fn {ifok a: any} {
+const_fn {isok a: any} {
 		if (== a ok)
 		{true} {false}
 	}; # TODO - implement any in interpreter
 
-const_fn {ifnok a: any} {
+const_fn {isnok a: any} {
 		if (!= a ok)
 		{true} {false}
 	};
 
-const_fn {iferr a: any} {
+const_fn {iserr a: any} {
 		if (== (typeof a) err)
 		{true} {false}
 	};
