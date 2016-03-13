@@ -30,6 +30,7 @@ void add_history(char* unused) {}
 int main(int argc, char** argv) {
 	Expr = mpc_new("expr");
 	Data = mpc_new("data");
+	Lambda = mpc_new("lambda");
 	Double = mpc_new("double");
 	Integer = mpc_new("integer");
 	Byte = mpc_new("byte");
@@ -51,7 +52,8 @@ int main(int argc, char** argv) {
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
 		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <sqexpr> | <qexpr> | <slist> | <list> | <comment> ; \
-		data		: <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
+		data		: <lambda> | <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
+		lambda		: <qexpr> \"->\" <qexpr> | <qexpr> \"->\" <list> ; \
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
 		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
@@ -69,14 +71,14 @@ int main(int argc, char** argv) {
 		qexpr		: '{' <expr>* '}' ; \
 		statement	: <expr>+ ';' | <comment> ; \
 		line		: /^/ <expr>* /$/ | /^/ <statement>* /$/ ; \
-		", Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Statement, Line);
+		", Expr, Data, Lambda, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Statement, Line);
 
 	denv* e = denv_new();
 	denv_add_builtins(e);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - Version 0.5.0");
-		puts("Press Ctrl+c to Exit\n");
+		puts("Type 'exit' to Exit the REPL\n");
 		// Load prelude here!
 		dval* pargs = dval_add(dval_sexpr(), dval_string("./examples/newstdlib.lydg"));
 		dval* prelude = builtin_load(e, pargs); 
@@ -91,7 +93,7 @@ int main(int argc, char** argv) {
 				mpc_result_t r;
 				if (mpc_parse("<stdin>", input, Line, &r)) {
 					//mpc_ast_print((mpc_ast_t*)r.output);
-					dval* x = dval_eval(e, dval_read((mpc_ast_t*)r.output));
+					dval* x = dval_eval(e, dval_read(e, (mpc_ast_t*)r.output));
 					dval_println(x);
 					dval_del(x);
 					mpc_ast_delete((mpc_ast_t*)r.output);
@@ -128,6 +130,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(19, Expr, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
+	mpc_cleanup(20, Expr, Lambda, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
 	return 0;
 }
