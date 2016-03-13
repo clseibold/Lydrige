@@ -15,12 +15,12 @@ const {const_fn} (l {f: qexpr b: qexpr} {
 });
 
 # Unpack List for function
-const_fn {unpack f: func q: qexpr} {
+const_fn {unpack f: func q: qexpr} { # Compiler Fix: Segmentation Fault
 	eval (join (list f) q)
 };
 
 # Pack List for Function
-const_fn {pack f: func &xs: int}
+const_fn {pack f: func &xs: int} # Segmentation fault when doing 'pack eval + 3 3'
 	{f xs};
 
 const_fn {do &l: any} {

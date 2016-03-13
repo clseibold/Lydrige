@@ -1,5 +1,18 @@
 #include "../headers/reading.h"
 
+dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
+	dval* error;
+	
+	dval* qexpr1 = dval_read(e, t->children[0]);
+	dval* qexpr2 = dval_read(e, t->children[2]);
+	dval* sexpr = dval_sexpr();
+	dval_add(sexpr, qexpr1);
+	dval_add(sexpr, qexpr2);
+	dval* lambda = builtin_lambda(e, sexpr);
+	
+	return errno != ERANGE ? lambda : error;
+}
+
 dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
@@ -51,8 +64,10 @@ dval* dval_read_character(mpc_ast_t* t) {
 	return errno != ERANGE ? dval_char(c) : dval_err((char*) "invalid character");
 }
 
-dval* dval_read(mpc_ast_t* t) {
-	if (strstr(t->tag, "double")) {
+dval* dval_read(denv* e, mpc_ast_t* t) {
+	if (strstr(t->tag, "lambda")) {
+		return dval_read_lambda(e, t);
+	} else if (strstr(t->tag, "double")) {
 		return dval_read_double(t);
 	} else if (strstr(t->tag, "range")) {
 		return dval_read_range(t);
@@ -102,9 +117,10 @@ dval* dval_read(mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ":") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ";") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "->") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
-		dval* v = dval_read(t->children[i]);
+		dval* v = dval_read(e, t->children[i]);
 		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE) {
 			dval_del(v);
 			return dval_err("Only types are allowed in Notes! Found %s.", dtype_name(v->type));
