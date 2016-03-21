@@ -5,14 +5,14 @@ const {true} 1;
 const {false} 0;
 
 # Function Definition
-const {fn} (l {f: qexpr b: qexpr} {
+const {fn} {f: qexpr b: qexpr} -> {
 	def (first f) (l (tail f) b)
-});
+};
 
 # Constant Function Definition
-const {const_fn} (l {f: qexpr b: qexpr} {
+const {const_fn} {f: qexpr b: qexpr} -> {
 	const (first f) (l (tail f) b)
-});
+};
 
 # Unpack List for function
 const_fn {unpack f: func q: qexpr} { # Compiler Fix: Segmentation Fault
