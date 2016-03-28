@@ -3,6 +3,8 @@
 #include "../../mpc/headers/mpc.h"
 #include <hashmap.h>
 
+#define internal static
+
 #define LASSERT(args, cond, fmt, ...) \
 	if (!(cond)) { \
 		dval* err = dval_err(fmt, ##__VA_ARGS__); \

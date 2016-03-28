@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 		puts("Type 'exit' to Exit the REPL\n");
 		// Load prelude here!
 		dval* pargs = dval_add(dval_sexpr(), dval_string("./examples/newstdlib.lydg"));
-		dval* prelude = builtin_load(e, pargs); 
+		dval* prelude = builtin_load(e, pargs);
 		if (prelude->type == DVAL_ERR) {
 			dval_println(prelude);
 			dval_del(prelude);
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
 	} else if (argc >= 2) {
 		// Load prelude here!
 		dval* pargs = dval_add(dval_sexpr(), dval_string("./examples/newstdlib.lydg"));
-		dval* prelude = builtin_load(e, pargs); 
+		dval* prelude = builtin_load(e, pargs);
 		if (prelude->type == DVAL_ERR) {
 			dval_println(prelude);
 			dval_del(prelude);
