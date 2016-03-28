@@ -78,5 +78,5 @@ dval* dval_eval_list(denv* e, dval* v);
 dval* dval_eval_slist(denv* e, dval* v);
 dval* dval_eval(denv* e, dval* v);
 
-void denv_add_builtin(denv* e, char* name, dbuiltin func);
+internal void denv_add_builtin(denv* e, char* name, dbuiltin func);
 void denv_add_builtins(denv* e);
