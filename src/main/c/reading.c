@@ -3,8 +3,8 @@
 dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	dval* error;
 	
-	dval* qexpr1 = dval_read(e, t->children[0]);
-	dval* qexpr2 = dval_read(e, t->children[2]);
+	dval* qexpr1 = dval_eval(e, dval_read(e, t->children[0]));
+	dval* qexpr2 = dval_eval(e, dval_read(e, t->children[2]));
 	dval* sexpr = dval_sexpr();
 	dval_add(sexpr, qexpr1);
 	dval_add(sexpr, qexpr2);
