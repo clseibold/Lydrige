@@ -1,13 +1,50 @@
-(print (+ 3 3))
-(def {x} 5)
-(print (if (== x 5) {"true"} {"false"}))
-(print (typeof x))
-(def {name} (read "Enter your name: "))
-(print "Hello" name "!")
-(fn {test x: int y: string} {print x y})
-(test 5 "string")
-(def {x} (l {} {5}))
-(print x)
-(if (== (typeof x) func) {print "x is a function"} {print "x is not a function"})
-(if (== (typeof (x)) int) {print "(x) is an integer"} {print "(x) is not an integer"})
-# (print 5; print 73;) # This is not allowed!!!
+# -- Basic things
+print (+ 3 3);
+def {x} 5;
+print (if (== x 5) {"true"} {"false"});
+print {x y non_existant_symbol};
+print [(+ x 1) x {x non_existant_symbol}];
+print (+ (+ x 1) x);
+print;
+
+# -- Typeof
+print (typeof x);
+print (typeof (typeof x));
+print (typeof (typeof (typeof x)));
+print;
+
+# -- Getting input from user (and assigning to variable)
+def {name} (read "Enter your name: ");
+print "Hello" name "!";
+print;
+
+# -- Function/Lambda declarations
+fn {test x: int y: string} {print x y};
+def {test2} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
+test 5 "string";
+test2 5 "string";
+print;
+
+# -- Lambda evaluation
+def {x} {} -> {5}; # Since this lambda takes no arguments, it is automatically evaluated before being assigned to the variable (x).
+print "x:" x;
+def {isFunction} {x: any} -> {if (== (typeof x) func) {"a function"} {"not a function"}};
+def {isInteger} {x: any} -> {if (== (typeof x) int) {"an integer"} {"not an integer"}};
+print "x is" (isFunction x);
+print "x is" (isInteger x);
+def {z} {y: int} -> {+ y 1};
+print "z:" z;
+print "z is" (isFunction z);
+print "z is" (isInteger z);
+print "(z 5):" (z 5);
+print;
+
+# -- Statements
+# (print 5; print 73;) # This is not allowed!!!;
+print 5; print 73; # But this is allowed!
+print;
+
+# -- While statements
+def {result} (while {(< x 20)} {do (print x) (def {x} (+ x 1))});
+print;
+print "While loop result:" result;
