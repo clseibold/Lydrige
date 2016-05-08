@@ -2,7 +2,7 @@
 
 // TODO: evaluate lambda's in dval_eval instead of when it's created! Allow the ussage of symbols and sexpression (that evaluate to qexpressions) within a lambda.
 //       These symbols/sexpressions should evaluate to qexpressions when the lambda is evaluated!
-dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
+internal dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	dval* error = dval_err("Unknown error when reading lambda");
 	
 	dval* qexpr1 = dval_read(e, t->children[0]);
@@ -27,7 +27,7 @@ dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	return errno != ERANGE ? lambda : error;
 }
 
-dval* dval_read_range(mpc_ast_t* t) {
+internal dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
 	long max = 0;
@@ -41,26 +41,26 @@ dval* dval_read_range(mpc_ast_t* t) {
 	return errno != ERANGE ? dval_range(min, max) : dval_err((char*) "invalid range");
 }
 
-dval* dval_read_int(mpc_ast_t* t) {
+internal dval* dval_read_int(mpc_ast_t* t) {
 	errno = 0;
 	long x = strtol(t->contents, NULL, 10);
 	return errno != ERANGE ? dval_int(x) : dval_err((char*) "invalid integer");
 }
 
-dval* dval_read_double(mpc_ast_t* t) {
+internal dval* dval_read_double(mpc_ast_t* t) {
 	errno = 0;
 	double x = strtod(t->contents, NULL);
 	return errno != ERANGE ? dval_double(x) : dval_err((char*) "invalid double");
 }
 
-dval* dval_read_byte(mpc_ast_t* t) {
+internal dval* dval_read_byte(mpc_ast_t* t) {
 	errno = 0;
 	unsigned int hex = 0x00;
 	sscanf(t->contents, "0x%02x", &hex);
 	return errno != ERANGE ? dval_byte((byte) hex) : dval_err((char*) "invalid byte (hex)");
 }
 
-dval* dval_read_string(mpc_ast_t* t) {
+internal dval* dval_read_string(mpc_ast_t* t) {
 	t->contents[strlen(t->contents) - 1] = '\0';
 	char* unescaped = (char*)malloc(strlen(t->contents + 1) + 1);
 	strcpy(unescaped, t->contents + 1);
@@ -70,7 +70,7 @@ dval* dval_read_string(mpc_ast_t* t) {
 	return str;
 }
 
-dval* dval_read_character(mpc_ast_t* t) {
+internal dval* dval_read_character(mpc_ast_t* t) {
 	// Remove the quotes
 	errno = 0;
 	char c = 'a';
@@ -98,7 +98,6 @@ dval* dval_read(denv* e, mpc_ast_t* t) {
 	}
 
 	dval* x = NULL;
-	unsigned int start = 0;
 	if (strcmp(t->tag, ">") == 0) { // Not working correctly in REPL. Should not make sexpr if statements are being used!
 		dval* result = dval_qexpr();
 		for (int i = 0; i < t->children_num; i++) {
