@@ -1,5 +1,5 @@
 # Atoms
-const {ok: any} ();
+const {ok: void} ();
 const {nil: qexpr} {};
 const {true: int} 1;
 const {false: int} 0;

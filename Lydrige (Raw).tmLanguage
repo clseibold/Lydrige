@@ -60,7 +60,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(int|double|byte|string|char|err|qexpr|func|any|lst)\b</string>
+			<string>\b(int|double|byte|string|char|err|qexpr|func|any|lst|void)\b</string>
 			<key>name</key>
 			<string>storage.type.lydrige</string>
 		</dict>
