@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 		string		: /\"(\\\\.|[^\"])*\"/ ; \
 		character	: /\'(\\\\.|[^\"])\'/ ; \
 		comment		: /#[^\\r\\n]*/ ; \
-		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!\\.^]+/ | '&' ; \
+		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!\\.^%]+/ | '&' ; \
 		note		: ':' <symbol> | ':' '(' <symbol>+ ')' ; \
 		slist		: \"\\'[\" <expr>* ']' ; \
 		list		: '[' <expr>* ']' ; \

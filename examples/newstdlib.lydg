@@ -4,23 +4,13 @@ const {nil} {};
 const {true} 1;
 const {false} 0;
 
-# Function Definition
-#const {fn} {f: qexpr b: qexpr} -> {
-#	def (first f) ((tail f) -> b)
-#};
-
-# Constant Function Definition
-#const {const_fn} {f: qexpr b: qexpr} -> {
-#	const (first f) ((tail f) -> b)
-#};
-
-# Unpack List for function
+# Unpack and Pack List for function
 const {unpack} {f: func q: qexpr} -> {
 	eval (join (list f) q)
 };
-
-# Pack List for Function
 const {pack} {f: func &xs: int} -> {f xs};
+const {curry} unpack;
+const {uncurry} pack;
 
 const {do} {&l: any} -> {
 	if (== 1 nil)
@@ -30,7 +20,7 @@ const {do} {&l: any} -> {
 
 # Open a new scope
 const {scope} {b: qexpr} -> {
-	{_: any} -> b ()
+	{_: any} -> b () # TODO: '{} -> b' should also work (although, it doesn't right now)
 };
 
 const {flip} {f: func a: any b: any} -> {f b a};
@@ -38,13 +28,8 @@ const {flip} {f: func a: any b: any} -> {f b a};
 const {map} {f: func q: qexpr} -> {
 	if (== q nil)
 		{nil}
-		{join (list (f (get 0 l))) (map f (tail q))}
+		{join (list (f (get 0 q))) (map f (tail q))}
 };
-#const_fn {map f: func q: qexpr} {
-#	if (== q nil)
-#		{nil}
-#		{join (list (f (get 0 l))) (map f (tail q))}
-#};
 
 const {isok} {a: any} -> {
 	if (== a ok)
@@ -64,4 +49,17 @@ const {iserr} {a: any} -> {
 const {iferrdo} {a: any f: func} -> {
 	if (== (typeof a) err)
 		{f a} {ok}
+};
+
+const {ghost} {&xs: any} -> {eval xs};
+
+# Compose Functions Together
+const {comp} {f: func g: func x: any} -> {f (g x)};
+
+const {first_eval} (comp eval first);
+
+const {filter} {f: func q: qexpr} -> {
+	if (== q nil)
+		{nil}
+		{join (if (f (first_eval q)) {first q} {nil}) (filter f (tail q))}
 };
