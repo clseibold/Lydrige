@@ -39,4 +39,6 @@ build/release/libhashmap.a: src/hashmap/c/bstrlib.c src/hashmap/c/darray.c src/h
 	gcc -c -std=c99 -Wall -O3 ../../../src/hashmap/c/*.c; \
 	ar -cvq ../libhashmap.a *.o; \
 	cd ../../../ ;
-	
+
+clean:
+	$(RM) -r build/

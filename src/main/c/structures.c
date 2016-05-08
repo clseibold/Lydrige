@@ -113,7 +113,7 @@ dval* dval_sym(char* s, int type) {
 	else if (strcmp(s, "char") == 0) return dval_type(DDATA_CHAR);
 	else if (strcmp(s, "err") == 0) return dval_type(DVAL_ERR);
 	else if (strcmp(s, "qexpr") == 0) return dval_type(DVAL_QEXPR);
-	else if (strcmp(s, "lst") == 0) return dval_type(DVAL_LIST);
+	else if (strcmp(s, "lst") == 0) return dval_type(DVAL_LIST); // TODO: Don't lists evaluate to qexpressions?
 	else if (strcmp(s, "func") == 0) return dval_type(DVAL_FUNC);
 	else if (strcmp(s, "any") == 0) return dval_type(DDATA_ANY);
 
