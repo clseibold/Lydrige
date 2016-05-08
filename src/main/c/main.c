@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 			dval_del(prelude);
 		} else {
 			while (running) {
-				char* input = readline("Lydrige -> ");
+				char* input = readline(COL_GREEN "Lydrige -> " COL_RESET);
 				add_history(input);
 
 				mpc_result_t r;

@@ -63,3 +63,18 @@ const {filter} {f: func q: qexpr} -> {
 		{nil}
 		{join (if (f (first_eval q)) {first q} {nil}) (filter f (tail q))}
 };
+
+def {foldl} {f: func z: any q: qexpr} -> {
+	if (== q nil)
+		{z}
+		{foldl f (f z (first_eval q)) (tail q)}
+};
+
+def {sum} {q: qexpr} -> {foldl + 0 q};
+def {product} {q: qexpr} -> {foldl * 1 q};
+
+def {fib} {n: int} -> {
+	if (== n 0) {0}
+		(== n 1) {1}
+		{+ (fib (- n 1)) (fib (- n 2))}
+};
