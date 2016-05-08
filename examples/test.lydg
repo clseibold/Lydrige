@@ -15,6 +15,7 @@ print [(+ x 1) x {x non_existant_symbol}];
 print (+ (+ x 1) x);
 continue_or_quit ();
 print;
+print 0x55;
 
 # -- The 'typeof' Function
 print "--- The 'typeof' Function ---";
