@@ -1,5 +1,5 @@
 #include "../headers/builtin.h"
-#include <bstrlib.h>
+#include "../../hashmap/headers/bstrlib.h"
 
 /* Returns extracted element at index i, shifts list elements backwards to fill in where element was at */
 dval* dval_pop(dval* v, int i) {
@@ -456,7 +456,6 @@ dval* builtin_lambda(denv* e, dval* a) {
 			dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
         if (strcmp(a->cell[0]->cell[i]->str, "&") != 0) {
             if (i == a->cell[0]->count - 1) {
-            	char *symbol_name = a->cell[0]->cell[i]->str;
             	dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
                 dval_del(a);
                 dval_del(formals);
@@ -732,21 +731,18 @@ dval* builtin_ord(denv* e, dval* a, char* op) { // TODO: Make work with bytes, s
 	//LASSERT_TYPE(op, a, 0, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
 	// LASSERT_TYPE(op, a, 1, DDATA_INT || DDATA_DOUBLE || DDATA_BYTE || DDATA_CHAR);
 
-	int r;
+	int r = 0;
 
 	double num0 = a->cell[0]->type == DDATA_DOUBLE ? a->cell[0]->doub : a->cell[0]->integer; // TODO: Make this work with bytes!
 	double num1 = a->cell[1]->type == DDATA_DOUBLE ? a->cell[1]->doub : a->cell[1]->integer;
 
 	if (strcmp(op, ">") == 0) {
 		r = num0 > num1;
-	}
-	if (strcmp(op, "<") == 0) {
+	} else if (strcmp(op, "<") == 0) {
 		r = num0 < num1;
-	}
-	if (strcmp(op, ">=") == 0) {
+	} else if (strcmp(op, ">=") == 0) {
 		r = num0 >= num1;
-	}
-	if (strcmp(op, "<=") == 0) {
+	} else if (strcmp(op, "<=") == 0) {
 		r = num0 <= num1;
 	}
 	dval_del(a);
@@ -771,15 +767,14 @@ dval* builtin_le(denv* e, dval* a) {
 
 dval* builtin_cmp(denv* e, dval* a, char* op) {
 	LASSERT(a, a->count > 1, "Function '%d' passed incorrect number of arguments. Got %i, Expected 2 or more.", op, a->count);
-	int r;
+	int r = 0;
 	if (strcmp(op, "==") == 0) {
 		for (unsigned int i = 1; i < a->count; i++) {
 			if ((r = dval_eq(a->cell[0], a->cell[i]))) {
 				break;
 			}
 		}
-	}
-	if (strcmp(op, "!=") == 0) {
+	} else if (strcmp(op, "!=") == 0) {
 		for (unsigned int i = 1; i < a->count; i++) {
 			if (!(r = !dval_eq(a->cell[0], a->cell[i]))) {
 				break;
@@ -948,12 +943,12 @@ dval* builtin_read(denv* e, dval* a) {
     LASSERT_TYPE((char*) "read", a, 0, DDATA_STRING);
     
     printf("%s", a->cell[0]->str);
-	char str[255];
+	char str[255]; // TODO: Change to char * later?
 	fgets(str, 255, stdin);
 	char* pos;
 	if ((pos=strchr(str, '\n')) != NULL)
 		*pos = '\0';
-	dval* result = dval_string(&str);
+	dval* result = dval_string((char *)str);
 
 	dval_del(a);
 	return result;
@@ -1098,7 +1093,7 @@ dval* dval_eval(denv* e, dval* v) {
 	return v;
 }
 
-void denv_add_builtin(denv* e, char* name, dbuiltin func) {
+internal void denv_add_builtin(denv* e, char* name, dbuiltin func) {
 	dval* k = dval_sym(name, DVAL_FUNC);
 	dval* v = dval_func(func);
 	dval_del(denv_put(e, k, v, 1)); // TODO: Check for error here (of already defined builtin function).

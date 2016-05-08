@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <stdint.h>
 
-void dval_expr_print(dval* v, char* open, char* close) {
+internal void dval_expr_print(dval* v, char* open, char* close) {
 	for (unsigned int i = 0; i < strlen(open); i++) {
 		putchar(open[i]);
 	}
@@ -19,7 +19,7 @@ void dval_expr_print(dval* v, char* open, char* close) {
 	}
 }
 
-void dval_print_str(dval* v) {
+internal void dval_print_str(dval* v) {
 	// char* escaped = (char*)malloc(strlen(v->str) + 1);
 	// strcpy(escaped, v->str);
 	// escaped = (char*)mpcf_escape(escaped);
@@ -27,7 +27,7 @@ void dval_print_str(dval* v) {
 	//free(escaped);
 }
 
-void dval_print_char(dval* v) {
+internal void dval_print_char(dval* v) {
 	putchar(v->character);
 }
 
