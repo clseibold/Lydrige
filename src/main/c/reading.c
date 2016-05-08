@@ -8,9 +8,7 @@ dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	dval* qexpr1 = dval_read(e, t->children[0]);
 	dval* qexpr2 = dval_read(e, t->children[2]);
 	if (qexpr1->count == 0) {
-		//printf("testing\n");
 		if (qexpr2->type == DVAL_SYM) {
-			printf("Is a symbol\n");
 			dval_del(qexpr1);
 			dval_del(error);
 			return qexpr2; // TODO: For some reason, this is returning the symbol in a qexpression!?!?!?!
