@@ -68,3 +68,6 @@ There are examples of programs/functions written in this language in the example
 ## Compiling the Interpreter and Running Examples ##
 Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/test.lydg`.
 * Alternatively, you can use `make release` and `make run` to build and run the release version of this. Note that this only works with gcc.
+
+## Sublime Syntax Definitons for Lydrige ##
+I have created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
