@@ -1,14 +1,30 @@
 #include "../headers/reading.h"
 
+// TODO: evaluate lambda's in dval_eval instead of when it's created! Allow the ussage of symbols and sexpression (that evaluate to qexpressions) within a lambda.
+//       These symbols/sexpressions should evaluate to qexpressions when the lambda is evaluated!
 dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
-	dval* error;
+	dval* error = dval_err("Unknown error when reading lambda");
 	
-	dval* qexpr1 = dval_eval(e, dval_read(e, t->children[0]));
-	dval* qexpr2 = dval_eval(e, dval_read(e, t->children[2]));
-	dval* sexpr = dval_sexpr();
-	dval_add(sexpr, qexpr1);
-	dval_add(sexpr, qexpr2);
-	dval* lambda = builtin_lambda(e, sexpr);
+	dval* qexpr1 = dval_read(e, t->children[0]);
+	dval* qexpr2 = dval_read(e, t->children[2]);
+	if (qexpr1->count == 0) {
+		//printf("testing\n");
+		if (qexpr2->type == DVAL_SYM) {
+			printf("Is a symbol\n");
+			dval_del(qexpr1);
+			dval_del(error);
+			return qexpr2; // TODO: For some reason, this is returning the symbol in a qexpression!?!?!?!
+		}
+		qexpr2->type = DVAL_SEXPR;
+		dval_del(qexpr1);
+		dval_del(error);
+		return qexpr2;
+	}
+	// Translate lambda into a function call
+	dval* lambda = dval_sexpr();
+	dval_add(lambda, dval_sym("l", DVAL_SYM));
+	dval_add(lambda, qexpr1);
+	dval_add(lambda, qexpr2);
 	
 	return errno != ERANGE ? lambda : error;
 }
@@ -121,7 +137,7 @@ dval* dval_read(denv* e, mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
 		dval* v = dval_read(e, t->children[i]);
-		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE) {
+		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE && v->type != DVAL_SYM) { // TODO: Evaluate any symbols in notes when the note is evaluated or used in any functions that take it in a qexpression (for example, the 'def' function)!
 			dval_del(v);
 			return dval_err("Only types are allowed in Notes! Found %s.", dtype_name(v->type));
 		}

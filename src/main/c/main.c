@@ -53,7 +53,9 @@ int main(int argc, char** argv) {
 		" \
 		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <sqexpr> | <qexpr> | <slist> | <list> | <comment> ; \
 		data		: <lambda> | <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
-		lambda		: <qexpr> \"->\" <qexpr> | <qexpr> \"->\" <list> ; \
+		lambda		: <qexpr> \"->\" <qexpr> | <qexpr> \"->\" <list> | <symbol> \"->\" <qexpr> | <sexpr> \"->\" <qexpr> | \
+						<qexpr> \"->\" <symbol> | <symbol> \"->\" <symbol> | <sexpr> \"->\" <symbol> | \
+						<qexpr> \"->\" <sexpr> | <symbol> \"->\" <sexpr> | <sexpr> \"->\" <sexpr> ; \
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
 		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
