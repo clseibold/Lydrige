@@ -677,6 +677,9 @@ dval* builtin_while(denv* e, dval* a) { // TODO: cleanup
 }
 
 dval* builtin_if(denv* e, dval* a) { // Make work with bytes?
+	if (a->count == 0) {
+		return dval_err("Function 'if' passed incorrect number of arguments. Got 0, Expected 2 or more.");
+	}
 	if (a->count % 2 == 0) { // TODO: Make better later
 		return dval_err((char*) "Must have a q-expression for each s-expression conditional, except for the else q-expression. The else q-expression is required.");
 	}
@@ -752,7 +755,7 @@ dval* builtin_le(denv* e, dval* a) {
 }
 
 dval* builtin_cmp(denv* e, dval* a, char* op) {
-	LASSERT(a, a->count > 1, "You must have at least 2 arguments. Got %i, Expected 2+", a->count);
+	LASSERT(a, a->count > 1, "Function '%d' passed incorrect number of arguments. Got %i, Expected 2 or more.", op, a->count);
 	int r;
 	if (strcmp(op, "==") == 0) {
 		for (unsigned int i = 1; i < a->count; i++) {
@@ -773,7 +776,7 @@ dval* builtin_cmp(denv* e, dval* a, char* op) {
 }
 
 /** Returns dval integer 1 (true) if the first item is equal to any of the other
-  * items. Note that is does not have to be all of them, just at least one.
+  * items. Note that it does not have to be all of them, just at least one.
   * Ex: `(== (typeof x) integer double)` returns 1 if x is either an integer or a double
   */
 dval* builtin_eq(denv* e, dval* a) {
@@ -805,6 +808,9 @@ dval* builtin_not(denv* e, dval* a) {
 }
 
 dval* builtin_and(denv* e, dval* a) {
+	if (a->count <= 1) {
+		return dval_err("Function 'and' passed incorrect number of arguments. Got %d, Expected 2 or more.", a->count);
+	}
 	for (unsigned int i = 0; i < a->count; i++) {
 		LASSERT_TYPE((char*) "and", a, i, DDATA_INT);
 	}
@@ -821,6 +827,9 @@ dval* builtin_and(denv* e, dval* a) {
 }
 
 dval* builtin_or(denv* e, dval* a) {
+	if (a->count <= 1) {
+		return dval_err("Function 'or' passed incorrect number of arguments. Got %d, Expected 2 or more.", a->count);
+	}
 	for (unsigned int i = 0; i < a->count; i++) {
 		LASSERT_TYPE((char*) "or", a, i, DDATA_INT);
 	}
@@ -1100,7 +1109,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "to_qexpr", builtin_to_qexpr);
 	denv_add_builtin(e, (char*) "read", builtin_read);
 
-	denv_add_builtin(e, (char*) "while",builtin_while); // TODO
+	denv_add_builtin(e, (char*) "while", builtin_while); // TODO
 
 	denv_add_builtin(e, (char*) "+", builtin_add);
 	denv_add_builtin(e, (char*) "-", builtin_sub);
