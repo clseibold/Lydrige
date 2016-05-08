@@ -12,10 +12,10 @@ const {pack} {f: func &xs: int} -> {f xs};
 const {curry} unpack;
 const {uncurry} pack;
 
-const {do} {&l: any} -> {
-	if (== 1 nil)
+const {do} {&q: any} -> {
+	if (== q nil)
 		{nil}
-		{last l}
+		{last q}
 };
 
 # Open a new scope

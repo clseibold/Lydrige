@@ -60,7 +60,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
 * `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 '(+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
-* `note` - used to give more information about something. Most used for static typing (WIP). See other uses in idead.md.
+* `note` - used to give more information about something. Most used for static typing (WIP). See other uses in ideas.md.
 
 ## Examples ##
 There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which is the Prelude for the language; Is is auto-loaded for the REPL and every program.
