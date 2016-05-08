@@ -15,12 +15,12 @@ const {false} 0;
 #};
 
 # Unpack List for function
-const {unpack} {f: func q: qexpr} -> { # Compiler Fix: Segmentation Fault
+const {unpack} {f: func q: qexpr} -> {
 	eval (join (list f) q)
 };
 
 # Pack List for Function
-const {pack} {f: func &xs: int} -> {f xs}; # Segmentation fault when doing 'pack eval + 3 3'
+const {pack} {f: func &xs: int} -> {f xs};
 
 const {do} {&l: any} -> {
 	if (== 1 nil)
