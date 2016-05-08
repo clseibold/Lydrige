@@ -70,6 +70,9 @@ void dval_print(dval* v) {
 			printf(" -> "); dval_print(v->body);
 		}
 		break;
+	default:
+		printf("UNKNOWN\n");
+		break;
 	}
 }
 

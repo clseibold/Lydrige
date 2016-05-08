@@ -220,7 +220,7 @@ dval* builtin_eval(denv* e, dval* a) {
 
 	dval* x = dval_take(a, 0);
 	x->type = DVAL_SEXPR;
-	return dval_eval(e, x);
+	return dval_eval_sexpr(e, x);
 }
 
 /** Evaluates the insides of a q-expression and returns the new q-expression.
@@ -232,6 +232,7 @@ dval* builtin_inner_eval(denv* e, dval* a) {
 
 	dval* x = dval_take(a, 0);
 	for (unsigned int i = 0; i < x->count; i++) {
+		if (x->cell[i]->type == DVAL_FUNC) continue;
 		x->cell[i] = dval_eval(e, x->cell[i]);
 	}
 	return x;
@@ -499,6 +500,9 @@ dval* builtin_lambda(denv* e, dval* a) {
 }
 
 dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
+	if (a->count == 0) {
+		return dval_err("Must have at least 1 argument");
+	}
 	for (unsigned int i = 0; i < a->count; i++) {
 		LASSERT_MTYPE(op, a, i, a->cell[i]->type == DDATA_INT || a->cell[i]->type == DDATA_DOUBLE,
 			"%s or %s.", dtype_name(DDATA_INT), dtype_name(DDATA_DOUBLE));
@@ -832,6 +836,7 @@ dval* builtin_or(denv* e, dval* a) {
 }
 
 dval* builtin_var(denv* e, dval* a, char* func, int constant) { // TODO
+	LASSERT_NUM(func, a, 2);
 	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
 
 	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
@@ -864,9 +869,9 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) { // TODO
 				// Delete necessary stuff and return the error!
 				dval_del(a);
 				return err;
-			} else {
+			}/* else {
 				dval_del(err);
-			}
+			}*/
 		}
 	}
 
@@ -970,6 +975,7 @@ dval* builtin_exit(denv* e, dval* a) {
 
 dval* dval_eval_sexpr(denv* e, dval* v) {
 	for (unsigned int i = 0; i < v->count; i++) {
+		if (v->cell[i]->type == DVAL_FUNC) continue;
 		v->cell[i] = dval_eval(e, v->cell[i]);
 		if (v->cell[i]->type == DVAL_ERR) {
 			return dval_take(v, i);
@@ -1019,6 +1025,7 @@ dval* dval_eval_qexpr(denv* e, dval* v) {
 
 dval* dval_eval_list(denv* e, dval* v) {
 	for (unsigned int i = 0; i < v->count; i++) {
+		if (v->cell[i]->type == DVAL_FUNC) continue;
 		v->cell[i] = dval_eval(e, v->cell[i]);
 		if (v->cell[i]->type == DVAL_ERR) {
 			return dval_take(v, i);
@@ -1030,6 +1037,7 @@ dval* dval_eval_list(denv* e, dval* v) {
 
 dval* dval_eval_slist(denv* e, dval* v) {
 	for (unsigned int i = 0; i < v->count; i++) {
+		if (v->cell[i]->type == DVAL_FUNC) continue;
 		v->cell[i] = dval_eval(e, v->cell[i]);
 		if (v->cell[i]->type == DVAL_ERR) {
 			return dval_take(v, i);
@@ -1040,7 +1048,7 @@ dval* dval_eval_slist(denv* e, dval* v) {
 	return v;
 }
 
-dval* dval_eval(denv* e, dval* v) { // v is deleted!
+dval* dval_eval(denv* e, dval* v) {
 	if (v->type == DVAL_SYM) {
 		dval* x = denv_get(e, v);
 		dval_del(v);

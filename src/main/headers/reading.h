@@ -2,6 +2,7 @@
 #define READING_H_INCLUDE_GUARD
 
 #include "structures.h"
+#include "builtin.h"
 #include "../../mpc/headers/mpc.h"
 
 internal dval* dval_read_lambda(denv* e, mpc_ast_t* t);

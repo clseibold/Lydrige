@@ -5,58 +5,63 @@ const {true} 1;
 const {false} 0;
 
 # Function Definition
-const {fn} {f: qexpr b: qexpr} -> {
-	def (first f) (l (tail f) b)
-};
+#const {fn} {f: qexpr b: qexpr} -> {
+#	def (first f) ((tail f) -> b)
+#};
 
 # Constant Function Definition
-const {const_fn} {f: qexpr b: qexpr} -> {
-	const (first f) (l (tail f) b)
-};
+#const {const_fn} {f: qexpr b: qexpr} -> {
+#	const (first f) ((tail f) -> b)
+#};
 
 # Unpack List for function
-const_fn {unpack f: func q: qexpr} { # Compiler Fix: Segmentation Fault
+const {unpack} {f: func q: qexpr} -> { # Compiler Fix: Segmentation Fault
 	eval (join (list f) q)
 };
 
 # Pack List for Function
-const_fn {pack f: func &xs: int} # Segmentation fault when doing 'pack eval + 3 3'
-	{f xs};
+const {pack} {f: func &xs: int} -> {f xs}; # Segmentation fault when doing 'pack eval + 3 3'
 
-const_fn {do &l: any} {
-	if (== l nil)
+const {do} {&l: any} -> {
+	if (== 1 nil)
 		{nil}
-		{last l}};
-
-# Open a new scope
-const_fn {scope b: qexpr} {
-	(l {_: any} b) ()
+		{last l}
 };
 
-const_fn {flip f: func a: any b: any} {f b a};
+# Open a new scope
+const {scope} {b: qexpr} -> {
+	{_: any} -> b ()
+};
 
-const_fn {map f: func q: qexpr} {
+const {flip} {f: func a: any b: any} -> {f b a};
+
+const {map} {f: func q: qexpr} -> {
 	if (== q nil)
 		{nil}
 		{join (list (f (get 0 l))) (map f (tail q))}
 };
+#const_fn {map f: func q: qexpr} {
+#	if (== q nil)
+#		{nil}
+#		{join (list (f (get 0 l))) (map f (tail q))}
+#};
 
-const_fn {isok a: any} {
-		if (== a ok)
+const {isok} {a: any} -> {
+	if (== a ok)
 		{true} {false}
-	}; # TODO - implement any in interpreter
+};
 
-const_fn {isnok a: any} {
-		if (!= a ok)
+const {isnok} {a: any} -> {
+	if (!= a ok)
 		{true} {false}
-	};
+};
 
-const_fn {iserr a: any} {
-		if (== (typeof a) err)
+const {iserr} {a: any} -> {
+	if (== (typeof a) err)
 		{true} {false}
-	};
+};
 
-const_fn {iferrdo a: any f: func} {
-		if (== (typeof a) err)
+const {iferrdo} {a: any f: func} -> {
+	if (== (typeof a) err)
 		{f a} {ok}
-	};
+};

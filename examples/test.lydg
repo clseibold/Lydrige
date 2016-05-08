@@ -19,7 +19,7 @@ print "Hello" name "!";
 print;
 
 # -- Function/Lambda declarations
-fn {test x: int y: string} {print x y};
+def {test} {x: int y: string} -> {print x y};
 def {test2} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
 test 5 "string";
 test2 5 "string";
@@ -40,11 +40,14 @@ print "(z 5):" (z 5);
 print;
 
 # -- Statements
-# (print 5; print 73;) # This is not allowed!!!;
-print 5; print 73; # But this is allowed!
+# (print 5; print 73;)   # This is not allowed!!!;
+print 5; print 73;       # But this is allowed!
 print;
 
 # -- While statements
+def {x} 5;
 def {result} (while {(< x 20)} {do (print x) (def {x} (+ x 1))});
 print;
 print "While loop result:" result;
+
+# -- 'and' & 'or' functions
