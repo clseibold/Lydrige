@@ -30,7 +30,7 @@ dval* dval_join(dval* x, dval* y) {
 	return x;
 }
 
-// TODO: This can be simplified greatly because most error checking for functions happens upon definition
+// TODO: This can be possibly simplified because most error checking for functions happens upon definition
 dval* dval_call(denv* e, dval* f, dval* a) { // TODO: Look more into this for memory leaks and errors
 	if (f->builtin) {
 		return f->builtin(e, a);
@@ -55,8 +55,17 @@ dval* dval_call(denv* e, dval* f, dval* a) { // TODO: Look more into this for me
 				return dval_err((char*)"Function format invalid. Symbol '&' not followed by single symbol."); // NOT NEEDED??
 			}
 
-			dval* nsym = dval_pop(f->formals, 0);
-            dval* list = builtin_list(e, a);
+			dval* nsym = dval_pop(f->formals, 0); // Next symbol
+            dval* list = builtin_list(e, a); // everything that apeears in the list argument (as a qexpression)
+			
+			for (int i = 0; i < list->count; i++) {
+				if (list->cell[i]->type != nsym->sym_type && nsym->sym_type != DDATA_ANY) {
+					dval* error = dval_err("Given wrong type(s) for argument '&%s'. Got '%s', Expected '%s'.", nsym->str, dtype_name(list->cell[i]->type), dtype_name(nsym->sym_type));
+					dval_del(sym); dval_del(nsym); dval_del(list); //dval_del(a);
+					return error;
+				}
+			}
+			
 			dval* err = denv_put(f->env, nsym, list, 0);
 			if (err->type == DVAL_ERR) {
 				dval_del(sym); dval_del(nsym); dval_del(list);
@@ -71,7 +80,12 @@ dval* dval_call(denv* e, dval* f, dval* a) { // TODO: Look more into this for me
 
 		dval* val = dval_pop(a, 0);
         
-		// Check if val is the correct type here:
+		// Check if val is the correct type:
+		if (val->type != sym->sym_type && sym->sym_type != DDATA_ANY) {
+			dval* err = dval_err("Given wrong type for argument '%s'. Got '%s', Expected '%s'.", sym->str, dtype_name(val->type), dtype_name(sym->sym_type));
+			dval_del(sym); dval_del(val);
+			return err;
+		}
         
 		dval* err = denv_put(f->env, sym, val, 0);
 		if (err->type == DVAL_ERR) {
@@ -357,9 +371,9 @@ dval* builtin_get(denv* e, dval* a) { // Make work for strings
 /** Very similar to the `get` function, except, what is returned is not automatically semi-evaluated.
  */
 dval* builtin_extract(denv* e, dval* a) {
-	LASSERT_NUM("get", a, 2);
-	LASSERT_TYPE("get", a, 0, DDATA_INT);
-	LASSERT_MTYPE("get", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
+	LASSERT_NUM("extract", a, 2);
+	LASSERT_TYPE("extract", a, 0, DDATA_INT);
+	LASSERT_MTYPE("extract", a, 1, a->cell[1]->type == DVAL_QEXPR || a->cell[1]->type == DVAL_LIST,
 		"%s or %s", dtype_name(DVAL_QEXPR), dtype_name(DVAL_LIST));
 	LASSERT(a, a->cell[0]->integer >= 0,
 		"Index must be zero or positive.");
@@ -482,7 +496,8 @@ dval* builtin_lambda(denv* e, dval* a) {
             // TODO: The type allowed in the list should be the type given for the argument (in its note).
             // Using type `any` will allow any type for the list.
         } else {
-		  v->sym_type = a->cell[0]->cell[i]->ttype;
+			// a->cell[0]->cell[i + 1] is the note. Go into its cell to get the types within it!
+			v->sym_type = a->cell[0]->cell[i + 1]->cell[0]->ttype;
         }
         // TODO: Check if argument name is already defined as a constant, do not allow this!
 		dval_add(formals, v);

@@ -306,6 +306,7 @@ dval* dval_copy(dval* v) {
 		break;
 	case DVAL_SYM:
 		x = ddata_copy(x->type, v, x);
+		x->sym_type = v->sym_type;
 		x->constant = v->constant;
 		break;
 	case DVAL_LIST:
