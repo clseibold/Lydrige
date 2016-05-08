@@ -515,7 +515,7 @@ dval* builtin_lambda(denv* e, dval* a) {
 
 dval* builtin_op(denv* e, dval* a, char* op) { // Make work with bytes!
 	if (a->count == 0) {
-		return dval_err("Must have at least 1 argument");
+		return dval_err("Function '%s' requires at least 1 argument", op);
 	}
 	for (unsigned int i = 0; i < a->count; i++) {
 		LASSERT_MTYPE(op, a, i, a->cell[i]->type == DDATA_INT || a->cell[i]->type == DDATA_DOUBLE,
@@ -854,51 +854,62 @@ dval* builtin_or(denv* e, dval* a) {
 	return x;
 }
 
-dval* builtin_var(denv* e, dval* a, char* func, int constant) { // TODO
-	LASSERT_NUM(func, a, 2);
-	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
-
-	dval* syms = a->cell[0]; // syms: DVAL_QEXPR
-	for (unsigned int i = 0; i < syms->count; i++) {
-		LASSERT(a, syms->cell[i]->type == DVAL_SYM,
-			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.", func,
-			dtype_name(syms->cell[i]->type),
-			dtype_name(DVAL_SYM));
+dval* builtin_var(denv* e, dval* a, char* func, int constant) {
+	//LASSERT_NUM(func, a, 2);
+	if (a->count <= 1) {
+		return dval_err("Function '%s' requires at least 2 arguments.", func);
 	}
+	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
+	LASSERT(a, (a->cell[0]->count / 2 == a->count - 1),
+		(char*) "Function '%s' passed incorrect number of arguments for symbols. Got %i, Expected %i.", func, a->count - 1, a->cell[0]->count / 2);
 
-	LASSERT(a, (syms->count == a->count - 1),
-		(char*) "Function '%s' passed too many arguments for symbols. Got %i, Expected %i.", func, syms->count, a->count - 1);
-
-	for (unsigned int i = 0; i < syms->count; i++) {
-		if (a->cell[i+1]->type == DVAL_ERR) {
-			dval* err = dval_copy(a->cell[i+1]); // TODO: switch to dval_pop???
+	for (unsigned int i = 0; i < a->cell[0]->count; i+=2) {
+		LASSERT(a, a->cell[0]->cell[i]->type == DVAL_SYM,
+			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.",
+			func, dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
+		if (i == a->cell[0]->count - 1) {
+			dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
 			dval_del(a);
 			return err;
 		}
-		if (strcmp(func, "def") == 0) {
-			dval* err = denv_def(e, syms->cell[i], a->cell[i + 1], constant);
-			if (err->type == DVAL_ERR) {
-				// Delete necessary stuff and return the error!
-				dval_del(a);
-				return err;
-			}
-		} else if (strcmp(func, "let") == 0) {
-			dval* err = denv_put(e, syms->cell[i], a->cell[i + 1], constant);
-			if (err->type == DVAL_ERR) {
-				// Delete necessary stuff and return the error!
-				dval_del(a);
-				return err;
-			}/* else {
-				dval_del(err);
-			}*/
+		if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
+			dval* result = dval_pop(a->cell[0], i+1);
+			dval_del(a);
+			return result;
 		}
+		LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
+			(char*) "Argument %s must have a type. Got %s, Expected %s.",
+			a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i + 1]->type), dtype_name(DVAL_NOTE));
+
+		dval* v = dval_copy(a->cell[0]->cell[i]);
+		v->sym_type = a->cell[0]->cell[i+1]->cell[0]->ttype;
+
+		// Check that value is correct type!
+		if (a->cell[(i/2)+1]->type != v->sym_type && v->sym_type != DDATA_ANY) {
+			dval* err = dval_err("Given wrong type for symbol %d. Got '%s', Expected '%s'.", i / 2, dtype_name(a->cell[(i/2)+1]->type), dtype_name(v->sym_type));
+			dval_del(a); dval_del(v);
+			return err;
+		}
+
+		dval* result;
+		if (strcmp(func, "def") == 0) {
+			result = denv_def(e, v, a->cell[(i/2) + 1], constant);
+		} else if (strcmp(func, "let") == 0) {
+			result = denv_put(e, v, a->cell[(i/2) + 1], constant);
+		}
+		if (result->type == DVAL_ERR) {
+				dval_del(a); dval_del(v);
+				return result;
+		}
+
+		dval_del(v);
 	}
 
 	dval* result = dval_qexpr();
 	result->count = a->count - 1;
 	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
 	for (unsigned int i = 0; i < result->count; i++) {
-		result->cell[i] = dval_copy(a->cell[i + 1]); // TODO: Switch to dval_pop???
+		result->cell[i] = dval_copy(a->cell[i + 1]);
 	}
 	dval_del(a);
 	return result;
@@ -914,6 +925,10 @@ dval* builtin_put(denv* e, dval* a) {
 
 dval* builtin_const(denv* e, dval* a) {
 	return builtin_var(e, a, (char*) "def", 1);
+}
+
+dval* builtin_put_const(denv* e, dval* a) {
+	return builtin_var(e, a, (char*) "let", 1);
 }
 
 // Note that the 'print' function automatically evaluates what was given to it (including functions, especially ones that don't have arguments).
@@ -1131,6 +1146,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "def", builtin_def);
 	denv_add_builtin(e, (char*) "const", builtin_const);
 	denv_add_builtin(e, (char*) "let", builtin_put);
+	denv_add_builtin(e, (char*) "let_const", builtin_put_const);
 	denv_add_builtin(e, (char*) "l", builtin_lambda);
 	denv_add_builtin(e, (char*) "lambda", builtin_lambda);
 
