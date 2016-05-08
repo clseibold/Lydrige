@@ -100,8 +100,21 @@ dval* dval_read(denv* e, mpc_ast_t* t) {
 	}
 
 	dval* x = NULL;
+	unsigned int start = 0;
 	if (strcmp(t->tag, ">") == 0) { // Not working correctly in REPL. Should not make sexpr if statements are being used!
-		x = dval_sexpr();
+		dval* result = dval_qexpr();
+		for (int i = 0; i < t->children_num; i++) {
+			if (strstr(t->children[i]->tag, "statement")) {
+				dval_add(result, dval_eval(e, dval_read(e, t->children[i])));
+			}
+		}
+		if (result->count == 0) {
+			dval_del(result);
+			x = dval_sexpr();
+		} else {
+			return result;
+		}
+		//x = dval_sexpr();
 	} else if (strstr(t->tag, "statement")) {
 		x = dval_sexpr();
 	} else if (strstr(t->tag, "ssexpr")) {
@@ -137,7 +150,7 @@ dval* dval_read(denv* e, mpc_ast_t* t) {
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		else if (strstr(t->children[i]->tag, "comment")) continue;
 		dval* v = dval_read(e, t->children[i]);
-		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE && v->type != DVAL_SYM) { // TODO: Evaluate any symbols in notes when the note is evaluated or used in any functions that take it in a qexpression (for example, the 'def' function)!
+		if (x->type == DVAL_NOTE && v->type != DVAL_TYPE && v->type != DVAL_SYM) { // TODO: Evaluate any symbols in notes when the note is evaluated or used in any functions that take it in a qexpression (for example, the 'def' function) instead of here?
 			dval_del(v);
 			return dval_err("Only types are allowed in Notes! Found %s.", dtype_name(v->type));
 		}
