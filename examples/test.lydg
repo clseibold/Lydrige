@@ -35,8 +35,10 @@ print;
 print "--- Function/Lambda Declarations ---";
 def {test} {x: int y: string} -> {print x y};
 def {test2} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
+def {test3} {a: int f: func b: int} -> {f a b};
 test 5 "string";
 test2 5 "string";
+print "(test3 5 - 4): "(test3 5 - 4);
 continue_or_quit ();
 print;
 

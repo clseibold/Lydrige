@@ -1,6 +1,5 @@
 #include "../headers/printing.h"
 
-#include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
 
@@ -24,7 +23,7 @@ void dval_print_str(dval* v) {
 	// char* escaped = (char*)malloc(strlen(v->str) + 1);
 	// strcpy(escaped, v->str);
 	// escaped = (char*)mpcf_escape(escaped);
-	printf("%s", v->str);
+	printf(v->str);
 	//free(escaped);
 }
 
