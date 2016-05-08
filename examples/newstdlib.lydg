@@ -1,79 +1,79 @@
 # Atoms
-const {ok} ();
-const {nil} {};
-const {true} 1;
-const {false} 0;
+const {ok: any} ();
+const {nil: qexpr} {};
+const {true: int} 1;
+const {false: int} 0;
 
 # Unpack and Pack List for function
-const {unpack} {f: func q: qexpr} -> {
+const {unpack: func} {f: func q: qexpr} -> {
 	eval (join (list f) q)
 };
-const {pack} {f: func &xs: int} -> {f xs};
-const {curry} unpack;
-const {uncurry} pack;
+const {pack: func} {f: func &xs: int} -> {f xs};
+const {curry: func} unpack;
+const {uncurry: func} pack;
 
-const {do} {&q: any} -> {
+const {do: func} {&q: any} -> {
 	if (== q nil)
 		{nil}
 		{last q}
 };
 
 # Open a new scope
-const {scope} {b: qexpr} -> {
+const {scope: func} {b: qexpr} -> {
 	{_: any} -> b () # TODO: '{} -> b' should also work (although, it doesn't right now)
 };
 
-const {flip} {f: func a: any b: any} -> {f b a};
+const {flip: func} {f: func a: any b: any} -> {f b a};
 
-const {map} {f: func q: qexpr} -> {
+const {map: func} {f: func q: qexpr} -> {
 	if (== q nil)
 		{nil}
 		{join (list (f (get 0 q))) (map f (tail q))}
 };
 
-const {isok} {a: any} -> {
+const {isok: func} {a: any} -> {
 	if (== a ok)
 		{true} {false}
 };
 
-const {isnok} {a: any} -> {
+const {isnok: func} {a: any} -> {
 	if (!= a ok)
 		{true} {false}
 };
 
-const {iserr} {a: any} -> {
+const {iserr: func} {a: any} -> {
 	if (== (typeof a) err)
 		{true} {false}
 };
 
-const {iferrdo} {a: any f: func} -> {
+const {iferrdo: func} {a: any f: func} -> {
 	if (== (typeof a) err)
 		{f a} {ok}
 };
 
-const {ghost} {&xs: any} -> {eval xs};
+const {ghost: func} {&xs: any} -> {eval xs};
 
 # Compose Functions Together
-const {comp} {f: func g: func x: any} -> {f (g x)};
+const {comp: func} {f: func g: func x: any} -> {f (g x)};
 
-const {first_eval} (comp eval first);
+const {first_eval: func} (comp eval first);
 
-const {filter} {f: func q: qexpr} -> {
+const {filter: func} {f: func q: qexpr} -> {
 	if (== q nil)
 		{nil}
 		{join (if (f (first_eval q)) {first q} {nil}) (filter f (tail q))}
 };
 
-def {foldl} {f: func z: any q: qexpr} -> {
+def {foldl: func} {f: func z: any q: qexpr} -> {
 	if (== q nil)
 		{z}
 		{foldl f (f z (first_eval q)) (tail q)}
 };
 
-def {sum} {q: qexpr} -> {foldl + 0 q};
-def {product} {q: qexpr} -> {foldl * 1 q};
+def {sum: func} {q: qexpr} -> {foldl + 0 q};
+def {product: func} {q: qexpr} -> {foldl * 1 q};
 
-def {fib} {n: int} -> {
+def {fib: func} {n: int} -> {
 	if (== n 0) {0}
 		(== n 1) {1}
 		{+ (fib (- n 1)) (fib (- n 2))}

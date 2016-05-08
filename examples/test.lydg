@@ -1,4 +1,4 @@
-const {continue_or_quit} {_: any} -> { do
+const {continue_or_quit: func} {_: any} -> { do
 	(print)
 	(print)
 	(let {input} (read "-> Press ENTER to continue or CTRL-C to Quit! "))
@@ -8,7 +8,7 @@ const {continue_or_quit} {_: any} -> { do
 # -- Basic things
 print "--- Basic Things ---";
 print (+ 3 3);
-def {x} 5;
+def {x: int} 5;
 print (if (== x 5) {"true"} {"false"});
 print {x y non_existant_symbol};
 print [(+ x 1) x {x non_existant_symbol}];
@@ -27,16 +27,16 @@ print;
 
 # -- Getting input from user (and assigning to variable)
 print "--- Input from User ---";
-def {name} (read "Enter your name: ");
+def {name: string} (read "Enter your name: ");
 print "  -> Hello" name "!";
 continue_or_quit ();
 print;
 
 # -- Function/Lambda declarations
 print "--- Function/Lambda Declarations ---";
-def {test} {x: int y: string} -> {print x y};
-def {test2} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
-def {test3} {a: int f: func b: int} -> {f a b};
+def {test: func} {x: int y: string} -> {print x y};
+def {test2: func} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
+def {test3: func} {a: int f: func b: int} -> {f a b};
 test 5 "string";
 test2 5 "string";
 print "(test3 5 - 4): "(test3 5 - 4);
@@ -45,13 +45,13 @@ print;
 
 # -- Lambda evaluation
 print "--- Lambda Evaluation ---";
-def {x} {} -> {5}; # Since this lambda takes no arguments, it is automatically evaluated before being assigned to the variable (x).
+def {x: int} {} -> {5}; # Since this lambda takes no arguments, it is automatically evaluated before being assigned to the variable (x).
 print "x:" x;
-def {isFunction} {x: any} -> {if (== (typeof x) func) {"a function"} {"not a function"}};
-def {isInteger} {x: any} -> {if (== (typeof x) int) {"an integer"} {"not an integer"}};
+def {isFunction: func} {x: any} -> {if (== (typeof x) func) {"a function"} {"not a function"}};
+def {isInteger: func} {x: any} -> {if (== (typeof x) int) {"an integer"} {"not an integer"}};
 print "x is" (isFunction x);
 print "x is" (isInteger x);
-def {z} {y: int} -> {+ y 1};
+def {z: func} {y: int} -> {+ y 1};
 print "z:" z;
 print "z is" (isFunction z);
 print "z is" (isInteger z);
@@ -68,8 +68,8 @@ print;
 
 # -- While Loop
 print "--- While Loop ---";
-def {x} 5;
-scope {def {result} (while {(< x 20)} {do (print x) (let {x} (+ x 1))})};
+def {x: int} 5;
+scope {def {result: qexpr} (while {(< x 20)} {do (print x) (let {x} (+ x 1))})};
 print;
 print "While loop result:" result;
 print "x: " x;
