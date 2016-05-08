@@ -12,10 +12,12 @@ Lydrige is an interpreted programming language built off of and expanded from th
 ## Basic Syntax ##
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
 Here is an example of the syntax of a simple print statement:
-`(print "This number evaluates to " (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
+`(print "This number evaluates to" (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
+* The syntax has now been slightly modified. Basically, files are made up of statements OR expression. A statement is defined as multiple expressions with a semicolon at the end. However, statements are evaluated as if they were one big expression. This allows us to have a syntax more similar to that of C-based langauges. Here is the print statement using the new syntax. It is also important to note that the above syntax and this new syntax will both be allowed by the interpreter and the result will be the same.
+`print "This number evaluates to" (+ 1 1);`
 
 ## Builtin Functions ##
-Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (+, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=)
+Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
 * `list` - returns a q-expression with all of the given arguments inside.
 * `first` - returns the first item in a given q-expression or list literal.
 * `last` - returns the last item in a given q-expression or list literal.
@@ -54,20 +56,14 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
 * `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{'[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
 * `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
-* `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined. You can see an example of this in the standard library (`./examples/stdlib.lydg`):
-```clojure
-	(const_fn {get_fn_arg_checking bare_args arg_types} {
-		; '{} are special q-expressions that will be converted to regular q-expressions when returned/passed to a function,
-		;   This allows you to have special s-expressions or special lists that won't evaluate until the special q-expression is turned into a regular q-expression!
-		'{if (== (typeof '(extract 0 bare_args)) '(get 0 arg_types))}
-	})
-```
+* `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined.
 * `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
 * `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 '(+ 1 1)}` returns `{3 2}`)
 * `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
+* `note` - used to give more information about something. Most used for static typing (WIP). See other uses in idead.md.
 
 ## Examples ##
-There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which will be the Prelude for the language (use the one prefixed with *new-*, the other one is an older version).
+There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which is the Prelude for the language; Is is auto-loaded for the REPL and every program.
 
 ## Compiling the Interpreter and Running Examples ##
-Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/stdlib.lydg`.
+Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/test.lydg`.
