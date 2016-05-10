@@ -8,21 +8,25 @@ internal dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	dval* qexpr1 = dval_read(e, t->children[0]);
 	dval* qexpr2 = dval_read(e, t->children[2]);
 	if (qexpr1->count == 0) {
-		if (qexpr2->type == DVAL_SYM) {
+		/*if (qexpr2->type == DVAL_SYM) {
 			dval_del(qexpr1);
 			dval_del(error);
 			return qexpr2; // TODO: For some reason, this is returning the symbol in a qexpression!?!?!?!
-		}
+		}*/
 		qexpr2->type = DVAL_SEXPR;
 		dval_del(qexpr1);
 		dval_del(error);
 		return qexpr2;
 	}
 	// Translate lambda into a function call
-	dval* lambda = dval_sexpr();
+	/*dval* lambda = dval_sexpr();
 	dval_add(lambda, dval_sym("l", DVAL_SYM));
 	dval_add(lambda, qexpr1);
-	dval_add(lambda, qexpr2);
+	dval_add(lambda, qexpr2);*/
+	dval* a = dval_sexpr();
+	dval_add(a, qexpr1);
+	dval_add(a, qexpr2);
+	dval* lambda = builtin_lambda(e, a);
 	
 	return errno != ERANGE ? lambda : error;
 }
