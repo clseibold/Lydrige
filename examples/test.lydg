@@ -1,4 +1,4 @@
-const {continue_or_quit: func} {_: void} -> { do
+const {continue_or_quit: func} {_: unit} -> { do
 	(print)
 	(print)
 	(let {input: string} (read "-> Press ENTER to continue or CTRL-C to Quit! "))

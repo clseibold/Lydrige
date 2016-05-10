@@ -1,5 +1,4 @@
 # Atoms
-const {ok: void} ();
 const {nil: qexpr} {};
 const {true: int} 1;
 const {false: int} 0;
@@ -32,12 +31,12 @@ const {map: func} {f: func q: qexpr} -> {
 };
 
 const {isok: func} {a: any} -> {
-	if (== a ok)
+	if (== a ())
 		{true} {false}
 };
 
 const {isnok: func} {a: any} -> {
-	if (!= a ok)
+	if (!= a ())
 		{true} {false}
 };
 
@@ -48,7 +47,7 @@ const {iserr: func} {a: any} -> {
 
 const {iferrdo: func} {a: any f: func} -> {
 	if (== (typeof a) err)
-		{f a} {ok}
+		{f a} {()}
 };
 
 const {ghost: func} {&xs: any} -> {eval xs};

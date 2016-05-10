@@ -16,7 +16,7 @@ char* dtype_name(int t) {
 	case DVAL_TYPE: return (char*) "Type";
 	case DVAL_LIST: return (char*) "List";
 	case DVAL_SLIST: return (char*) "Special List";
-	case DVAL_SEXPR: return (char*) "Void"; // TODO: Does this cause any error reporting problems?
+	case DVAL_SEXPR: return (char*) "Unit"; // TODO: Does this cause any error reporting problems?
 	case DVAL_SSEXPR: return (char*) "Special S-Expression";
 	case DVAL_QEXPR: return (char*) "Q-Expression";
 	case DVAL_NOTE: return (char*) "Note";
@@ -116,7 +116,7 @@ dval* dval_sym(char* s, int type) {
 	else if (strcmp(s, "lst") == 0) return dval_type(DVAL_LIST); // TODO: Don't lists evaluate to qexpressions?
 	else if (strcmp(s, "func") == 0) return dval_type(DVAL_FUNC);
 	else if (strcmp(s, "any") == 0) return dval_type(DDATA_ANY);
-	else if (strcmp(s, "void") == 0) return dval_type(DVAL_SEXPR); // TODO: Call this `unit` instead?
+	else if (strcmp(s, "unit") == 0) return dval_type(DVAL_SEXPR);
 
 	dval* v = (dval*)malloc(sizeof(dval));
 	v->type = DVAL_SYM;
