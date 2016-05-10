@@ -855,7 +855,6 @@ dval* builtin_or(denv* e, dval* a) {
 }
 
 dval* builtin_var(denv* e, dval* a, char* func, int constant) {
-	//LASSERT_NUM(func, a, 2);
 	if (a->count <= 1) {
 		return dval_err("Function '%s' requires at least 2 arguments.", func);
 	}

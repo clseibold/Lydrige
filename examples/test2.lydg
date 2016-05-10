@@ -1,0 +1,7 @@
+print "Main Function Definition";
+print "Simple Variable Definition";
+def {x: int} 5;
+print "MultiVariable Definition";
+def {x: int y: double} 5 9.0;
+print "Printing Variables";
+print "x:" x "y:" y "x + y:" (+ x y);
