@@ -36,6 +36,7 @@ dval* builtin_typeof(denv* e, dval* a);
 dval* builtin_list(denv* e, dval* a);
 dval* builtin_to_list(denv* e, dval* a);
 dval* builtin_to_qexpr(denv* e, dval* a);
+dval* builtin_cast(denv* e, dval* a);
 
 dval* builtin_lambda(denv* e, dval* a);
 

@@ -442,6 +442,34 @@ dval* builtin_to_qexpr(denv* e, dval* a) {
 	return dval_eval(e, result);
 }
 
+dval* builtin_cast(denv* e, dval* a) {
+	LASSERT_NUM("cast", a, 2);
+	LASSERT_TYPE("cast", a, 0, DVAL_TYPE);
+
+	if (a->cell[0]->ttype == a->cell[1]->type) {
+		dval* error = dval_err("No need to cast. They are of same type.");
+		dval_del(a);
+		return error;
+	}
+
+	if (a->cell[0]->ttype == DDATA_DOUBLE) {
+		if (a->cell[1]->type == DDATA_INT) {
+			dval* v = dval_double((double)a->cell[1]->integer);
+			dval_del(a);
+			return v;
+		}
+	} else if (a->cell[0]->ttype == DDATA_INT) {
+		if (a->cell[1]->type == DDATA_DOUBLE) {
+			dval* v = dval_int((int)a->cell[1]->doub);
+			dval_del(a);
+			return v;
+		}
+	}
+	dval* error = dval_err("Value of type %s cannot be casted into a(n) %s", dtype_name(a->cell[1]->type), dtype_name(a->cell[0]->ttype));
+	dval_del(a);
+	return error;
+}
+
 dval* builtin_lambda(denv* e, dval* a) {
 	LASSERT_NUM((char*) "l", a, 2);
 	LASSERT_TYPE((char*) "l", a, 0, DVAL_QEXPR);
@@ -1131,6 +1159,7 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "throw", builtin_throw);
 	denv_add_builtin(e, (char*) "to_list", builtin_to_list); // TODO: to_qexpr
 	denv_add_builtin(e, (char*) "to_qexpr", builtin_to_qexpr);
+	denv_add_builtin(e, (char*) "cast", builtin_cast);
 	denv_add_builtin(e, (char*) "read", builtin_read);
 
 	denv_add_builtin(e, (char*) "while", builtin_while); // TODO
