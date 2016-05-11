@@ -463,6 +463,16 @@ dval* builtin_cast(denv* e, dval* a) {
 			dval* v = dval_int((int)a->cell[1]->doub);
 			dval_del(a);
 			return v;
+		} else if (a->cell[1]->type == DDATA_CHAR) {
+			dval* v = dval_int((int)a->cell[1]->character);
+			dval_del(a);
+			return v;
+		}
+	} else if (a->cell[0]->ttype == DDATA_CHAR) {
+		if (a->cell[1]->type == DDATA_INT) {
+			dval* v = dval_char((char)a->cell[1]->integer);
+			dval_del(a);
+			return v;
 		}
 	}
 	dval* error = dval_err("Value of type %s cannot be casted into a(n) %s", dtype_name(a->cell[1]->type), dtype_name(a->cell[0]->ttype));

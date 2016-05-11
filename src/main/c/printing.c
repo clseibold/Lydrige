@@ -23,7 +23,7 @@ internal void dval_print_str(dval* v) {
 	// char* escaped = (char*)malloc(strlen(v->str) + 1);
 	// strcpy(escaped, v->str);
 	// escaped = (char*)mpcf_escape(escaped);
-	printf(v->str);
+	printf("%s", v->str);
 	//free(escaped);
 }
 
