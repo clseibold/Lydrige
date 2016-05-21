@@ -4,5 +4,4 @@ def {x1: double} (cast double (read "Please enter a number: "));
 def {x2: double} (cast double (read "Please enter the second number: "));
 def {f: string} (read "Please enter the operation (+, -, *, /, %): ");
 def {v: double} (if (== f "+") {+ x1 x2} (== f "-") {- x1 x2} (== f "*") {* x1 x2} (== f "/") {/ x1 x2} (== f "%") {% x1 x2} {0});
-print "The value is " v;
-5;
+print "The value is " v ".";

@@ -925,28 +925,69 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 		return dval_err("Function '%s' requires at least 2 arguments.", func);
 	}
 	LASSERT_TYPE(func, a, 0, DVAL_QEXPR);
-	LASSERT(a, (a->cell[0]->count / 2 == a->count - 1),
-		(char*) "Function '%s' passed incorrect number of arguments for symbols. Got %i, Expected %i.", func, a->count - 1, a->cell[0]->count / 2);
+	/*LASSERT(a, (a->cell[0]->count / 2 == a->count - 1),
+		(char*) "Function '%s' passed incorrect number of arguments for symbols. Got %i, Expected %i.", func, a->count - 1, a->cell[0]->count / 2);*/
 
 	for (unsigned int i = 0; i < a->cell[0]->count; i+=2) {
 		LASSERT(a, a->cell[0]->cell[i]->type == DVAL_SYM,
 			(char*) "Function '%s' cannot define non-symbol. Got %s, Expected %s.",
 			func, dtype_name(a->cell[0]->cell[i]->type), dtype_name(DVAL_SYM));
-		if (i == a->cell[0]->count - 1) {
-			dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
-			dval_del(a);
-			return err;
+		if (strcmp(a->cell[0]->cell[i]->str, "&") == 0) {
+			if (i == a->cell[0]->count - 1 || a->cell[0]->cell[i + 1]->type == DVAL_NOTE) {
+				dval_del(a);
+				return dval_err("A symbol that takes multiple values must have a name.");
+			} else if (i + 1 == a->cell[0]->count - 1) {
+				dval_del(a);
+				return dval_err("A symbol that takes multiple values must have a type.");
+			}
+			//i--; // TODO
+		} else {
+			if (i == a->cell[0]->count - 1) {
+				dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
+				dval_del(a);
+				return err;
+			}
+			if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
+				dval* result = dval_pop(a->cell[0], i+1);
+				dval_del(a);
+				return result;
+			}
+			LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
+				(char*) "Argument %s must have a type. Got %s, Expected %s.",
+				a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i + 1]->type), dtype_name(DVAL_NOTE));
 		}
-		if (a->cell[0]->cell[i+1]->type == DVAL_ERR) {
-			dval* result = dval_pop(a->cell[0], i+1);
-			dval_del(a);
-			return result;
-		}
-		LASSERT(a, (a->cell[0]->cell[i+1]->type == DVAL_NOTE),
-			(char*) "Argument %s must have a type. Got %s, Expected %s.",
-			a->cell[0]->cell[i]->str, dtype_name(a->cell[0]->cell[i + 1]->type), dtype_name(DVAL_NOTE));
 
-		dval* v = dval_copy(a->cell[0]->cell[i]);
+		if (strcmp(a->cell[0]->cell[i]->str, "&") == 0) {
+			if (i < a->cell[0]->count - 3) {
+				dval_del(a);
+				return dval_err("A symbol that takes multiple values must be the last symbol in the list!");
+			}
+			dval* v = dval_copy(a->cell[0]->cell[i+1]); // Symbol name
+			v->sym_type = a->cell[0]->cell[i+2]->cell[0]->ttype; // TODO: ???
+
+			dval* vv = dval_qexpr();// Symbols given value
+			for (unsigned int ii = (i / 2) + 1; ii < a->count; ii++) {
+				// Check that values are correct type before adding them to qexpr
+				dval_add(vv, a->cell[ii]);
+			}
+
+			dval* result;
+			if (strcmp(func, "def") == 0) {
+				result = denv_def(e, v, vv, constant);
+			} else if (strcmp(func, "let") == 0) {
+				result = denv_put(e, v, vv, constant);
+			}
+
+			if (result->type == DVAL_ERR) {
+				dval_del(a); dval_del(v); dval_del(vv);
+				return result;
+			}
+
+			dval_del(v);
+			break;
+		}
+
+		dval* v = dval_copy(a->cell[0]->cell[i]); // Symbol name
 		v->sym_type = a->cell[0]->cell[i+1]->cell[0]->ttype;
 
 		// Check that value is correct type!
@@ -962,6 +1003,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 		} else if (strcmp(func, "let") == 0) {
 			result = denv_put(e, v, a->cell[(i/2) + 1], constant);
 		}
+
 		if (result->type == DVAL_ERR) {
 				dval_del(a); dval_del(v);
 				return result;
@@ -970,6 +1012,7 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 		dval_del(v);
 	}
 
+	// TODO: Make this handle '&' Symbol
 	dval* result = dval_qexpr();
 	result->count = a->count - 1;
 	result->cell = (dval**)malloc(sizeof(dval*) * result->count);
