@@ -31,6 +31,30 @@ internal dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	return errno != ERANGE ? lambda : error;
 }
 
+internal dval* dval_read_index(denv* e, mpc_ast_t* t) {
+	dval* v;
+
+	dval* qexpr = dval_read(e, t->children[0]);
+	if (qexpr->type == DVAL_SYM) {
+		// Evaluate the Symbol
+		qexpr = dval_eval(e, qexpr); // TODO: Does the original get deleted?
+	}
+	if (qexpr->type != DVAL_QEXPR) {
+		dval_del(qexpr);
+		return dval_err("Can only get index of qexpressions."); // TODO
+	}
+
+	dval* index = dval_read(e, t->children[2]);
+	if (index->integer < 0 || index->integer >= qexpr->count) {
+		dval_del(qexpr);
+		dval_del(index);
+		return dval_err("Index out of bounds.");
+	}
+	v = dval_eval(e, dval_pop(qexpr, index->integer));
+
+	return v;
+}
+
 internal dval* dval_read_range(mpc_ast_t* t) {
 	errno = 0;
 	long min = 0;
@@ -82,9 +106,12 @@ internal dval* dval_read_character(mpc_ast_t* t) {
 	return errno != ERANGE ? dval_char(c) : dval_err((char*) "invalid character");
 }
 
+/* Returns NULL if it cannot read the input */
 dval* dval_read(denv* e, mpc_ast_t* t) {
 	if (strstr(t->tag, "lambda")) {
 		return dval_read_lambda(e, t);
+	} else if (strstr(t->tag, "index")) {
+		return dval_read_index(e, t);
 	} else if (strstr(t->tag, "double")) {
 		return dval_read_double(t);
 	} else if (strstr(t->tag, "range")) {

@@ -77,7 +77,7 @@ mpc_parser_t* Lambda;
 mpc_parser_t* Double;
 mpc_parser_t* Range;
 mpc_parser_t* Integer;
-mpc_parser_t* Byte;
+mpc_parser_t* LByte;
 mpc_parser_t* Comment;
 mpc_parser_t* String;
 mpc_parser_t* Character;
@@ -89,6 +89,7 @@ mpc_parser_t* SSexpr;
 mpc_parser_t* Sexpr;
 mpc_parser_t* SQexpr;
 mpc_parser_t* Qexpr;
+mpc_parser_t* Index;
 mpc_parser_t* Statement;
 mpc_parser_t* Line;
 
