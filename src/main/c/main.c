@@ -76,6 +76,16 @@ int main(int argc, char** argv) {
 	denv* e = denv_new();
 	denv_add_builtins(e);
 
+	denv_def(e, dval_string("argc"), dval_int(argc - 2), 1);
+	if (argc > 2) {
+		for (unsigned int i = 2; i < argc; i++) {
+			dval* str = dval_string(argv[i]);
+			char name[10];
+			sprintf(name, "arg%d", i - 2);
+			denv_def(e, dval_string(name), str, 1);
+		}
+	}
+
 	if (argc == 1) {
 		puts("Lydrige REPL - Version 0.5.0");
 		puts("Type 'exit' to Exit the REPL\n");
@@ -115,7 +125,7 @@ int main(int argc, char** argv) {
 			dval_println(prelude);
 			dval_del(prelude);
 		} else {
-			for (int i = 1; i < argc; i++) {
+			/*for (int i = 1; i < argc; i++) {
 				dval* args = dval_add(dval_sexpr(), dval_string(argv[i]));
 				dval* x = builtin_load(e, args);
 				if (x->type == DVAL_ERR) {
@@ -124,7 +134,13 @@ int main(int argc, char** argv) {
 					break;
 				}
 				dval_del(x);
+			}*/
+			dval* arg = dval_add(dval_sexpr(), dval_string(argv[1]));
+			dval* x = builtin_load(e, arg);
+			if (x->type == DVAL_ERR) {
+				dval_println(x);
 			}
+			dval_del(x);
 			dval_del(prelude);
 		}
 	}
