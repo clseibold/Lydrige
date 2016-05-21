@@ -1,1 +1,1 @@
-if (> argc 0) {print "First arg given was: " arg0} {print "No Args!"};
+if (> argc 0) {print "First arg given was: " (get 0 args)} {print "No Args!"};

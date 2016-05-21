@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	Lambda = mpc_new("lambda");
 	Double = mpc_new("double");
 	Integer = mpc_new("integer");
-	Byte = mpc_new("byte");
+	LByte = mpc_new("byte");
 	Range = mpc_new("range");
 	Comment = mpc_new("comment");
 	String = mpc_new("string");
@@ -46,13 +46,14 @@ int main(int argc, char** argv) {
 	SSexpr = mpc_new("ssexpr");
 	Qexpr = mpc_new("qexpr");
 	SQexpr = mpc_new("sqexpr");
+	Index = mpc_new("index");
 	Statement = mpc_new("statement");
 	Line = mpc_new("line");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
 		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <sqexpr> | <qexpr> | <slist> | <list> | <comment> ; \
-		data		: <lambda> | <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
+		data		: <lambda> | <index> | <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
 		lambda		: <qexpr> \"->\" <qexpr> | <qexpr> \"->\" <list> ; \
 		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		integer		: /-?[0-9]+/ ; \
@@ -69,22 +70,23 @@ int main(int argc, char** argv) {
 		sexpr		: '(' <expr>* ')' ; \
 		sqexpr		: \"\\'{\" <expr>* '}' ; \
 		qexpr		: '{' <expr>* '}' ; \
+		index 		: <qexpr> '[' <integer> ']' | <symbol> '[' <integer> ']' ; \
 		statement	: <expr>+ ';' | <comment> ; \
 		line		: /^/ <expr>* /$/ | /^/ <statement>* /$/ ; \
-		", Expr, Data, Lambda, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Statement, Line);
+		", Expr, Data, Lambda, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Index, Statement, Line);
 
 	denv* e = denv_new();
 	denv_add_builtins(e);
 
 	denv_def(e, dval_string("argc"), dval_int(argc - 2), 1);
+	dval* args = dval_qexpr();
 	if (argc > 2) {
 		for (unsigned int i = 2; i < argc; i++) {
 			dval* str = dval_string(argv[i]);
-			char name[10];
-			sprintf(name, "arg%d", i - 2);
-			denv_def(e, dval_string(name), str, 1);
+			dval_add(args, str);
 		}
 	}
+	denv_def(e, dval_string("args"), args, 1);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - Version 0.5.0");
@@ -146,6 +148,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(20, Expr, Lambda, Data, Double, Integer, Byte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Statement,  Line);
+	mpc_cleanup(20, Expr, Lambda, Data, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Index, Statement,  Line);
 	return 0;
 }
