@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 					dval_del(x);
 					mpc_ast_delete((mpc_ast_t*)r.output);
 				}
-				else {
+				else { // TODO: Better error messages here! (can start with not having ';' at end)
 					mpc_err_print(r.error);
 					mpc_err_delete(r.error);
 				}
