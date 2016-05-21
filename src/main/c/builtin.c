@@ -999,7 +999,7 @@ dval* builtin_put_const(denv* e, dval* a) {
 // Note that the 'print' function automatically evaluates what was given to it (including functions, especially ones that don't have arguments).
 dval* builtin_print(denv* e, dval* a) {
 	for (unsigned int i = 0; i < a->count; i++) {
-		dval_print(dval_eval(e, a->cell[i])); putchar(' ');
+		dval_print(dval_eval(e, a->cell[i]));
 	}
 
 	putchar('\n');

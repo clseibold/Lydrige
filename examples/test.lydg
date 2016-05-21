@@ -2,10 +2,12 @@ const {continue_or_quit: func} {_: unit} -> { do
 	(print)
 	(print)
 	(let {input: string} (read "-> Press ENTER to continue or CTRL-C to Quit! "))
+	(clear)
 	#(if (== input "q") {exit} {}) # TODO: Right now, 'exit' only works directly from the REPL
 };
 
 # -- Basic things
+clear;
 print "--- Basic Things ---";
 print (+ 3 3);
 def {x: int} 5;
@@ -13,9 +15,8 @@ print (if (== x 5) {"true"} {"false"});
 print {x y non_existant_symbol};
 print [(+ x 1) x {x non_existant_symbol}];
 print (+ (+ x 1) x);
-continue_or_quit ();
-print;
 print 0x55;
+continue_or_quit ();
 
 # -- The 'typeof' Function
 print "--- The 'typeof' Function ---";
@@ -23,58 +24,52 @@ print (typeof x);
 print (typeof (typeof x));
 print (typeof (typeof (typeof x)));
 continue_or_quit ();
-print;
 
 # -- Getting input from user (and assigning to variable)
 print "--- Input from User ---";
 def {name: string} (read "Enter your name: ");
-print "  -> Hello" name "!";
+print "  -> Hello " name "!";
 continue_or_quit ();
-print;
 
 # -- Function/Lambda declarations
 print "--- Function/Lambda Declarations ---";
 def {test: func} {x: int y: string} -> {print x y};
 def {test2: func} {x: int y: string} -> {print x y}; # Same as 'test' function, just different syntax (using lambda's directly instead of the std lib function 'fn')
 def {test3: func} {a: int f: func b: int} -> {f a b};
-test 5 "string";
-test2 5 "string";
+test 5 " string";
+test2 5 " string";
 print "(test3 5 - 4): "(test3 5 - 4);
 continue_or_quit ();
-print;
 
 # -- Lambda evaluation
 print "--- Lambda Evaluation ---";
 def {x: int} {} -> {5}; # Since this lambda takes no arguments, it is automatically evaluated before being assigned to the variable (x).
-print "x:" x;
+print "x: " x;
 def {isFunction: func} {x: any} -> {if (== (typeof x) func) {"a function"} {"not a function"}};
 def {isInteger: func} {x: any} -> {if (== (typeof x) int) {"an integer"} {"not an integer"}};
-print "x is" (isFunction x);
-print "x is" (isInteger x);
+print "x is " (isFunction x);
+print "x is " (isInteger x);
 def {z: func} {y: int} -> {+ y 1};
-print "z:" z;
-print "z is" (isFunction z);
-print "z is" (isInteger z);
-print "(z 5):" (z 5);
+print "z: " z;
+print "z is " (isFunction z);
+print "z is " (isInteger z);
+print "(z 5): " (z 5);
 continue_or_quit ();
-print;
 
 # -- Statements
 print "--- Statements ---";
 # (print 5; print 73;)   # This is not allowed!!!;
 print 5; print 73;       # But this is allowed!
 continue_or_quit ();
-print;
 
 # -- While Loop
 print "--- While Loop ---";
 def {x: int} 5;
-scope {def {result: qexpr} (while {(< x 20)} {do (print x) (let {x: int} (+ x 1))})};
+def {result: qexpr} (while {< x 20} {do (print x) (let {x: int} (+ x 1))});
 print;
-print "While loop result:" result;
+print "While loop result: " result; # TODO: Error of Unbound symbol Result
 print "x: " x;
 continue_or_quit ();
-print;
 
 # -- The 'map' and 'filter' Functions
 print "--- The 'map' and 'filter' Functions ---";
@@ -82,29 +77,26 @@ print "Mapping to lambda '{n: any} -> {+ n 1}': " (map ({n: any} -> {+ n 1}) {3 
 print "Mapping to function '-': " (map - {3 3 3 3});
 print "filter using lambda '{n: any} -> {> n 2}': " (filter ({n: any} -> {> n 2}) {5 2 11 -7 8 1});
 continue_or_quit ();
-print;
 
 # -- The '==' Function
 #    Returns true if first item is equal to any of the successive items.
 #      Note that it doesn't have to be equal to all of them, as long as it is equal to at least one of them.
 #      Examples of this are shown below:
 print "--- The '==' Function ---";
-print "(== 1 0) ->" (== 1 0);
-print "(== 1 1) ->" (== 1 1);
-print "(== 1 1 0) ->" (== 1 1 0);
-print "(== 1 0 1) ->" (== 1 0 1);
-print "(== 1 0 0) ->" (== 1 0 0);
+print "(== 1 0) -> " (== 1 0);
+print "(== 1 1) -> " (== 1 1);
+print "(== 1 1 0) -> " (== 1 1 0);
+print "(== 1 0 1) -> " (== 1 0 1);
+print "(== 1 0 0) -> " (== 1 0 0);
 continue_or_quit ();
-print;
 
 # -- The '!=' Function
 #    Returns true if first item is not equal to ALL of the successive items.
 #      It it is equal to any of them, even just one, it will return false (0).
 #      Examples of this are shown below:
 print "--- The '!=' Function ---";
-print "(!= 1 0) ->" (!= 1 0);
-print "(!= 1 1) ->" (!= 1 1);
-print "(!= 1 1 0) ->" (!= 1 1 0);
-print "(!= 1 0 1) ->" (!= 1 0 1);
-print "(!= 1 0 0) ->" (!= 1 0 0);
-print;
+print "(!= 1 0) -> " (!= 1 0);
+print "(!= 1 1) -> " (!= 1 1);
+print "(!= 1 1 0) -> " (!= 1 1 0);
+print "(!= 1 0 1) -> " (!= 1 0 1);
+print "(!= 1 0 0) -> " (!= 1 0 0);
