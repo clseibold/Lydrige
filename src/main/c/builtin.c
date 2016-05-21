@@ -492,6 +492,15 @@ dval* builtin_cast(denv* e, dval* a) {
 			dval* v = dval_char((char)a->cell[1]->integer);
 			dval_del(a);
 			return v;
+		} else if (a->cell[1]->type == DDATA_STRING) {
+			if (strlen(a->cell[1]->str) == 0) {
+				dval* err = dval_err("String given is empty.");
+				dval_del(a);
+				return err;
+			}
+			dval* v = dval_char(a->cell[1]->str[0]);
+			dval_del(a);
+			return v;
 		}
 	}
 	dval* error = dval_err("Value of type %s cannot be casted into a(n) %s", dtype_name(a->cell[1]->type), dtype_name(a->cell[0]->ttype));
@@ -1058,6 +1067,11 @@ dval* builtin_load(denv* e, dval* a) {
 	}
 }
 
+dval* builtin_clear(denv* e, dval* a) {
+	system("@cls||clear"); // TODO: HACK, is there a better way to do this?
+	return dval_sexpr();
+}
+
 dval* builtin_exit(denv* e, dval* a) {
 	running = 0;
 	return dval_string("Program ran successfully!");
@@ -1221,5 +1235,6 @@ void denv_add_builtins(denv* e) {
 	denv_add_builtin(e, (char*) "print", builtin_print);
 	denv_add_builtin(e, (char*) "error", builtin_error);
 	denv_add_builtin(e, (char*) "load", builtin_load);
+	denv_add_builtin(e, (char*) "clear", builtin_clear);
 	denv_add_builtin(e, (char*) "exit", builtin_exit);
 }
