@@ -920,7 +920,7 @@ dval* builtin_or(denv* e, dval* a) {
 	return x;
 }
 
-dval* builtin_var(denv* e, dval* a, char* func, int constant) {
+dval* builtin_var(denv* e, dval* a, char* func, int constant) { // TODO: cleanup???
 	if (a->count <= 1) {
 		return dval_err("Function '%s' requires at least 2 arguments.", func);
 	}
@@ -940,7 +940,6 @@ dval* builtin_var(denv* e, dval* a, char* func, int constant) {
 				dval_del(a);
 				return dval_err("A symbol that takes multiple values must have a type.");
 			}
-			//i--; // TODO
 		} else {
 			if (i == a->cell[0]->count - 1) {
 				dval* err = dval_err("Argument %s must have a type. Got NULL, Expected %s.", a->cell[0]->cell[i]->str, dtype_name(DVAL_NOTE));
