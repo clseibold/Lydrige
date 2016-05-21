@@ -457,6 +457,15 @@ dval* builtin_cast(denv* e, dval* a) {
 			dval* v = dval_double((double)a->cell[1]->integer);
 			dval_del(a);
 			return v;
+		} else if (a->cell[1]->type == DDATA_STRING) {
+			double d = strtod(a->cell[1]->str, NULL);
+			if (errno == ERANGE) { // Doesn't work for some standard library implementations
+				dval* err = dval_err("Double given was out of range.");
+				dval_del(a);
+				return err;
+			}
+			dval* v = dval_double(d);
+			return v;
 		}
 	} else if (a->cell[0]->ttype == DDATA_INT) {
 		if (a->cell[1]->type == DDATA_DOUBLE) {
@@ -465,6 +474,16 @@ dval* builtin_cast(denv* e, dval* a) {
 			return v;
 		} else if (a->cell[1]->type == DDATA_CHAR) {
 			dval* v = dval_int((int)a->cell[1]->character);
+			dval_del(a);
+			return v;
+		} else if (a->cell[1]->type == DDATA_STRING) {
+			long i = strtol(a->cell[1]->str, NULL, 10);
+			if (i == LONG_MAX && errno == ERANGE) {
+				dval* err = dval_err("Integer given was out of range.");
+				dval_del(a);
+				return err;
+			}
+			dval* v = dval_int(i); // TODO: Error checking
 			dval_del(a);
 			return v;
 		}
