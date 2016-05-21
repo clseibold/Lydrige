@@ -72,6 +72,7 @@ dval* builtin_print(denv* e, dval* a);
 dval* builtin_error(denv* e, dval* a);
 dval* builtin_read(denv* e, dval* a);
 dval* builtin_load(denv* e, dval* a);
+dval* builtin_clear(denv* e, dval* a);
 dval* builtin_exit(denv* e, dval* a);
 
 dval* dval_eval_sexpr(denv* e, dval* v);
