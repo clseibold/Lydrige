@@ -72,6 +72,14 @@ def {foldl: func} {f: func z: any q: qexpr} -> {
 def {sum: func} {q: qexpr} -> {foldl + 0 q};
 def {product: func} {q: qexpr} -> {foldl * 1 q};
 
+def {case: func} {x: any f: func &cs: qexpr} -> {
+	if (== cs nil)
+		{error "No Case Found"}
+		{if (f x (first_eval (first_eval cs))) {get 1 (first_eval cs)} {
+			unpack case (join (list x) (list f) (tail cs))
+		}}
+};
+
 def {fib: func} {n: int} -> {
 	if (== n 0) {0}
 		(== n 1) {1}
