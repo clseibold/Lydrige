@@ -31,7 +31,7 @@ internal dval* dval_read_lambda(denv* e, mpc_ast_t* t) {
 	return errno != ERANGE ? lambda : error;
 }
 
-internal dval* dval_read_index(denv* e, mpc_ast_t* t) {
+internal dval* dval_read_index(denv* e, mpc_ast_t* t) { // TODO: Allow support for Strings.
 	dval* v;
 
 	dval* qexpr = dval_read(e, t->children[0]);
@@ -145,16 +145,16 @@ dval* dval_read(denv* e, mpc_ast_t* t) {
 		//x = dval_sexpr();
 	} else if (strstr(t->tag, "statement")) {
 		x = dval_sexpr();
-	} else if (strstr(t->tag, "ssexpr")) {
-		x = dval_ssexpr();
+	//} else if (strstr(t->tag, "ssexpr")) {
+	//	x = dval_ssexpr();
 	} else if (strstr(t->tag, "sexpr")) {
 		x = dval_sexpr();
-	} else if (strstr(t->tag, "sqexpr")) {
-		x = dval_sqexpr();
+	//} else if (strstr(t->tag, "sqexpr")) {
+	//	x = dval_sqexpr();
 	} else if (strstr(t->tag, "qexpr")) {
 		x = dval_qexpr();
-	} else if (strstr(t->tag, "slist")) {
-		x = dval_slist();
+	//} else if (strstr(t->tag, "slist")) {
+	//	x = dval_slist();
 	} else if (strstr(t->tag, "list")) {
 		x = dval_list();
 	} else if (strstr(t->tag, "note")) {

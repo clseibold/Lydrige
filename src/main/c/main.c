@@ -41,39 +41,33 @@ int main(int argc, char** argv) {
 	Symbol = mpc_new("symbol");
 	Note = mpc_new("note");
 	List = mpc_new("list");
-	SList = mpc_new("slist");
 	Sexpr = mpc_new("sexpr");
-	SSexpr = mpc_new("ssexpr");
 	Qexpr = mpc_new("qexpr");
-	SQexpr = mpc_new("sqexpr");
 	Index = mpc_new("index");
 	Statement = mpc_new("statement");
 	Line = mpc_new("line");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
 		" \
-		expr		: <data> | <symbol> | <ssexpr> | <sexpr> | <sqexpr> | <qexpr> | <slist> | <list> | <comment> ; \
+		expr		: <data> | <symbol> | <sexpr> | <qexpr> | <list> | <comment> ; \
 		data		: <lambda> | <index> | <byte> | <double> | <range> | <integer> | <string> | <character> | <note> ; \
 		lambda		: <qexpr> \"->\" <qexpr> | <qexpr> \"->\" <list> ; \
-		double		: /-?[0-9]+\\.[0-9]+/ ; \
-		integer		: /-?[0-9]+/ ; \
+		index 		: <qexpr> '[' <integer> ']' | <symbol> '[' <integer> ']' ; \
 		byte		: /0x[0-9a-fA-F][0-9a-fA-F]/ ; \
+		double		: /-?[0-9]+\\.[0-9]+/ ; \
 		range		: <integer> \"..\" <integer> ; \
+		integer		: /-?[0-9]+/ ; \
 		string		: /\"(\\\\.|[^\"])*\"/ ; \
 		character	: /\'(\\\\.|[^\"])\'/ ; \
-		comment		: /#[^\\r\\n]*/ ; \
-		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!\\.^%]+/ | '&' ; \
 		note		: ':' <symbol> | ':' '(' <symbol>+ ')' ; \
-		slist		: \"\\'[\" <expr>* ']' ; \
-		list		: '[' <expr>* ']' ; \
-		ssexpr		: \"\\'(\" <expr>* ')' ; \
+		symbol		: /[a-zA-Z0-9_+\\-*\\/\\\\=<>!\\.^%]+/ | '&' ; \
 		sexpr		: '(' <expr>* ')' ; \
-		sqexpr		: \"\\'{\" <expr>* '}' ; \
 		qexpr		: '{' <expr>* '}' ; \
-		index 		: <qexpr> '[' <integer> ']' | <symbol> '[' <integer> ']' ; \
+		list		: '[' <expr>* ']' ; \
+		comment		: /#[^\\r\\n]*/ ; \
 		statement	: <expr>+ ';' | <comment> ; \
 		line		: /^/ <expr>* /$/ | /^/ <statement>* /$/ ; \
-		", Expr, Data, Lambda, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, SList, SSexpr, Sexpr, SQexpr, Qexpr, Index, Statement, Line);
+		", Expr, Data, Lambda, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, Sexpr, Qexpr, Index, Statement, Line);
 
 	denv* e = denv_new();
 	denv_add_builtins(e);
@@ -148,6 +142,6 @@ int main(int argc, char** argv) {
 	}
 
 	denv_del(e);
-	mpc_cleanup(20, Expr, Lambda, Data, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, SSexpr, SList, Sexpr, SQexpr, Qexpr, Index, Statement,  Line);
+	mpc_cleanup(18, Expr, Lambda, Data, Double, Integer, LByte, Range, Comment, String, Character, Symbol, Note, List, Sexpr, Qexpr, Index, Statement,  Line);
 	return 0;
 }
