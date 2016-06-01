@@ -76,6 +76,8 @@ print "--- The 'map' and 'filter' Functions ---";
 print "Mapping to lambda '{n: any} -> {+ n 1}': " (map ({n: any} -> {+ n 1}) {3 3 3 3});
 print "Mapping to function '-': " (map - {3 3 3 3});
 print "filter using lambda '{n: any} -> {> n 2}': " (filter ({n: any} -> {> n 2}) {5 2 11 -7 8 1});
+map (join {5 5}) {{4} {3}}; # TODO - print result out
+map first {{4 3 2} {6 5 4}};
 continue_or_quit ();
 
 # -- The '==' Function

@@ -76,7 +76,11 @@ void Hashmap_destroy(Hashmap *map) {
                 DArray *bucket = DArray_get(map->buckets, i);
                 if (bucket) {
                     for (j = 0; j < DArray_count(bucket); j++) {
-                        free(DArray_get(bucket, j));
+                        void *data = DArray_get(bucket, j);
+                        free(((HashmapNode *) data)->key);
+                        free(((HashmapNode *) data)->data);
+                        free(data);
+                        //free(DArray_get(bucket, j)); // Is this a Hashmap node?
                     }
                     DArray_destroy(bucket);
                 }
@@ -125,7 +129,7 @@ error:
 int Hashmap_set(Hashmap *map, void *key, void *data) {
     uint32_t hash = 0;
     DArray *bucket = Hashmap_find_bucket(map, key, 1, &hash);
-    check(bucket, "Error can't create bucket.");
+    check(bucket, "Error: Can't create bucket.");
 
     HashmapNode *node = Hashmap_node_create(hash, key, data);
     check_mem(node);
