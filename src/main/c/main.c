@@ -103,19 +103,20 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 					elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
 				} else if (strstr(t->children[i]->children[ii]->tag, "value")) { // TODO
 					if (strstr(t->children[i]->children[ii]->tag, "int")) {
-
+						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
 					} else if (t->children[i]->children[ii]->tag, "double") {
-
+						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
 					} else if (t->children[i]->children[ii]->tag, "ident") {
-
+						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
 					}
 				} else {
 					// TODO: Error?
+					elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
 				}
 				lcurrentArgPos++;
 			}
 
-			args[currentArgPos] = dval_list(elements, lcount);
+			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements }, lcount };
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "statement")) {
 			result = read_eval_expr(e, t->children[i]); // TODO(BUG): This will result in lines returning only its last statement's value
@@ -233,7 +234,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				REPLOutput(result);
 				dval_del(result);

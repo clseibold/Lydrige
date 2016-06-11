@@ -45,6 +45,10 @@ dval *builtin_add(denv *e, dval *args, unsigned int argc) {
 	// Check if any are doubles. Set isDouble to true is so.
 	int isDouble = false;
 	for (int i = 0; i < argc; i++) {
+		if (args[i].type == DVAL_LIST) { // DEBUG/DEV
+			//print all of the elements
+			builtin_print(e, args[i].elements, args[i].count);
+		}
 		if (!(args[i].type == DVAL_DOUBLE || args[i].type == DVAL_INT)) {
 			return(dval_error("Function '+' may only be passed values of type int or double."));
 		}
