@@ -75,11 +75,14 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				dval_del(d);
 			}
 			currentArgPos++;
-		} else if (strstr(t->children[i]->tag, "list")) {
+		} else if (strstr(t->children[i]->tag, "list")) { // TODO(BUG): Last argument isn't getting set correctly in some way (the value only, the type seems to be correct)
+			// TODO(CLEANUP): This is essentially just a copy of code from the outer loop!
 			// For loop to get element count
 			unsigned int lcount = 0;
 			for (int ii = 0; ii < t->children[i]->children_num; ii++) { // TODO
 				if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
+				else if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
+				else if (strcmp(t->children[i]->children[ii]->contents, ")") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
@@ -97,17 +100,32 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->tag, "regex") == 0) continue;
-				// TODO: Check for values (int, double, ident) and expressions (call dval_eval_expr for these) and add to elements array
 				if (strstr(t->children[i]->children[ii]->tag, "expression")) {
-					// TODO
-					elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
+					dval *d = read_eval_expr(e, t->children[i]->children[ii]);
+					elements[lcurrentArgPos] = *d;
+					if (d->type == DVAL_ERROR) { // TODO(IFFY)
+						result = d;
+						free(args);
+						free(elements);
+						return(result);
+					} else {
+						dval_del(d);
+					}
 				} else if (strstr(t->children[i]->children[ii]->tag, "value")) { // TODO
 					if (strstr(t->children[i]->children[ii]->tag, "int")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
+						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
 					} else if (t->children[i]->children[ii]->tag, "double") {
-						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
-					} else if (t->children[i]->children[ii]->tag, "ident") {
-						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
+						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
+					} else if (t->children[i]->children[ii]->tag, "ident") { // TODO(BUG): When printing a list, functions do not get printed correctly. Coult be from not setting value of element correctly
+						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
+						if (v->type == DVAL_ERROR) { // TODO(IFFY)
+							result = v;
+							free(args);
+							free(elements);
+							return(result);
+						} else {
+							elements[lcurrentArgPos] = *v; // TODO(NOTE): This is coppied
+						}
 					}
 				} else {
 					// TODO: Error?
@@ -146,7 +164,7 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				args[currentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->contents, NULL, 10)} };
 			} else if (strstr(t->children[i]->tag, "double")) {
 				args[currentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->contents, NULL)} };
-			} else {
+			} else { // TODO: Shouldn't I just be returning the error (instead of setting it to an argument)?
 				args[currentArgPos] = (dval) { DVAL_ERROR, 0, {.str = "(Interpreter error) A value type was added to the parser, but it's evaluation is not handled."} };
 			}
 			currentArgPos++;

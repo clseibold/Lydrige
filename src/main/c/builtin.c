@@ -236,21 +236,36 @@ dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
 	}
 }
 
+internal bool print_elem(dval arg) {
+	switch (arg.type) {
+		case DVAL_INT:
+			printf("%d", arg.integer);
+			return true;
+		case DVAL_DOUBLE:
+			printf("%f", arg.doub);
+			return true;
+		case DVAL_FUNC:
+			printf("(Func)");
+			return true;
+		case DVAL_LIST:
+			printf("[");
+			for (int i = 0; i < arg.count; i++) {
+				print_elem(arg.elements[i]);
+				printf(", ");
+			}
+			printf("]");
+			return true;
+		default:
+			return false;
+	}
+}
+
 dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	for (int i = 0; i < argc; i++) {
-		switch (args[i].type) {
-			case DVAL_INT:
-				printf("%d", args[i].integer);
-				break;
-			case DVAL_DOUBLE:
-				printf("%f", args[i].doub);
-				break;
-			case DVAL_FUNC:
-				printf("(Func)");
-				break;
-			default:
-				return(dval_error("Function 'print' cannot print values of type Any or Unknown."));
+		if (!print_elem(args[i])) {
+			return(dval_error("Cannot print value of type Unknown or Any!"));
 		}
+		printf(" ");
 	}
 	printf("\n");
 	return(dval_int(1));

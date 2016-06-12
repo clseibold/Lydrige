@@ -7,6 +7,7 @@
 #include "../../hashmap/headers/hashmap.h"
 
 #define internal static
+#define bool int
 #define true 1
 #define false 0
 
