@@ -115,7 +115,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 					if (strstr(t->children[i]->children[ii]->tag, "int")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "double")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
+						elements[lcurrentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
 						if (v->type == DVAL_ERROR) { // TODO(IFFY)
