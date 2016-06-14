@@ -251,7 +251,9 @@ internal bool print_elem(dval arg) {
 			printf("[");
 			for (int i = 0; i < arg.count; i++) {
 				print_elem(arg.elements[i]);
-				printf(", ");
+				if (i != arg.count - 1) {
+					printf(", ");
+				}
 			}
 			printf("]");
 			return true;

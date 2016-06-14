@@ -33,7 +33,7 @@ void add_history(char* unused) {}
 #define COL_CYAN "\x1b[36m"
 #define COL_RESET "\x1b[0m"
 
-dval *read_eval_expr(denv *e, mpc_ast_t* t) {
+internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 	// For loop to determine amount of args used
 	unsigned int argc = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {
@@ -94,7 +94,7 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 
 			// Add the elements
 			unsigned int lcurrentArgPos = 0;
-			for (int ii = 0; ii < lcount; ii++) {
+			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
 				if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
@@ -118,6 +118,9 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
 					} else if (t->children[i]->children[ii]->tag, "ident") { // TODO(BUG): When printing a list, functions do not get printed correctly. Coult be from not setting value of element correctly
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
+							printf("Elem %d is maybe a Func.\n", lcurrentArgPos);
+						if (v->type == DVAL_FUNC) {
+						}
 						if (v->type == DVAL_ERROR) { // TODO(IFFY)
 							result = v;
 							free(args);
@@ -133,6 +136,7 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				}
 				lcurrentArgPos++;
 			}
+			printf("LCurrentArgPos: %d\n", lcurrentArgPos);
 
 			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements }, lcount };
 			currentArgPos++;
@@ -151,6 +155,7 @@ dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 			}
 		} else if (strstr(t->children[i]->tag, "value")) {
 			if (strstr(t->children[i]->tag, "ident")) { // TODO: Check for errors when reading values
+				// TODO(FUTURE): Handle unary operators here
 				// Evaluate identifier here, and add result to args
 				dval *v = denv_get(e, t->children[i]->contents);
 				if (v->type == DVAL_ERROR) {
@@ -240,19 +245,19 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		", Line, Command, Statement, Expression, Value, Identifier, Double, Integer, List);
 
 	if (argc == 1) {
-		puts("Lydrige REPL - v0.7.0");
+		puts("Lydrige REPL - v0.6.0 Alpha");
 		puts("Type ':exit' to Exit the REPL\n");
 
 		denv *e = denv_new();
 		denv_add_builtins(e);
 
 		while (running) {
-			char* input = readline(COL_GREEN "Lydrige2> " COL_RESET);
+			char* input = readline(COL_GREEN "Lydrige> " COL_RESET);
 			add_history(input);
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				REPLOutput(result);
 				dval_del(result);
