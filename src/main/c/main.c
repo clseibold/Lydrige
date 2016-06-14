@@ -39,6 +39,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ")") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "[") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ";") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value")) continue;
@@ -57,6 +60,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ")") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "[") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
+		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ";") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
 		if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value")) {
@@ -80,9 +86,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 			// For loop to get element count
 			unsigned int lcount = 0;
 			for (int ii = 0; ii < t->children[i]->children_num; ii++) { // TODO
-				if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
+				if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ")") == 0) continue;
+				else if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
@@ -103,7 +109,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				if (strstr(t->children[i]->children[ii]->tag, "expression")) {
 					dval *d = read_eval_expr(e, t->children[i]->children[ii]);
 					elements[lcurrentArgPos] = *d;
-					if (d->type == DVAL_ERROR) { // TODO(IFFY)
+					if (d->type == DVAL_ERROR) {
 						result = d;
 						free(args);
 						free(elements);
@@ -111,14 +117,14 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 					} else {
 						dval_del(d);
 					}
-				} else if (strstr(t->children[i]->children[ii]->tag, "value")) { // TODO
+				} else if (strstr(t->children[i]->children[ii]->tag, "value")) {
 					if (strstr(t->children[i]->children[ii]->tag, "int")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "double")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
-						if (v->type == DVAL_ERROR) { // TODO(IFFY)
+						if (v->type == DVAL_ERROR) {
 							result = v;
 							free(args);
 							free(elements);
@@ -126,7 +132,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 						} else {
 							elements[lcurrentArgPos] = *v; // TODO(NOTE): This is coppied
 						}
-					}
+					} // TODO: else
 				} else {
 					// TODO: Error?
 					elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
@@ -144,13 +150,16 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				result = dval_error("Program Exited with Result: 1\n (User Interruption)\n");
 				free(args);
 				return(result);
+			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
+				printf(" Lydrige Version v0.6.0a\n");
+				result = dval_int(1);
 			} else {
 				result = dval_error("Command doesn't exist.");
 				free(args);
 				return(result);
 			}
 		} else if (strstr(t->children[i]->tag, "value")) {
-			if (strstr(t->children[i]->tag, "ident")) { // TODO: Check for errors when reading values
+			if (strstr(t->children[i]->tag, "ident")) {
 				// TODO(FUTURE): Handle unary operators here
 				// Evaluate identifier here, and add result to args
 				dval *v = denv_get(e, t->children[i]->contents);
@@ -241,7 +250,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		", Line, Command, Statement, Expression, Value, Identifier, Double, Integer, List);
 
 	if (argc == 1) {
-		puts("Lydrige REPL - v0.6.0 Alpha");
+		puts("Lydrige REPL - v0.6.0a");
 		puts("Type ':exit' to Exit the REPL\n");
 
 		denv *e = denv_new();
