@@ -114,13 +114,10 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				} else if (strstr(t->children[i]->children[ii]->tag, "value")) { // TODO
 					if (strstr(t->children[i]->children[ii]->tag, "int")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
-					} else if (t->children[i]->children[ii]->tag, "double") {
+					} else if (strstr(t->children[i]->children[ii]->tag, "double")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
-					} else if (t->children[i]->children[ii]->tag, "ident") { // TODO(BUG): When printing a list, functions do not get printed correctly. Coult be from not setting value of element correctly
+					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
-							printf("Elem %d is maybe a Func.\n", lcurrentArgPos);
-						if (v->type == DVAL_FUNC) {
-						}
 						if (v->type == DVAL_ERROR) { // TODO(IFFY)
 							result = v;
 							free(args);
@@ -136,7 +133,6 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				}
 				lcurrentArgPos++;
 			}
-			printf("LCurrentArgPos: %d\n", lcurrentArgPos);
 
 			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements }, lcount };
 			currentArgPos++;
@@ -257,7 +253,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				REPLOutput(result);
 				dval_del(result);
