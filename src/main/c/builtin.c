@@ -236,6 +236,16 @@ dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
 	}
 }
 
+dval *builtin_list(denv *e, dval *args, unsigned int argc) {
+	if (argc == 0) {
+		return(dval_error("Function 'list' must be passed 1 or more arguments."));
+	}
+
+	dval *largs = calloc(argc, sizeof(dval));
+	memcpy(largs, args, sizeof(dval) * argc); // TODO: IFFY
+	return(dval_list(largs, argc));
+}
+
 internal bool print_elem(dval arg) {
 	switch (arg.type) {
 		case DVAL_INT:
@@ -286,5 +296,8 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "/", builtin_divide);
 	denv_add_builtin(e, "mod", builtin_mod);
 	denv_add_builtin(e, "succ", builtin_succ);
+
+	denv_add_builtin(e, "list", builtin_list);
+
 	denv_add_builtin(e, "print", builtin_print);
 }

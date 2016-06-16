@@ -81,11 +81,11 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				dval_del(d);
 			}
 			currentArgPos++;
-		} else if (strstr(t->children[i]->tag, "list")) { // TODO(BUG): Last argument isn't getting set correctly in some way (the value only, the type seems to be correct)
+		} else if (strstr(t->children[i]->tag, "list")) {
 			// TODO(CLEANUP): This is essentially just a copy of code from the outer loop!
 			// For loop to get element count
 			unsigned int lcount = 0;
-			for (int ii = 0; ii < t->children[i]->children_num; ii++) { // TODO
+			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
 				if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ")") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
@@ -153,6 +153,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
 				printf(" Lydrige Version v0.6.0a\n");
 				result = dval_int(1);
+			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
+				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n");
+				result = dval_int(1);
 			} else {
 				result = dval_error("Command doesn't exist.");
 				free(args);
@@ -218,7 +221,13 @@ void REPLOutput(dval *d) {
 			printf(" %d\n", d->integer);
 			break;
 		case DVAL_FUNC:
-			printf(" Func(%s)", d->str);
+			printf(" (Func)\n", d->str);
+			break;
+		case DVAL_LIST: // TODO
+			printf(" (List)\n");
+			/*for (int i = 0; i < d->count; i++) {
+
+			}*/
 			break;
 		default:
 			printf(COL_RED " Error: " COL_RESET "Unknown Output\n");
@@ -262,7 +271,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				// mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				REPLOutput(result);
 				dval_del(result);
