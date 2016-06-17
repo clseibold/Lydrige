@@ -16,7 +16,8 @@ dval *builtin_divide(denv *e, dval *args, unsigned int argc);
 dval *builtin_mod(denv *e, dval *args, unsigned int argc);
 dval *builtin_succ(denv *e, dval *args, unsigned int argc);
 
-dval *builtin_list(denv *a, dval *args, unsigned int argc); // TODO: For this, just memcopy the args into the new list's args
+dval *builtin_list(denv *a, dval *args, unsigned int argc);
+dval *builtin_len(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_print(denv *e, dval *args, unsigned int argc);
 

@@ -154,7 +154,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				printf(" Lydrige Version v0.6.0a\n");
 				result = dval_int(1);
 			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
-				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n");
+				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n len - returns length of list as an integer\n");
 				result = dval_int(1);
 			} else {
 				result = dval_error("Command doesn't exist.");

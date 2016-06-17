@@ -246,6 +246,17 @@ dval *builtin_list(denv *e, dval *args, unsigned int argc) {
 	return(dval_list(largs, argc));
 }
 
+dval *builtin_len(denv *a, dval *args, unsigned int argc) {
+	if (argc > 1 || argc == 0) {
+		return(dval_error("Function 'len' must be passed only 1 argument."));
+	}
+	if (args[0].type != DVAL_LIST) {
+		return(dval_error("Function 'len' must be passed a list."));
+	}
+
+	return(dval_int(args[0].count));
+}
+
 internal bool print_elem(dval arg) {
 	switch (arg.type) {
 		case DVAL_INT:
@@ -298,6 +309,7 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "succ", builtin_succ);
 
 	denv_add_builtin(e, "list", builtin_list);
+	denv_add_builtin(e, "len", builtin_len);
 
 	denv_add_builtin(e, "print", builtin_print);
 }
