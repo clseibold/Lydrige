@@ -10,4 +10,4 @@ gcc -m32 -c -std=c99 -Wall -O3 ../../../../src/hashmap/c/*.c
 ar -cvq ../libhashmap.a *.o
 cd ../../../../
 
-gcc -m32 -std=c99 -Wall -O3 src/main/c/*.c build/dist/x86/libmpc.a build/dist/x86/libhashmap.a -lreadline -lm -o build/dist/x86/main
+gcc -m32 -std=c99 -Wall -O3 src/main/c/*.c build/dist/x86/libmpc.a build/dist/x86/libhashmap.a -lreadline -lm -o build/dist/x86/Lydrige-linux_x86_bin-v060a
