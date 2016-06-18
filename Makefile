@@ -7,11 +7,11 @@ run: build/release/main
 
 build/debug/main: build/debug/libmpc.a build/debug/libhashmap.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
 	mkdir -p build/debug
-	gcc -std=c99 -Wall -g -Og src/main/c/*.c build/debug/libmpc.a build/debug/libhashmap.a -lreadline -lm -o build/debug/main
+	gcc -std=c99 -Wall -g -Og src/main/c/*.c build/debug/libmpc.a build/debug/libhashmap.a -lreadline -lm -o build/debug/lydrige
 
 build/release/main: build/release/libmpc.a build/release/libhashmap.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
 	mkdir -p build/release
-	gcc -std=c99 -Wall -O3 src/main/c/*.c build/release/libmpc.a build/release/libhashmap.a -lreadline -lm -o build/release/main
+	gcc -std=c99 -Wall -O3 src/main/c/*.c build/release/libmpc.a build/release/libhashmap.a -lreadline -lm -o build/release/lydrige
 
 build/debug/libmpc.a: src/mpc/c/mpc.c src/mpc/headers/mpc.h
 	mkdir -p build/debug/mpc
