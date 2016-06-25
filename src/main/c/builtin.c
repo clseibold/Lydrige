@@ -242,7 +242,7 @@ dval *builtin_list(denv *e, dval *args, unsigned int argc) {
 	}
 
 	dval *largs = calloc(argc, sizeof(dval));
-	memcpy(largs, args, sizeof(dval) * argc); // TODO: IFFY
+	memcpy(largs, args, sizeof(dval) * argc);
 	return(dval_list(largs, argc));
 }
 
@@ -281,6 +281,35 @@ dval *builtin_last(denv *a, dval *args, unsigned int argc) {
 	dval *arg = calloc(1, sizeof(dval));
 	memcpy(arg, args[0].elements+(args[0].count-1), sizeof(dval) * 1); // Copy only the very last element into arg
 	return(arg);
+}
+
+dval *builtin_head(denv *a, dval *args, unsigned int argc) {
+	if (argc > 1 || argc == 0) {
+		return(dval_error("Function 'head' must be passed only 1 argument."));
+	}
+	if (args[0].type != DVAL_LIST) {
+		return(dval_error("Function 'head' must be passed a list."));
+	}
+
+	unsigned int count = args[0].count - 1;
+	dval *largs = calloc(count, sizeof(dval));
+	memcpy(largs, args[0].elements, sizeof(dval) * (args[0].count - 1)); // Copy all but last element into largs
+	largs->count = args[0].count - 1;
+	return(dval_list(largs, count));
+}
+
+dval *builtin_tail(denv *a, dval *args, unsigned int argc) {
+	if (argc > 1 || argc == 0) {
+		return(dval_error("Function 'head' must be passed only 1 argument."));
+	}
+	if (args[0].type != DVAL_LIST) {
+		return(dval_error("Function 'head' must be passed a list."));
+	}
+
+	unsigned int count = args[0].count - 1;
+	dval *largs = calloc(count, sizeof(dval));
+	memcpy(largs, args[0].elements + 1, sizeof(dval) * (args[0].count - 1)); // Copy all but first element into largs
+	return(dval_list(largs, count));
 }
 
 internal bool print_elem(dval arg) {
@@ -338,6 +367,8 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "len", builtin_len);
 	denv_add_builtin(e, "first", builtin_first);
 	denv_add_builtin(e, "last", builtin_last);
+	denv_add_builtin(e, "head", builtin_head);
+	denv_add_builtin(e, "tail", builtin_tail);
 
 	denv_add_builtin(e, "print", builtin_print);
 }
