@@ -270,6 +270,19 @@ dval *builtin_first(denv *a, dval *args, unsigned int argc) {
 	return(arg);
 }
 
+dval *builtin_last(denv *a, dval *args, unsigned int argc) {
+	if (argc > 1 || argc == 0) {
+		return(dval_error("Function 'last' must be passed only 1 argument."));
+	}
+	if (args[0].type != DVAL_LIST) {
+		return(dval_error("Function 'last' must be passed a list."));
+	}
+
+	dval *arg = calloc(1, sizeof(dval));
+	memcpy(arg, args[0].elements+(args[0].count-1), sizeof(dval) * 1); // Copy only the very last element into arg
+	return(arg);
+}
+
 internal bool print_elem(dval arg) {
 	switch (arg.type) {
 		case DVAL_INT:
@@ -324,6 +337,7 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "list", builtin_list);
 	denv_add_builtin(e, "len", builtin_len);
 	denv_add_builtin(e, "first", builtin_first);
+	denv_add_builtin(e, "last", builtin_last);
 
 	denv_add_builtin(e, "print", builtin_print);
 }
