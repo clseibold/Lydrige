@@ -20,6 +20,8 @@ dval *builtin_list(denv *a, dval *args, unsigned int argc);
 dval *builtin_len(denv *a, dval *args, unsigned int argc);
 dval *builtin_first(denv *a, dval *args, unsigned int argc);
 dval *builtin_last(denv *a, dval *args, unsigned int argc);
+dval *builtin_head(denv *a, dval *args, unsigned int argc);
+dval *builtin_tail(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_print(denv *e, dval *args, unsigned int argc);
 
