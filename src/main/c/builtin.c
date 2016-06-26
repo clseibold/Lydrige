@@ -257,6 +257,22 @@ dval *builtin_len(denv *a, dval *args, unsigned int argc) {
 	return(dval_int(args[0].count));
 }
 
+dval *builtin_get(denv *a, dval *args, unsigned int argc) {
+	if (argc > 2 || argc == 0) {
+		return(dval_error("Function 'get' must be passed 2 arguments."));
+	}
+	if (args[0].type != DVAL_INT) {
+		return(dval_error("Function 'get' must be passed an integer for argument 1."));
+	}
+	if (args[1].type != DVAL_LIST) {
+		return(dval_error("Function 'get' must be passed a list for argument 2."));
+	}
+
+	dval *arg = calloc(1, sizeof(dval));
+	memcpy(arg, args[1].elements + args[0].integer, sizeof(dval) * 1); // Copy element at given index into arg
+	return(arg);
+}
+
 dval *builtin_first(denv *a, dval *args, unsigned int argc) {
 	if (argc > 1 || argc == 0) {
 		return(dval_error("Function 'first' must be passed only 1 argument."));
@@ -369,6 +385,7 @@ void denv_add_builtins(denv *e) {
 
 	denv_add_builtin(e, "list", builtin_list);
 	denv_add_builtin(e, "len", builtin_len);
+	denv_add_builtin(e, "get", builtin_get);
 	denv_add_builtin(e, "first", builtin_first);
 	denv_add_builtin(e, "last", builtin_last);
 	denv_add_builtin(e, "head", builtin_head);
