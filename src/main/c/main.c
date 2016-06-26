@@ -237,7 +237,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;\
 		double : /-?[0-9]+\\.[0-9]+/ ;\
 		integer : /-?[0-9]+/ ;\
-		list : '[' <value>* ']' ;\
+		list : '[' <value> (',' <value>)* ']' ;\
 		", Line, Command, Statement, Expression, Value, Identifier, Double, Integer, List);
 
 	if (argc == 1) {
