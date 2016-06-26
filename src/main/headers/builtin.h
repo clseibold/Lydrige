@@ -5,6 +5,7 @@
 
 #include "structure.h"
 #include "../../hashmap/headers/bstrlib.h"
+#include "../../linenoise/headers/linenoise.h"
 
 dval *denv_put(denv *e, char *k, dval *v, int constant);
 dval *denv_get(denv *e, char *k);
@@ -24,6 +25,7 @@ dval *builtin_head(denv *a, dval *args, unsigned int argc);
 dval *builtin_tail(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_print(denv *e, dval *args, unsigned int argc);
+dval *builtin_clear(denv *a, dval *args, unsigned int argc);
 
 void denv_add_builtins(denv *e);
 

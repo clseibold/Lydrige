@@ -294,7 +294,6 @@ dval *builtin_head(denv *a, dval *args, unsigned int argc) {
 	unsigned int count = args[0].count - 1;
 	dval *largs = calloc(count, sizeof(dval));
 	memcpy(largs, args[0].elements, sizeof(dval) * (args[0].count - 1)); // Copy all but last element into largs
-	largs->count = args[0].count - 1;
 	return(dval_list(largs, count));
 }
 
@@ -349,6 +348,11 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	return(dval_int(1));
 }
 
+dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a command?
+	linenoiseClearScreen();
+	return(dval_int(1));
+}
+
 internal void denv_add_builtin(denv *e, char *name, dbuiltin func) {
 	dval *v = dval_func(func, 1);
 	dval_del(denv_put(e, name, v, v->constant)); // v is coppied (but not deleted in denv_put function)
@@ -371,4 +375,5 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "tail", builtin_tail);
 
 	denv_add_builtin(e, "print", builtin_print);
+	denv_add_builtin(e, "clear", builtin_clear);
 }
