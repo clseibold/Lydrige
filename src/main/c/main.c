@@ -248,7 +248,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		denv_add_builtins(e);
 
 		linenoiseSetMultiLine(1);
-		linenoiseHistorySetMaxLen(255); // TODO: May change
+		linenoiseHistorySetMaxLen(20); // TODO: May change
 		while (running) {
 			char* input = linenoise("Lydrige> ");
 			linenoiseHistoryAdd(input);
