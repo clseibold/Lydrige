@@ -1,6 +1,6 @@
 # Lydrige
 ## Introduction ##
-Lydrige is an interpreted programming language built off of and expanded from the interpreter from the BuildYourOwnLisp book (by Mr Daniel Holden). Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple higher level language inspired by Lisp. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions. You can see future ideas and plans in the [ideas.md file](https://github.com/christianap/Lydrige/blob/master/ideas.md "ideas.md file").
+Lydrige is an interpreted programming language. Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple language inspired by Lisp and other functional languages. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
 
 ## Contents ##
 * Basic Syntax
@@ -23,51 +23,22 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `last` - returns the last item in a given q-expression or list literal.
 * `head` - returns all but the last item from a given q-expression or list literal in a new q-expression.
 * `tail` - returns all but the first item from a given q-expression or list literal in a new q-expression.
-* `eval` - evaluates a q-expression (by converting it into an s-expression).
-* `join` - joins two q-expressions or lists together into a single q-expression.
-* `len` - returns the length of a given q-expression or list.
-* `typeof` - returns a string of the type of the given item.
-* `def` - defines a variable in global scope/root environment. The variable is mutable (simply use def again with same variable name).
-* `const` - similar to def, but defines variable as immutable. If variable already existed (and not immutable), the value is change and is made immutable.
-* `let` - similar to def, but defines variable in local scope/current environment
-* `let_const` - defines variable in local scope/current environment. The variable is immutable. (will be implemented soon!)
-* `l` - creates a lambda with the first given q-expression as the argument names and the second q-expression as the body
-* `lambda` - alias to l
-* `if` - if given integer is 1, the first given q-expression is evaluated, otherwise the second given q-expression is evaluated
-* `and` - returns 1 if all given integers/doubles are 1. Returns 0 if any given integer/double is 0.
-* `or` - returns 1 if given any given integer/double is 1. Returns 0 if no given integer/double is 1.
-* `print` - prints text to the screen. Returns ()
-* `error` - returns an error
-* `load` - loads in a separate file
-* `exit` - exits the REPL (currently not working)
-* `inner_eval` - acts as if the given q-expression is a list literal. The items are evaluated, but the expression itself is not.
-* `get` - gets item from given q-expression or list literal at given index. (ex: `get 0 {2 3 4 5}` will return `2` , `get 0 {unbound}` will return an error)
-* `extract` - very similar to the `get` function, except does not automatically evaluate the expression (this allows you to get unbound symbols without error, for example: `list (extract 0 {unbound})` will return `{unbound}`. This is needed for the future static typing of the language.)
-* `set` - returns a new q-expression with the item at the given index of give q-expression or list literal to a given value.
+* `join` - joins two lists together into a single list.
+* `len` - returns the length of a given list.
+* `print` - prints text to the screen. Returns `1`
 
 ## Data Types ##
 Here are all of the data types in Lydrige and how you represent them within the language:
 * `long` - simple number (ex: `12`)
 * `double` - number with decimal (ex: `12.0`)
-* `byte` - hex (ex: `0x10`)
-* `char` - character surrounded by single quotes (ex: `'c'`)
-* `string` - quotes wrapped around one or more characters (ex: `"string"`)
-* `range` - A range of numbers. (ex: `5..20` is a range of numbers 5 through 20, but not including 20) (Not currently working)
+* `char` - character surrounded by single quotes (ex: `'c'`) *(Comming Soon)*
 * `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
-* `special list` - just like a regular list, but are evaluated when inside q-expressions (ex: `{'[+ (+ 1 1) 3]}` returns `{[+ 2 3]}`)
-* `q-expression` - a list whose children are NOT evaluated, neither the list itself (ex: `{+ 1 (+ 1 1)}` returns `{+ 1 (+ 1 1)}`)
-* `special q-expression` - a list where neither the children, nor the list itself is evaluated. This special version does not allow the evaluation of any special s-expressions or special lists unless this q-expression is returned or used in a function. An example use of this is when you want to set a function that returns a q-expression, but the special lists/s-expressions inside are only evaluated when the function is called rather than defined.
-* `s-expression` - a list that is automatically evaluated, first item must be a function (ex: `(+ 1 (+ 1 1))` returns `3`)
-* `special s-expression` - just like a regular s-expression, but are evaluated when inside q-expressions (ex: `{3 '(+ 1 1)}` returns `{3 2}`)
-* `lambda` - called a function within the interpreter code (ex: `(\ {x y} {print x y})`)
-* `note` - used to give more information about something. Most used for static typing (WIP). See other uses in ideas.md.
 
 ## Examples ##
-There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which is the Prelude for the language; Is is auto-loaded for the REPL and every program.
+There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`.
 
 ## Compiling the Interpreter and Running Examples ##
-Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/test.lydg`.
-* Alternatively, you can use `make release` and `make run` to build and run the release version of this. Note that this only works with gcc.
+Currently, you can only compile on Linux (with gcc) or Mac OS X (with mac, gcc is aliased to clang). You simple run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
 
 ## Sublime Syntax Definitons for Lydrige ##
-I have created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
+I have also created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
