@@ -17,9 +17,9 @@ dval *denv_put(denv *e, char *k, dval *v, int constant) { // Doesn't delete v
 		}
 	} else { // Not in hashtable yet!
 		//e->count++; // TODO: Doesn't hashmap have a count?
-		t = dval_copy(v); // Copy value into t TODO: Possible Memory Leak - 't' never gets deleted/freed
+		t = dval_copy(v);
 		t->constant = constant; // set constant
-		Hashmap_set(e->map, bfromcstr(k), t);
+		Hashmap_set(e->map, bfromcstr(k), t); // TODO: Check for errors!
 		return(dval_int(0)); // TODO: Return something else?
 	}
 }
@@ -327,6 +327,22 @@ dval *builtin_tail(denv *a, dval *args, unsigned int argc) {
 	return(dval_list(largs, count));
 }
 
+dval *builtin_join(denv *a, dval *args, unsigned int argc) {
+	if (argc <= 1 || argc > 2) {
+		return(dval_error("Function 'join' must be passed only 2 arguments."));
+	}
+	if (args[0].type != DVAL_LIST || args[1].type != DVAL_LIST) {
+		return(dval_error("Function 'join' must be passed lists."));
+	}
+
+	unsigned int largc = args[0].count + args[1].count;
+	dval *largs = calloc(largc, sizeof(dval));
+	memcpy(largs, args[0].elements, sizeof(dval) * args[0].count);
+	memcpy(largs + args[0].count, args[1].elements, sizeof(dval) * args[1].count);
+	dval *list = dval_list(largs, largc);
+	return(list);
+}
+
 internal bool print_elem(dval arg) {
 	switch (arg.type) {
 		case DVAL_INT:
@@ -364,7 +380,7 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	return(dval_int(1));
 }
 
-dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a command?
+dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a REPL command?
 	linenoiseClearScreen();
 	return(dval_int(1));
 }
@@ -390,6 +406,7 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "last", builtin_last);
 	denv_add_builtin(e, "head", builtin_head);
 	denv_add_builtin(e, "tail", builtin_tail);
+	denv_add_builtin(e, "join", builtin_join);
 
 	denv_add_builtin(e, "print", builtin_print);
 	denv_add_builtin(e, "clear", builtin_clear);

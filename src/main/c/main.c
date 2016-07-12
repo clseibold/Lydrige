@@ -51,7 +51,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 			ident = t->children[i]->contents;
 			continue;
 		}
-		
+
 		if (strstr(t->children[i]->tag, "expression")) {
 			dval *d = read_eval_expr(e, t->children[i]);
 			args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
@@ -248,7 +248,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		denv_add_builtins(e);
 
 		linenoiseSetMultiLine(1);
-		linenoiseHistorySetMaxLen(20); // TODO: May change
+		linenoiseHistorySetMaxLen(20);
 		while (running) {
 			char* input = linenoise("Lydrige> ");
 			linenoiseHistoryAdd(input);
