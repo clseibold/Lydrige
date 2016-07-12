@@ -1,6 +1,6 @@
 # Lydrige
 ## Introduction ##
-Lydrige is an interpreted programming language. Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple language inspired by Lisp and other functional languages. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
+Lydrige is an interpreted programming language.Therefore, it is generally slower than compiled languages. It is a fairly simple language inspired by Lisp and other functional languages. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
 
 ## Contents ##
 * Basic Syntax
@@ -8,6 +8,7 @@ Lydrige is an interpreted programming language. Since this programming language 
 * Data Types
 * Examples
 * Compiling the Interpreter and Running Examples
+* Sublime Syntax Definitions for Lydrige
 
 ## Basic Syntax ##
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
