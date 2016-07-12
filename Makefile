@@ -4,6 +4,8 @@ debug: build/debug/lydrige
 release: build/release/lydrige
 run: build/release/lydrige
 	./build/release/lydrige
+run-debug: build/debug/lydrige
+	./build/debug/lydrige
 
 build/debug/lydrige: build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
 	mkdir -p build/debug
