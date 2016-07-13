@@ -13,7 +13,7 @@
 #define false 0
 
 typedef enum DVAL_TYPE {
-	DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
+	DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_CHARACTER, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
 } DVAL_TYPE;
 
 typedef struct dval dval;
@@ -26,6 +26,7 @@ struct dval {
 	union {
 		int integer;
 		double doub;
+		char character;
 		char *str;
 		dbuiltin func;
 		dval *elements; // For qexpressions and other list-like elements
@@ -35,6 +36,7 @@ struct dval {
 
 dval *dval_int(long integer);
 dval *dval_double(double doub);
+dval *dval_character(char character);
 dval *dval_error(char *str, ...);
 dval *dval_func(dbuiltin func, int constant);
 dval *dval_list(dval *elements, unsigned int count);
@@ -52,14 +54,15 @@ void denv_del(denv *e);
 
 int running;
 
-mpc_parser_t* Line;
-mpc_parser_t* Command;
-mpc_parser_t* Statement;
-mpc_parser_t* Expression;
-mpc_parser_t* Value;
-mpc_parser_t* Identifier;
-mpc_parser_t* Double;
-mpc_parser_t* Integer;
-mpc_parser_t* List;
+mpc_parser_t *Line;
+mpc_parser_t *Command;
+mpc_parser_t *Statement;
+mpc_parser_t *Expression;
+mpc_parser_t *Value;
+mpc_parser_t *Double;
+mpc_parser_t *Integer;
+mpc_parser_t *Character;
+mpc_parser_t *Identifier;
+mpc_parser_t *List;
 
 #endif

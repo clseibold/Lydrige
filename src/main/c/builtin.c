@@ -343,7 +343,7 @@ dval *builtin_join(denv *a, dval *args, unsigned int argc) {
 	return(list);
 }
 
-internal bool print_elem(dval arg) {
+bool print_elem(dval arg, bool removeQuotations) {
 	switch (arg.type) {
 		case DVAL_INT:
 			printf("%d", arg.integer);
@@ -351,13 +351,20 @@ internal bool print_elem(dval arg) {
 		case DVAL_DOUBLE:
 			printf("%f", arg.doub);
 			return true;
+		case DVAL_CHARACTER:
+			if (removeQuotations) {
+				printf("%c", arg.character);
+			} else {
+				printf("'%c'", arg.character);
+			}
+			return true;
 		case DVAL_FUNC:
 			printf("(Func)");
 			return true;
 		case DVAL_LIST:
 			printf("[");
 			for (int i = 0; i < arg.count; i++) {
-				print_elem(arg.elements[i]);
+				print_elem(arg.elements[i], false);
 				if (i != arg.count - 1) {
 					printf(", ");
 				}
@@ -371,7 +378,7 @@ internal bool print_elem(dval arg) {
 
 dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	for (int i = 0; i < argc; i++) {
-		if (!print_elem(args[i])) {
+		if (!print_elem(args[i], true)) {
 			return(dval_error("Cannot print value of type Unknown or Any!"));
 		}
 		printf(" ");

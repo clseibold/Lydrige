@@ -16,6 +16,14 @@ dval *dval_double(double doub) {
 	return(v);
 }
 
+dval *dval_character(char character) {
+	dval *v = (dval *) malloc(sizeof(dval));
+	v->type = DVAL_CHARACTER;
+	v->constant = 0;
+	v->character = character;
+	return(v);
+}
+
 dval *dval_error(char *str, ...) {
 	dval *d = (dval *) malloc(sizeof(dval));
 	d->type = DVAL_ERROR;
