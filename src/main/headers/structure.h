@@ -62,6 +62,7 @@ mpc_parser_t *Value;
 mpc_parser_t *Double;
 mpc_parser_t *Integer;
 mpc_parser_t *Character;
+mpc_parser_t *String;
 mpc_parser_t *Identifier;
 mpc_parser_t *List;
 
