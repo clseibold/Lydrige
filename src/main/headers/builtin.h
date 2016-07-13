@@ -26,6 +26,7 @@ dval *builtin_head(denv *a, dval *args, unsigned int argc);
 dval *builtin_tail(denv *a, dval *args, unsigned int argc);
 dval *builtin_join(denv *a, dval *args, unsigned int argc);
 
+bool print_elem(dval arg, bool removeQuotations);
 dval *builtin_print(denv *e, dval *args, unsigned int argc);
 dval *builtin_clear(denv *a, dval *args, unsigned int argc);
 

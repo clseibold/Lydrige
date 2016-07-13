@@ -28,6 +28,8 @@ Here is an example of the syntax of a simple print statement:
 * The syntax has now been slightly modified. Basically, files are made up of statements OR expression. A statement is defined as multiple expressions with a semicolon at the end. However, statements are evaluated as if they were one big expression. This allows us to have a syntax more similar to that of C-based langauges. Here is the print statement using the new syntax. It is also important to note that the above syntax and this new syntax will both be allowed by the interpreter and the result will be the same.
 `print "This number evaluates to" (+ 1 1);`
 
+You can view an example of a simple program in this language in the [examples/test.lydg](http://github.com/christianap/Lydrige/blob/dev/examples/test.lydg) file. This file explains many of the different features of the language.
+
 ##  3. <a name='BuiltinFunctions-2'></a>Builtin Functions
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
 * `list`  - returns a q-expression with all of the given arguments inside.
@@ -42,10 +44,10 @@ Here are the builtin functions in the language. Many of these builtin functions 
 
 ##  4. <a name='DataTypes-3'></a>Data Types
 Here are all of the data types in Lydrige and how you represent them within the language:
-* `long` - simple number (ex: `12`)
+* `long`   - simple number (ex: `12`)
 * `double` - number with decimal (ex: `12.0`)
-* `char` - character surrounded by single quotes (ex: `'c'`) *(Comming Soon)*
-* `list` - a list whose children are evaluated, but not the list itself (ex: `[+, 1, (+ 1 1)]` returns `[+ 1 2]`)
+* `char`   - character surrounded by single quotes (ex: `'c'`)
+* `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
 
 ##  5. <a name='Examples-4'></a>Examples
 There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`.

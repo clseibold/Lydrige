@@ -104,6 +104,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "double")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
+					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
+						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
 						if (v->type == DVAL_ERROR) {
@@ -159,6 +161,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				args[currentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->contents, NULL, 10)} };
 			} else if (strstr(t->children[i]->tag, "double")) {
 				args[currentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->contents, NULL)} };
+			} else if (strstr(t->children[i]->tag, "character")) {
+				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
 			} else { // TODO: Shouldn't I just be returning the error (instead of setting it to an argument)?
 				args[currentArgPos] = (dval) { DVAL_ERROR, 0, {.str = "(Interpreter error) A value type was added to the parser, but it's evaluation is not handled."} };
 			}
@@ -191,40 +195,16 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 	}
 }
 
-void REPLOutput(dval *d) {
-	switch (d->type) {
-		case DVAL_ERROR:
-			printf(COL_RED " Error: " COL_RESET "%s\n", d->str);
-			break;
-		case DVAL_DOUBLE:
-			printf(" %f\n", d->doub);
-			break;
-		case DVAL_INT:
-			printf(" %d\n", d->integer);
-			break;
-		case DVAL_FUNC:
-			printf(" (Func)\n", d->str);
-			break;
-		case DVAL_LIST: // TODO
-			printf(" (List)\n");
-			/*for (int i = 0; i < d->count; i++) {
-
-			}*/
-			break;
-		default:
-			printf(COL_RED " Error: " COL_RESET "Unknown Output\n");
-	}
-}
-
 int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy for all bstrings!
 	Line = mpc_new("line");
 	Command = mpc_new("command"); // REPL-Only commands
 	Statement = mpc_new("statement");
 	Expression = mpc_new("expression");
 	Value = mpc_new("value");
-	Identifier = mpc_new("ident");
-	Double = mpc_new("double");
 	Integer = mpc_new("integer");
+	Double = mpc_new("double");
+	Character = mpc_new("character");
+	Identifier = mpc_new("ident");
 	List = mpc_new("list");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
@@ -233,12 +213,13 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		command : ':' <ident> ;\
 		statement : <ident> <value>* ';' ;\
 		expression : '(' <ident> <value>* ')' ;\
-		value : <double> | <integer> | <expression> | <ident> | <list>;\
-		ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;\
+		value : <double> | <integer> | <character> | <expression> | <ident> | <list>;\
 		double : /-?[0-9]+\\.[0-9]+/ ;\
 		integer : /-?[0-9]+/ ;\
+		character : /\'(\\\\.|[^\"])\'/ ;\
+		ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;\
 		list : '[' <value> (',' <value>)* ']' ;\
-		", Line, Command, Statement, Expression, Value, Identifier, Double, Integer, List);
+		", Line, Command, Statement, Expression, Value, Double, Integer, Character, Identifier, List);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - v0.6.0a");
@@ -257,7 +238,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 			if (mpc_parse("<stdin>", input, Line, &r)) {
 				// mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
-				REPLOutput(result);
+				print_elem(*result, false); // TODO(BUG): 'print' function should return '1' directly after being ran, but '1' is only printed after entering another expression in REPL?!?!
 				dval_del(result);
 				mpc_ast_delete((mpc_ast_t *) r.output);
 			} else {
@@ -270,6 +251,6 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		denv_del(e);
 	}
 
-	mpc_cleanup(9, Line, Command, Statement, Expression, Value, Identifier, Double, Integer, List);
+	mpc_cleanup(10, Line, Command, Statement, Expression, Value, Double, Integer, Character, Identifier, List);
 	return(0);
 }
