@@ -106,6 +106,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 						elements[lcurrentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
+					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
+						free(args); free(elements);
+						return(dval_error("Strings are not completely implemented yet!"));
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
 						if (v->type == DVAL_ERROR) {
@@ -163,6 +166,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 				args[currentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->contents, NULL)} };
 			} else if (strstr(t->children[i]->tag, "character")) {
 				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
+			} else if (strstr(t->children[i]->tag, "string")) {
+				free(args);
+				return(dval_error("String are not completely implemented yet!"));
 			} else { // TODO: Shouldn't I just be returning the error (instead of setting it to an argument)?
 				args[currentArgPos] = (dval) { DVAL_ERROR, 0, {.str = "(Interpreter error) A value type was added to the parser, but it's evaluation is not handled."} };
 			}
@@ -204,6 +210,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 	Integer = mpc_new("integer");
 	Double = mpc_new("double");
 	Character = mpc_new("character");
+	String = mpc_new("string");
 	Identifier = mpc_new("ident");
 	List = mpc_new("list");
 
@@ -213,13 +220,14 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		command : ':' <ident> ;\
 		statement : <ident> <value>* ';' ;\
 		expression : '(' <ident> <value>* ')' ;\
-		value : <double> | <integer> | <character> | <expression> | <ident> | <list>;\
+		value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list>;\
 		double : /-?[0-9]+\\.[0-9]+/ ;\
 		integer : /-?[0-9]+/ ;\
 		character : /\'(\\\\.|[^\"])\'/ ;\
+		string : /\"(\\\\.|[^\"])*\"/ ;\
 		ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;\
-		list : '[' <value> (',' <value>)* ']' ;\
-		", Line, Command, Statement, Expression, Value, Double, Integer, Character, Identifier, List);
+		list : '[' (<value> (',' <value>)*)? ']' ;\
+		", Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - v0.6.0a");
@@ -251,6 +259,6 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		denv_del(e);
 	}
 
-	mpc_cleanup(10, Line, Command, Statement, Expression, Value, Double, Integer, Character, Identifier, List);
+	mpc_cleanup(11, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
 	return(0);
 }
