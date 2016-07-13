@@ -1,5 +1,7 @@
 # Lydrige
 <!-- vscode-markdown-toc -->
+
+## Contents
 1. [Introduction](#Introduction-0)
 2. [Basic Syntax](#BasicSyntax-1)
 3. [Builtin Functions](#BuiltinFunctions-2)
@@ -12,9 +14,9 @@
 ##  1. <a name='Introduction-0'></a>Introduction
 Lydrige is an interpreted programming language.Therefore, it is generally slower than compiled languages. It is a fairly simple language inspired by Lisp and other functional languages. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
 
-You can find even more information about this language on my website at [http://krixano.x10host.com](http://krixano.x10host.com), which includes:
+You can find even more information about this language on my website at [http://krixano.x10host.com/Lydrige](http://krixano.x10host.com/Lydrige), which includes:
 * Documentation on the Prelude, the Standard Library, and Builtin Functions
-* Documentation on how many of the builtin datastructures are implemented into the language
+* Documentation on how many of the builtin data structures are implemented into the language
 * Pre-Compiled downloads for the 3 major Operating Systems and x86/x86_64 architectures
 * Instructions on how to compile yourself
 * And Changelogs for all versions of the language, including alpha versions
@@ -28,13 +30,14 @@ Here is an example of the syntax of a simple print statement:
 
 ##  3. <a name='BuiltinFunctions-2'></a>Builtin Functions
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
-* `list` - returns a q-expression with all of the given arguments inside.
+* `list`  - returns a q-expression with all of the given arguments inside.
 * `first` - returns the first item in a given q-expression or list literal.
-* `last` - returns the last item in a given q-expression or list literal.
-* `head` - returns all but the last item from a given q-expression or list literal in a new q-expression.
-* `tail` - returns all but the first item from a given q-expression or list literal in a new q-expression.
-* `join` - joins two lists together into a single list.
-* `len` - returns the length of a given list.
+* `last`  - returns the last item in a given q-expression or list literal.
+* `head`  - returns all but the last item from a given q-expression or list literal in a new q-expression.
+* `tail`  - returns all but the first item from a given q-expression or list literal in a new q-expression.
+* `join`  - joins two lists together into a single list.
+* `get`   - gets item from given list at given index. (ex: `get 0 [2, 3, 4, 5];` will return `2`)
+* `len`   - returns the length of a given list.
 * `print` - prints text to the screen. Returns `1`
 
 ##  4. <a name='DataTypes-3'></a>Data Types
@@ -42,7 +45,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `long` - simple number (ex: `12`)
 * `double` - number with decimal (ex: `12.0`)
 * `char` - character surrounded by single quotes (ex: `'c'`) *(Comming Soon)*
-* `list` - a list whose children are evaluated, but not the list itself (ex: `[+ 1 (+ 1 1)]` returns `[+ 1 2]`)
+* `list` - a list whose children are evaluated, but not the list itself (ex: `[+, 1, (+ 1 1)]` returns `[+ 1 2]`)
 
 ##  5. <a name='Examples-4'></a>Examples
 There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`.
