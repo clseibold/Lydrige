@@ -215,19 +215,18 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 	List = mpc_new("list");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
-		" \
-		line : /^/ <command> /$/ | /^/ <expression>* /$/ | /^/ <statement>* /$/ ;\
-		command : ':' <ident> ;\
-		statement : <ident> <value>* ';' ;\
-		expression : '(' <ident> <value>* ')' ;\
-		value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list>;\
-		double : /-?[0-9]+\\.[0-9]+/ ;\
-		integer : /-?[0-9]+/ ;\
-		character : /\'(\\\\.|[^\"])\'/ ;\
-		string : /\"(\\\\.|[^\"])*\"/ ;\
-		ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;\
-		list : '[' (<value> (',' <value>)*)? ']' ;\
-		", Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
+		"line : /^/ <command> /$/ | /^/ <expression>* /$/ | /^/ <statement>* /$/ ;"
+		"command : ':' <ident> ;"
+		"statement : <ident> <value>* ';' ;"
+		"expression : '(' <ident> <value>* ')' ;"
+		"value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list>;"
+		"double : /-?[0-9]+\\.[0-9]+/ ;"
+		"integer : /-?[0-9]+/ ;"
+		"character : /\'(\\\\.|[^\"])\'/ ;"
+		"string : /\"(\\\\.|[^\"])*\"/ ;"
+		"ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
+		"list : '[' (<value> (',' <value>)*)? ']' ;",
+		Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - v0.6.0a");
@@ -246,7 +245,11 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 			if (mpc_parse("<stdin>", input, Line, &r)) {
 				// mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
-				print_elem(*result, false); // TODO(BUG): 'print' function should return '1' directly after being ran, but '1' is only printed after entering another expression in REPL?!?!
+				if (result->type == DVAL_ERROR) {
+					printf("Error: %s", result->str);
+				} else if (!print_elem(*result, false)) { // TODO(BUG): 'print' function should return '1' directly after being ran, but '1' is only printed after entering another expression in REPL?!?!
+					printf("Error: Cannot print value of type Unknown or Any!");
+				}
 				dval_del(result);
 				mpc_ast_delete((mpc_ast_t *) r.output);
 			} else {

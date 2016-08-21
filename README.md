@@ -39,6 +39,7 @@ Here are the builtin functions in the language. Many of these builtin functions 
 * `tail`  - returns all but the first item from a given q-expression or list literal in a new q-expression.
 * `join`  - joins two lists together into a single list.
 * `get`   - gets item from given list at given index. (ex: `get 0 [2, 3, 4, 5];` will return `2`)
+* `set`   - returns a new q-expression with the item at the given index of given q-expression set to a given value. Doesn't modify original q-expression.
 * `len`   - returns the length of a given list.
 * `print` - prints text to the screen. Returns `1`
 
