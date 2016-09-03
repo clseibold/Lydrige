@@ -246,7 +246,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 				// mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				if (result->type == DVAL_ERROR) {
-					printf("Error: %s", result->str);
+					printf("Error: %s\n", result->str);
 				} else {
 					bool unknown = print_elem(*result, false);
 					printf("\n");
