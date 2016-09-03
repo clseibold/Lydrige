@@ -247,8 +247,12 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				if (result->type == DVAL_ERROR) {
 					printf("Error: %s", result->str);
-				} else if (!print_elem(*result, false)) { // TODO(BUG): 'print' function should return '1' directly after being ran, but '1' is only printed after entering another expression in REPL?!?!
-					printf("Error: Cannot print value of type Unknown or Any!");
+				} else {
+					bool unknown = print_elem(*result, false);
+					printf("\n");
+					if (!unknown) {
+						printf("Error: Cannot print value of type Unknown or Any!");
+					}
 				}
 				dval_del(result);
 				mpc_ast_delete((mpc_ast_t *) r.output);
