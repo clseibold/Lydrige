@@ -284,10 +284,10 @@ dval *builtin_set(denv *a, dval *args, unsigned int argc) {
 		return(dval_error("Function 'get' must be passed a list for argument 3."));
 	}
 
-	dval *arg = calloc(1, sizeof(dval));
-	memcpy(arg, args[1].elements + args[0].integer, sizeof(dval) * 1); // Copy element at given index into arg
-	arg->elements[args[0].integer] = args[2];
-	return(arg);
+	dval *largs = calloc(args[2].count, sizeof(dval));
+	memcpy(largs, args[2].elements, sizeof(dval) * (args[2].count)); // Copy all elements into arg
+	largs[args[0].integer] = args[1];
+	return(dval_list(largs, args[2].count));
 }
 
 dval *builtin_first(denv *a, dval *args, unsigned int argc) {
