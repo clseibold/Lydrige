@@ -32,16 +32,16 @@ You can view an example of a simple program in this language in the [examples/te
 
 ##  3. <a name='BuiltinFunctions-2'></a>Builtin Functions
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
-* `list`  - returns a q-expression with all of the given arguments inside.
-* `first` - returns the first item in a given q-expression or list literal.
-* `last`  - returns the last item in a given q-expression or list literal.
-* `head`  - returns all but the last item from a given q-expression or list literal in a new q-expression.
-* `tail`  - returns all but the first item from a given q-expression or list literal in a new q-expression.
-* `join`  - joins two lists together into a single list.
-* `get`   - gets item from given list at given index. (ex: `get 0 [2, 3, 4, 5];` will return `2`)
-* `set`   - returns a new q-expression with the item at the given index of given q-expression set to a given value. Doesn't modify original q-expression.
-* `len`   - returns the length of a given list.
-* `print` - prints text to the screen. Returns `1`
+* `list`  - returns a q-expression with all of the given arguments inside. (`list 5 4 4 3;` returns `[5, 4, 4, 3]`)
+* `first` - returns the first item in a given q-expression or list literal. (`first [5, 4, 4, 3];` returns `5`)
+* `last`  - returns the last item in a given q-expression or list literal. (`last [5, 4, 4, 3];` returns `3`)
+* `head`  - returns all but the last item from a given q-expression or list literal in a new q-expression. (`head [5, 4, 4, 3];` returns `[5, 4, 4]`)
+* `tail`  - returns all but the first item from a given q-expression or list literal in a new q-expression. (`tail [5, 4, 4, 3];` returns `[4, 4, 3]`)
+* `join`  - joins two lists together into a single list. (`join [5, 4] [4, 3];` returns `[5, 4, 4, 3]`)
+* `get`   - gets item from given list at given index. (`get 0 [5, 4, 4, 3];` returns `5`)
+* `set`   - returns a new q-expression with the item at the given index of given q-expression set to a given value. Doesn't modify original q-expression. (`set 0 4 [5, 4, 4, 3];` returns `[4, 4, 4, 3]`)
+* `len`   - returns the length of a given list. (`len [5, 4, 4, 3];` returns `4`)
+* `print` - prints text to the screen. Returns `1` (`print [5, 4, 4, 3] 23.5;` will print `[5, 4, 4, 3] 23.5` and return `1`)
 
 ##  4. <a name='DataTypes-3'></a>Data Types
 Here are all of the data types in Lydrige and how you represent them within the language:
