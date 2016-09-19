@@ -51,7 +51,13 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
 
 ##  5. <a name='Examples-4'></a>Examples
-There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`.
+There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`. 
+
+Until Lydrige is fully rewritten, these examples won't currently work. However, some examples that do currently work are provided below:
+* `print 5.2;`
+* `print (+ 3 4.4);`
+* `print (join [5, 4, 3, 3] [2, 2, 3]);`
+* `print (+ 1 (get 0 [3, 2, 2]));`
 
 ##  6. <a name='CompilingtheInterpreterandRunningExamples-5'></a>Compiling the Interpreter and Running Examples
 Currently, you can only compile on Linux (with gcc) or Mac OS X (with mac, gcc is aliased to clang). You simple run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
