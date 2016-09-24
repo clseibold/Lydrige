@@ -13,7 +13,7 @@
 #define false 0
 
 typedef enum DVAL_TYPE {
-	DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_CHARACTER, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
+	DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_CHARACTER, DVAL_STRING, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
 } DVAL_TYPE;
 
 typedef struct dval dval;
@@ -31,7 +31,7 @@ struct dval {
 		dbuiltin func;
 		dval *elements; // For qexpressions and other list-like elements
 	};
-	unsigned int count; // For qexpressions and other list-like elements
+	unsigned int count; // For qexpressions and other list-like elements and strings
 };
 
 dval *dval_int(long integer);
@@ -50,7 +50,6 @@ struct denv {
 
 denv *denv_new(void);
 void denv_del(denv *e);
-
 
 int running;
 
