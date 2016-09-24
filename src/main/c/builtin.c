@@ -375,6 +375,13 @@ bool print_elem(dval arg, bool removeQuotations) {
 				printf("'%c'", arg.character);
 			}
 			return true;
+		case DVAL_STRING:
+			if (removeQuotations) {
+				printf("%s", arg.str);
+			} else {
+				printf("\"%s\"", arg.str);
+			}
+			return true;
 		case DVAL_FUNC:
 			printf("(Func)");
 			return true;

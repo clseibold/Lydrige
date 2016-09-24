@@ -15,7 +15,7 @@
 #define COL_CYAN "\x1b[36m"
 #define COL_RESET "\x1b[0m"
 
-internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
+internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	// For loop to determine amount of args used
 	unsigned int argc = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {
@@ -35,7 +35,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 	if (args == NULL) {
 		return(dval_error("Unable to allocate memory for arguments."));
 	}
-	char* ident; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
+	char *ident; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
 	dval *result;
 
 	unsigned int currentArgPos = 0;
@@ -107,8 +107,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
-						free(args); free(elements);
-						return(dval_error("Strings are not completely implemented yet!"));
+						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "almost implemented"}, 18 };
+						//free(args); free(elements);
+						//return(dval_error("Strings are not completely implemented yet!"));
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
 						if (v->type == DVAL_ERROR) {
@@ -167,8 +168,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t* t) {
 			} else if (strstr(t->children[i]->tag, "character")) {
 				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
 			} else if (strstr(t->children[i]->tag, "string")) {
-				free(args);
-				return(dval_error("String are not completely implemented yet!"));
+				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "almost implemented"}, 18 };
+				//free(args);
+				//return(dval_error("String are not completely implemented yet!"));
 			} else { // TODO: Shouldn't I just be returning the error (instead of setting it to an argument)?
 				args[currentArgPos] = (dval) { DVAL_ERROR, 0, {.str = "(Interpreter error) A value type was added to the parser, but it's evaluation is not handled."} };
 			}
@@ -264,6 +266,8 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		}
 
 		denv_del(e);
+	} else if (argc == 2) {
+		// Read file and evaluate each line here!
 	}
 
 	mpc_cleanup(11, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
