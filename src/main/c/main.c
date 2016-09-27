@@ -21,6 +21,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ")") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "[") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
@@ -42,6 +43,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ")") == 0) continue;
+		else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "[") == 0) continue;
 		else if (strcmp(t->children[i]->contents, "]") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
@@ -70,6 +72,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
 				if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ")") == 0) continue;
+				else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
@@ -85,6 +88,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
 				if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
+				else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
 				else if (strcmp(t->children[i]->children[ii]->tag, "regex") == 0) continue;
@@ -107,9 +111,10 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "almost implemented"}, 18 };
-						//free(args); free(elements);
-						//return(dval_error("Strings are not completely implemented yet!"));
+						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "Strings are almost implemented"}, 30 };
+					} else if (strstr(t->children[i]->children[ii]->tag, "qexpr")) {
+						free(args); free(elements);
+						return(dval_error("Qexpressions are not completely implemented yet!"));
 					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
 						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
 						if (v->type == DVAL_ERROR) {
@@ -120,10 +125,10 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 						} else {
 							elements[lcurrentArgPos] = *v; // TODO(NOTE): This is coppied
 						}
-					} // TODO: else
+					}
 				} else {
-					// TODO: Error?
-					elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {0} };
+					free(args); free(elements);
+					return(dval_error("[Interpreter] A value type was added to the parser, but it's evaluation is not handled - LIST SECTION."));
 				}
 				lcurrentArgPos++;
 			}
@@ -168,16 +173,15 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			} else if (strstr(t->children[i]->tag, "character")) {
 				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
 			} else if (strstr(t->children[i]->tag, "string")) {
-				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "almost implemented"}, 18 };
-				//free(args);
-				//return(dval_error("String are not completely implemented yet!"));
-			} else { // TODO: Shouldn't I just be returning the error (instead of setting it to an argument)?
-				args[currentArgPos] = (dval) { DVAL_ERROR, 0, {.str = "(Interpreter error) A value type was added to the parser, but it's evaluation is not handled."} };
+				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "Strings are almost implemented"}, 30 };
+			} else if (strstr(t->children[i]->tag, "qexpr")) {
+				free(args);
+				return(dval_error("Qexpressions are not completely implemented yet!"));
 			}
 			currentArgPos++;
 		} else {
-			args[currentArgPos] = (dval) { DVAL_ANY, 0, {0} };
-			currentArgPos++;
+			free(args);
+			return(dval_error("[Interpreter] A value type was added to the parser, but it's evaluation is not handled."));
 		}
 	}
 
@@ -215,20 +219,22 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 	String = mpc_new("string");
 	Identifier = mpc_new("ident");
 	List = mpc_new("list");
+	Qexpression = mpc_new("qexpr");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"line : /^/ <command> /$/ | /^/ <expression>* /$/ | /^/ <statement>* /$/ ;"
 		"command : ':' <ident> ;"
 		"statement : <ident> <value>* ';' ;"
 		"expression : '(' <ident> <value>* ')' ;"
-		"value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list>;"
+		"value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list> | <qexpr> ;"
 		"double : /-?[0-9]+\\.[0-9]+/ ;"
 		"integer : /-?[0-9]+/ ;"
 		"character : /\'(\\\\.|[^\"])\'/ ;"
 		"string : /\"(\\\\.|[^\"])*\"/ ;"
 		"ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
-		"list : '[' (<value> (',' <value>)*)? ']' ;",
-		Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
+		"list : '[' (<value> (',' <value>)*)? ']' ;"
+		"qexpr : \"'(\" <ident> <value>* ')' ;",
+		Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
 
 	if (argc == 1) {
 		puts("Lydrige REPL - v0.6.0a");
@@ -245,7 +251,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				// mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				if (result->type == DVAL_ERROR) {
 					printf("Error: %s\n", result->str);
@@ -270,6 +276,6 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		// Read file and evaluate each line here!
 	}
 
-	mpc_cleanup(11, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List);
+	mpc_cleanup(12, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
 	return(0);
 }
