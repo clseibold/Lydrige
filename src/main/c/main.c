@@ -113,9 +113,9 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
 						char *substring;
-						int substrlen = strlen(t->children[i]->contents) - 2;
+						int substrlen = strlen(t->children[i]->children[ii]->contents) - 2;
 						substring = malloc(substrlen * sizeof(char));
-						memcpy(substring, &t->children[i]->contents[1], substrlen);
+						memcpy(substring, &t->children[i]->children[ii]->contents[1], substrlen);
 						substring[substrlen] = '\0';
 						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
 					} else if (strstr(t->children[i]->children[ii]->tag, "qexpr")) {
