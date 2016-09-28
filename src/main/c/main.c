@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 #include "../../linenoise/headers/linenoise.h"
 
 #include "../../mpc/headers/mpc.h"
@@ -111,7 +112,12 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
 						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
 					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "Strings are almost implemented"}, 30 };
+						char *substring;
+						int substrlen = strlen(t->children[i]->contents) - 2;
+						substring = malloc(substrlen * sizeof(char));
+						memcpy(substring, &t->children[i]->contents[1], substrlen);
+						substring[substrlen] = '\0';
+						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
 					} else if (strstr(t->children[i]->children[ii]->tag, "qexpr")) {
 						free(args); free(elements);
 						return(dval_error("Qexpressions are not completely implemented yet!"));
@@ -173,7 +179,12 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			} else if (strstr(t->children[i]->tag, "character")) {
 				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
 			} else if (strstr(t->children[i]->tag, "string")) {
-				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=(char *) "Strings are almost implemented"}, 30 };
+				char *substring;
+				int substrlen = strlen(t->children[i]->contents) - 2;
+				substring = malloc(substrlen * sizeof(char));
+				memcpy(substring, &t->children[i]->contents[1], substrlen);
+				substring[substrlen] = '\0';
+				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
 			} else if (strstr(t->children[i]->tag, "qexpr")) {
 				free(args);
 				return(dval_error("Qexpressions are not completely implemented yet!"));
@@ -251,7 +262,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
-				//mpc_ast_print((mpc_ast_t*) r.output); puts("");
+				mpc_ast_print((mpc_ast_t*) r.output); puts("");
 				dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
 				if (result->type == DVAL_ERROR) {
 					printf("Error: %s\n", result->str);
