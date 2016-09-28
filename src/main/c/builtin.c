@@ -2,34 +2,39 @@
 
 dval *denv_put(denv *e, char *k, dval *v, int constant) { // Doesn't delete v
 	dval *t;
-	dval *item = (dval *) Hashmap_get(e->map, bfromcstr(k));
+	bstring k_bstr = bfromcstr(k);
+	dval *item = (dval *) Hashmap_get(e->map, k_bstr);
 	if (item != NULL) { // If already defined in hashtable
 		if (item->constant == 0) { // If not constant (in hashtable)
-			dval *deleted = (dval *) Hashmap_delete(e->map, bfromcstr(k));
+			dval *deleted = (dval *) Hashmap_delete(e->map, k_bstr);
 			dval_del(deleted); // Note that `deleted` is the same as `item`!
 			item = NULL;
 			t = dval_copy(v); // Copy value into t
 			t->constant = constant; // set constant
-			Hashmap_set(e->map, bfromcstr(k), t); // TODO: Check for errors!
+			Hashmap_set(e->map, k_bstr, t); // TODO: Check for errors!
 			return(dval_int(0)); // TODO: Return something else?
 		} else { // TODO
+			bdestroy(k_bstr);
 			return(dval_error("Cannot edit '%s'. It is a constant.", k));
 		}
 	} else { // Not in hashtable yet!
 		//e->count++; // TODO: Doesn't hashmap have a count?
 		t = dval_copy(v);
 		t->constant = constant; // set constant
-		Hashmap_set(e->map, bfromcstr(k), t); // TODO: Check for errors!
+		Hashmap_set(e->map, k_bstr, t); // TODO: Check for errors!
 		return(dval_int(0)); // TODO: Return something else?
 	}
 }
 
 dval *denv_get(denv *e, char *k) { // Copies the value gotten from hashmap, so it must be freed after calling this function!
 	dval *v;
-	if ((v = (dval *) Hashmap_get(e->map, bfromcstr(k)))) {
+	bstring k_bstr = bfromcstr(k);
+	if ((v = (dval *) Hashmap_get(e->map, k_bstr))) {
         dval *result = dval_copy(v); // TODO: Possible Memory Leak - should d get deleted? Not until end of program (when destroying hashmap)
+		bdestroy(k_bstr);
 		return(result);
 	}
+	bdestroy(k_bstr);
 
 	if (e->parent) {
 		return(denv_get(e->parent, k));
