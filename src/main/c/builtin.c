@@ -417,7 +417,9 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a REPL command?
+#ifndef _WIN32
 	linenoiseClearScreen();
+#endif
 	return(dval_int(1));
 }
 
