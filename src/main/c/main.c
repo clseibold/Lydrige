@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <ctype.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -54,8 +52,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	if (args == NULL) {
 		return(dval_error("Unable to allocate memory for arguments."));
 	}
-	char *ident; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
-	dval *result;
+	char *ident = ""; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
+	dval *result = NULL;
 
 	unsigned int currentArgPos = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {

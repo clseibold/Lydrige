@@ -62,7 +62,7 @@ dval *builtin_add(denv *e, dval *args, unsigned int argc) {
 		}
 	}
 	if (isDouble) {
-		double accumulator;
+		double accumulator = 0.0;
 		if (args[0].type == DVAL_DOUBLE) {
 			accumulator = args[0].doub;
 		} else if (args[0].type == DVAL_INT) {
@@ -138,7 +138,7 @@ dval *builtin_multiply(denv *e, dval *args, unsigned int argc) {
 		}
 	}
 	if (isDouble) {
-		double accumulator;
+		double accumulator = 0.0;
 		if (args[0].type == DVAL_DOUBLE) {
 			accumulator = args[0].doub;
 		} else if (args[0].type == DVAL_INT) {
@@ -182,7 +182,7 @@ dval *builtin_divide(denv *e, dval *args, unsigned int argc) {
 		}
 	}
 	if (isDouble) {
-		double accumulator;
+		double accumulator = 0.0;
 		if (args[0].type == DVAL_DOUBLE) {
 			accumulator = args[0].doub;
 		} else if (args[0].type == DVAL_INT) {
