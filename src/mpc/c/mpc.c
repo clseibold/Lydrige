@@ -127,6 +127,37 @@ static mpc_input_t *mpc_input_new_string(const char *filename, const char *strin
   return i;
 }
 
+static mpc_input_t *mpc_input_new_nstring(const char *filename, const char *string, size_t length) {
+
+  mpc_input_t *i = malloc(sizeof(mpc_input_t));
+  
+  i->filename = malloc(strlen(filename) + 1);
+  strcpy(i->filename, filename);
+  i->type = MPC_INPUT_STRING;
+  
+  i->state = mpc_state_new();
+  
+  i->string = malloc(length + 1);
+  strncpy(i->string, string, length);
+  i->string[length] = '\0';
+  i->buffer = NULL;
+  i->file = NULL;
+  
+  i->suppress = 0;
+  i->backtrack = 1;
+  i->marks_num = 0;
+  i->marks_slots = MPC_INPUT_MARKS_MIN;
+  i->marks = malloc(sizeof(mpc_state_t) * i->marks_slots);
+  i->lasts = malloc(sizeof(char) * i->marks_slots);
+  i->last = '\0';
+  
+  i->mem_index = 0;
+  memset(i->mem_full, 0, sizeof(char) * MPC_INPUT_MEM_NUM);
+  
+  return i;
+
+}
+
 static mpc_input_t *mpc_input_new_pipe(const char *filename, FILE *pipe) {
 
   mpc_input_t *i = malloc(sizeof(mpc_input_t));
@@ -1223,6 +1254,14 @@ int mpc_parse(const char *filename, const char *string, mpc_parser_t *p, mpc_res
   return x;
 }
 
+int mpc_nparse(const char *filename, const char *string, size_t length, mpc_parser_t *p, mpc_result_t *r) {
+  int x;
+  mpc_input_t *i = mpc_input_new_nstring(filename, string, length);
+  x = mpc_parse_input(i, p, r);
+  mpc_input_delete(i);
+  return x;
+}
+
 int mpc_parse_file(const char *filename, FILE *file, mpc_parser_t *p, mpc_result_t *r) {
   int x;
   mpc_input_t *i = mpc_input_new_file(filename, file);
@@ -2095,7 +2134,7 @@ static mpc_val_t *mpcf_re_range(mpc_val_t *x) {
         for (j = start; j <= end; j++) {
           range = realloc(range, strlen(range) + 1 + 1 + 1);
           range[strlen(range) + 1] = '\0';
-          range[strlen(range) + 0] = j;
+          range[strlen(range) + 0] = (char)j;
         }        
       }
     }
@@ -2217,7 +2256,7 @@ mpc_val_t *mpcf_oct(mpc_val_t *x) {
 
 mpc_val_t *mpcf_float(mpc_val_t *x) {
   float *y = malloc(sizeof(float));
-  *y = strtod(x, NULL);
+  *y = strtof(x, NULL);
   free(x);
   return y;
 }
@@ -2730,6 +2769,14 @@ mpc_ast_t *mpc_ast_add_tag(mpc_ast_t *a, const char *t) {
   return a;
 }
 
+mpc_ast_t *mpc_ast_add_root_tag(mpc_ast_t *a, const char *t) {
+  if (a == NULL) { return a; }
+  a->tag = realloc(a->tag, (strlen(t)-1) + strlen(a->tag) + 1);
+  memmove(a->tag + (strlen(t)-1), a->tag, strlen(a->tag)+1);
+  memmove(a->tag, t, (strlen(t)-1));
+  return a;
+}
+
 mpc_ast_t *mpc_ast_tag(mpc_ast_t *a, const char *t) {
   a->tag = realloc(a->tag, strlen(t) + 1);
   strcpy(a->tag, t);
@@ -2808,6 +2855,142 @@ mpc_ast_t *mpc_ast_get_child_lb(mpc_ast_t *ast, const char *tag, int lb) {
   return NULL;
 }
 
+mpc_ast_trav_t *mpc_ast_traverse_start(mpc_ast_t *ast,
+                                       mpc_ast_trav_order_t order)
+{
+  mpc_ast_trav_t *trav, *n_trav;
+  mpc_ast_t *cnode = ast;
+
+  /* Create the traversal structure */
+  trav = malloc(sizeof(mpc_ast_trav_t));
+  trav->curr_node = cnode;
+  trav->parent = NULL;
+  trav->curr_child = 0;
+  trav->order = order;
+
+  /* Get start node */
+  switch(order) {
+    case mpc_ast_trav_order_pre:
+      /* Nothing else is needed for pre order start */
+      break;
+
+    case mpc_ast_trav_order_post:
+      while(cnode->children_num > 0) {
+        cnode = cnode->children[0];
+
+        n_trav = malloc(sizeof(mpc_ast_trav_t));
+        n_trav->curr_node = cnode;
+        n_trav->parent = trav;
+        n_trav->curr_child = 0;
+        n_trav->order = order;
+
+        trav = n_trav;
+      }
+
+      break;
+
+    default:
+      /* Unreachable, but compiler complaints */
+      break;
+  }
+
+  return trav;
+}
+
+mpc_ast_t *mpc_ast_traverse_next(mpc_ast_trav_t **trav) {
+  mpc_ast_trav_t *n_trav, *to_free;
+  mpc_ast_t *ret = NULL;
+  int cchild;
+
+  /* The end of traversal was reached */
+  if(*trav == NULL) return NULL;
+
+  switch((*trav)->order) {
+    case mpc_ast_trav_order_pre:
+      ret = (*trav)->curr_node;
+
+      /* If there aren't any more children, go up */
+      while(*trav != NULL &&
+        (*trav)->curr_child >= (*trav)->curr_node->children_num)
+      {
+        to_free = *trav;
+        *trav = (*trav)->parent;
+        free(to_free);
+      }
+
+      /* If trav is NULL, the end was reached */
+      if(*trav == NULL) {
+        break;
+      }
+
+      /* Go to next child */
+      n_trav = malloc(sizeof(mpc_ast_trav_t));
+
+      cchild = (*trav)->curr_child;
+      n_trav->curr_node = (*trav)->curr_node->children[cchild];
+      n_trav->parent = *trav;
+      n_trav->curr_child = 0;
+      n_trav->order = (*trav)->order;
+
+      (*trav)->curr_child++;
+      *trav = n_trav;
+
+      break;
+
+    case mpc_ast_trav_order_post:
+      ret = (*trav)->curr_node;
+
+      /* Move up tree to the parent If the parent doesn't have any more nodes,
+       * then this is the current node. If it does, move down to its left most
+       * child. Also, free the previous traversal node */
+      to_free = *trav;
+      *trav = (*trav)->parent;
+      free(to_free);
+
+      if(*trav == NULL)
+        break;
+
+      /* Next child */
+      (*trav)->curr_child++;
+
+      /* If there aren't any more children, this is the next node */
+      if((*trav)->curr_child >= (*trav)->curr_node->children_num) {
+        break;
+      }
+
+      /* If there are still more children, find the leftmost child from this
+       * node */
+      while((*trav)->curr_node->children_num > 0) {
+        n_trav = malloc(sizeof(mpc_ast_trav_t));
+
+        cchild = (*trav)->curr_child;
+        n_trav->curr_node = (*trav)->curr_node->children[cchild];
+        n_trav->parent = *trav;
+        n_trav->curr_child = 0;
+        n_trav->order = (*trav)->order;
+
+        *trav = n_trav;
+      }
+
+    default:
+      /* Unreachable, but compiler complaints */
+      break;
+  }
+
+  return ret;
+}
+
+void mpc_ast_traverse_free(mpc_ast_trav_t **trav) {
+  mpc_ast_trav_t *n_trav;
+
+  /* Go through parents until all are free */
+  while(*trav != NULL) {
+      n_trav = (*trav)->parent;
+      free(*trav);
+      *trav = n_trav;
+  }
+}
+
 mpc_val_t *mpcf_fold_ast(int n, mpc_val_t **xs) {
   
   int i, j;
@@ -2825,16 +3008,16 @@ mpc_val_t *mpcf_fold_ast(int n, mpc_val_t **xs) {
     
     if (as[i] == NULL) { continue; }
     
-    if (as[i] && as[i]->children_num > 0) {
-      
+    if        (as[i] && as[i]->children_num == 0) {
+      mpc_ast_add_child(r, as[i]);
+    } else if (as[i] && as[i]->children_num == 1) {
+      mpc_ast_add_child(r, mpc_ast_add_root_tag(as[i]->children[0], as[i]->tag));
+      mpc_ast_delete_no_children(as[i]);
+    } else if (as[i] && as[i]->children_num >= 2) {
       for (j = 0; j < as[i]->children_num; j++) {
         mpc_ast_add_child(r, as[i]->children[j]);
       }
-      
       mpc_ast_delete_no_children(as[i]);
-      
-    } else if (as[i] && as[i]->children_num == 0) {
-      mpc_ast_add_child(r, as[i]);
     }
   
   }
