@@ -1,8 +1,25 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+
+static char buffer[2048];
+
+char* readline(char* prompt) {
+  fputs(prompt, stdout);
+  fgets(buffer, 2048, stdin);
+  char *cpy = (char *) malloc(strlen(buffer)+1);
+  strcpy(cpy, buffer);
+  cpy[strlen(cpy)-1] = '\0';
+  return cpy;
+}
+
+#else
 #include "../../linenoise/headers/linenoise.h"
+#endif
 
 #include "../../mpc/headers/mpc.h"
 #include "../headers/structure.h"
@@ -254,11 +271,18 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 		denv *e = denv_new();
 		denv_add_builtins(e);
 
+#ifndef _WIN32
 		linenoiseSetMultiLine(1);
 		linenoiseHistorySetMaxLen(20);
+#endif
+
 		while (running) {
-			char* input = linenoise("Lydrige> ");
+#ifdef _WIN32
+			char *input = readline("Lydrige> ");
+#else
+			char *input = linenoise("Lydrige> ");
 			linenoiseHistoryAdd(input);
+#endif
 
 			mpc_result_t r;
 			if (mpc_parse("<stdin>", input, Line, &r)) {
@@ -279,7 +303,11 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 				mpc_err_print(r.error);
 				mpc_err_delete(r.error);
 			}
+#ifdef _WIN32
+			free(input);
+#else
 			linenoiseFree(input);
+#endif
 		}
 
 		denv_del(e);
