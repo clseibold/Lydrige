@@ -31,6 +31,11 @@ char* readline(char* prompt) {
 #define COL_CYAN "\x1b[36m"
 #define COL_RESET "\x1b[0m"
 
+// Returns array of dvals
+/*internal dval *test(int *argc) {
+
+}*/
+
 internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	// For loop to determine amount of args used
 	unsigned int argc = 0;
@@ -158,6 +163,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "statement")) {
 			result = read_eval_expr(e, t->children[i]); // TODO(BUG): This will result in lines returning only its last statement's value
+			free(args);
+			return(result);
 		} else if (strstr(t->children[i]->tag, "command")) { // REPL Only
 			if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
 				running = false;
@@ -167,9 +174,13 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
 				printf(" Lydrige Version v0.6.0a\n");
 				result = dval_int(1);
+				free(args);
+				return(result);
 			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
 				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n len - returns length of list as an integer\n");
 				result = dval_int(1);
+				free(args);
+				return(result);
 			} else {
 				result = dval_error("Command doesn't exist.");
 				free(args);
@@ -248,7 +259,7 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 	Qexpression = mpc_new("qexpr");
 
 	mpca_lang(MPCA_LANG_DEFAULT,
-		"line : /^/ <command> /$/ | /^/ <expression>* /$/ | /^/ <statement>* /$/ ;"
+		"line : /^/ <command> /$/ | /^/ <statement>* /$/ ;"
 		"command : ':' <ident> ;"
 		"statement : <ident> <value>* ';' ;"
 		"expression : '(' <ident> <value>* ')' ;"
