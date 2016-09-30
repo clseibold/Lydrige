@@ -1,5 +1,6 @@
 # Lydrige
 <!-- vscode-markdown-toc -->
+![travis-ci](https://travis-ci.org/krixano/Lydrige.svg?branch=dev)
 
 ## Contents
 1. [Introduction](#Introduction-0)
