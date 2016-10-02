@@ -89,7 +89,6 @@ internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
 			}
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "list")) {
-
 			unsigned int largc = arg_amt(t->children[i]);
 			darray_or_dval elements = test(largc, t->children[i], NULL, e);
 			if (!elements.isArray) { // Error
