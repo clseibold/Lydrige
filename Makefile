@@ -1,4 +1,4 @@
-default: debug
+default: all
 all: build/debug/lydrige build/release/lydrige
 debug: build/debug/lydrige
 release: build/release/lydrige
