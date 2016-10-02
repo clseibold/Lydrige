@@ -5,7 +5,7 @@ set arch=%2
 if /i "%compiler%"=="gcc" goto :gcc
 if /i "%compiler%"=="run" goto :run
 if /i "%compiler%"=="clean" goto :clean
-if /i "%compiler%"=="" echo Error: Please type in the compiler, 'msvc'/'gcc', or type in 'run' or 'clean' (argument 2)
+if /i "%compiler%"=="" echo Error: Please type in the compiler, 'gcc', or a command: 'run' or 'clean' (argument 2)
 echo Error: Unknown command (argument 2)
 goto :end
 
