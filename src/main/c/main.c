@@ -31,13 +31,15 @@ char* readline(char* prompt) {
 #define COL_CYAN "\x1b[36m"
 #define COL_RESET "\x1b[0m"
 
-// Returns array of dvals
-/*internal dval *test(int *argc) {
+typedef struct darray_or_dval {
+	bool isArray;
+	dval *result;
+} darray_or_dval;
 
-}*/
+internal dval *read_eval_expr(denv *e, mpc_ast_t *t);
 
-internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
-	// For loop to determine amount of args used
+// Returns int of amount of args
+internal int arg_amt(mpc_ast_t *t) {
 	unsigned int argc = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
@@ -51,15 +53,16 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 		if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value")) continue;
 		argc++;
 	}
+	return argc;
+}
 
+// Returns array of dvals
+internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
 	dval *args = (dval*) calloc(argc, sizeof(dval));
 	// Check for NULL, and return an error
 	if (args == NULL) {
-		return(dval_error("Unable to allocate memory for arguments."));
+		return((darray_or_dval) { .isArray = false, .result = dval_error("Unable to allocate memory for arguments.") });
 	}
-	char *ident = ""; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
-	dval *result = NULL;
-
 	unsigned int currentArgPos = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {
 		if (strcmp(t->children[i]->contents, "(") == 0) continue;
@@ -70,8 +73,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 		else if (strcmp(t->children[i]->contents, ",") == 0) continue;
 		else if (strcmp(t->children[i]->contents, ";") == 0) continue;
 		else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
-		if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value")) {
-			ident = t->children[i]->contents;
+		if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && ident != NULL) {
+			*ident = t->children[i]->contents;
 			continue;
 		}
 
@@ -79,112 +82,40 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 			dval *d = read_eval_expr(e, t->children[i]);
 			args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
 			if (d->type == DVAL_ERROR) {
-				result = d;
 				free(args);
-				return(result);
+				return((darray_or_dval) { .isArray = false, d });
 			} else {
 				dval_del(d);
 			}
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "list")) {
-			// TODO(CLEANUP): This is essentially just a copy of code from the outer loop!
-			// For loop to get element count
-			unsigned int lcount = 0;
-			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
-				if (strcmp(t->children[i]->children[ii]->contents, "(") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, ")") == 0) continue;
-				else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->tag, "regex") == 0) continue;
-				lcount++;
+
+			unsigned int largc = arg_amt(t->children[i]);
+			darray_or_dval elements = test(largc, t->children[i], NULL, e);
+			if (!elements.isArray) { // Error
+				return((darray_or_dval) { false, elements.result });
 			}
-
-			dval *elements = calloc(lcount, sizeof(dval));
-
-			// Add the elements
-			unsigned int lcurrentArgPos = 0;
-			for (int ii = 0; ii < t->children[i]->children_num; ii++) {
-				if (strcmp(t->children[i]->children[ii]->contents, "[") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, "]") == 0) continue;
-				else if (strcmp(t->children[i]->contents, "'(") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, ",") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->contents, ";") == 0) continue;
-				else if (strcmp(t->children[i]->children[ii]->tag, "regex") == 0) continue;
-				if (strstr(t->children[i]->children[ii]->tag, "expression")) {
-					dval *d = read_eval_expr(e, t->children[i]->children[ii]);
-					elements[lcurrentArgPos] = *d;
-					if (d->type == DVAL_ERROR) {
-						result = d;
-						free(args);
-						free(elements);
-						return(result);
-					} else {
-						dval_del(d);
-					}
-				} else if (strstr(t->children[i]->children[ii]->tag, "value")) {
-					if (strstr(t->children[i]->children[ii]->tag, "int")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->children[ii]->contents, NULL, 10)} };
-					} else if (strstr(t->children[i]->children[ii]->tag, "double")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_DOUBLE, 0, {.doub=strtod(t->children[i]->children[ii]->contents, NULL)} };
-					} else if (strstr(t->children[i]->children[ii]->tag, "character")) {
-						elements[lcurrentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->children[ii]->contents[1]} };
-					} else if (strstr(t->children[i]->children[ii]->tag, "string")) {
-						char *substring;
-						int substrlen = strlen(t->children[i]->children[ii]->contents) - 2;
-						substring = malloc(substrlen * sizeof(char));
-						memcpy(substring, &t->children[i]->children[ii]->contents[1], substrlen);
-						substring[substrlen] = '\0';
-						elements[lcurrentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
-					} else if (strstr(t->children[i]->children[ii]->tag, "qexpr")) {
-						free(args); free(elements);
-						return(dval_error("Qexpressions are not completely implemented yet!"));
-					} else if (strstr(t->children[i]->children[ii]->tag, "ident")) {
-						dval *v = denv_get(e, t->children[i]->children[ii]->contents);
-						if (v->type == DVAL_ERROR) {
-							result = v;
-							free(args);
-							free(elements);
-							return(result);
-						} else {
-							elements[lcurrentArgPos] = *v; // TODO(NOTE): This is coppied
-						}
-					}
-				} else {
-					free(args); free(elements);
-					return(dval_error("[Interpreter] A value type was added to the parser, but it's evaluation is not handled - LIST SECTION."));
-				}
-				lcurrentArgPos++;
-			}
-
-			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements }, lcount };
+			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements.result }, largc };
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "statement")) {
-			result = read_eval_expr(e, t->children[i]); // TODO(BUG): This will result in lines returning only its last statement's value
 			free(args);
-			return(result);
+			return((darray_or_dval) { false, read_eval_expr(e, t->children[i])}); // TODO(BUG): This will result in lines returning only its first statement's value
 		} else if (strstr(t->children[i]->tag, "command")) { // REPL Only
 			if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
 				running = false;
-				result = dval_error("Program Exited with Result: 1\n (User Interruption)\n");
 				free(args);
-				return(result);
+				return((darray_or_dval) { false, dval_error("Program Exited with Result: 1\n (User Interruption)\n") });
 			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
 				printf(" Lydrige Version v0.6.0a\n");
-				result = dval_int(1);
 				free(args);
-				return(result);
+				return((darray_or_dval) { false, dval_int(1) });
 			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
 				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n len - returns length of list as an integer\n");
-				result = dval_int(1);
 				free(args);
-				return(result);
+				return((darray_or_dval) { false, dval_int(1) });
 			} else {
-				result = dval_error("Command doesn't exist.");
 				free(args);
-				return(result);
+				return((darray_or_dval) { false, dval_error("Command doesn't exist.") });
 			}
 		} else if (strstr(t->children[i]->tag, "value")) {
 			if (strstr(t->children[i]->tag, "ident")) {
@@ -192,9 +123,8 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 				// Evaluate identifier here, and add result to args
 				dval *v = denv_get(e, t->children[i]->contents);
 				if (v->type == DVAL_ERROR) {
-					result = v;
 					free(args);
-					return(result);
+					return((darray_or_dval) { false, v });
 				} else {
 					args[currentArgPos] = *v; // TODO: This gets copied
 				}
@@ -213,32 +143,44 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
 			} else if (strstr(t->children[i]->tag, "qexpr")) {
 				free(args);
-				return(dval_error("Qexpressions are not completely implemented yet!"));
+				return((darray_or_dval) { false, dval_error("Qexpressions are not completely implemented yet!") });
 			}
 			currentArgPos++;
 		} else {
 			free(args);
-			return(dval_error("[Interpreter] A value type was added to the parser, but it's evaluation is not handled."));
+			return((darray_or_dval) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled.") });
 		}
 	}
+	return((darray_or_dval) { true, args });
+}
 
+internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
+	char *ident = ""; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
+	dval *result = NULL;
+
+	unsigned int argc = arg_amt(t);
+	darray_or_dval args = test(argc, t, &ident, e);
+	if (!args.isArray) {
+		return(args.result);
+	}
+	
 	if (strcmp(t->tag, ">") == 0) {
-		free(args);
+		free(args.result);
 		return(result);
 	}
 
 	// Function/Lambda call
 	dval *func = denv_get(e, ident);
 	if (func->type == DVAL_FUNC) {
-		dval *v = func->func(e, args, argc);
-		free(args);
+		dval *v = func->func(e, args.result, argc);
+		free(args.result);
 		free(func);
 		return(v);
 	} else if (func->type == DVAL_ERROR) {
-		free(args);
+		free(args.result);
 		return(func);
 	} else {
-		free(args);
+		free(args.result);
 		free(func);
 		return(dval_int(0));
 	}
