@@ -13,7 +13,7 @@
 
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Introduction-0'></a>Introduction
-Lydrige is an interpreted programming language.Therefore, it is generally slower than compiled languages. It is a fairly simple language inspired by Lisp and other functional languages. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
+Lydrige is a statically typed interpreted programming language inspired by lisp. It is a fairly simple language which makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
 
 You can find even more information about this language on my website at [http://krixano.x10host.com/Lydrige](http://krixano.x10host.com/Lydrige), which includes:
 * Documentation on the Prelude, the Standard Library, and Builtin Functions
