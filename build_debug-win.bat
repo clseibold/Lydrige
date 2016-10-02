@@ -5,14 +5,14 @@ set arch=%2
 if /i "%compiler%"=="gcc" goto :gcc
 if /i "%compiler%"=="run" goto :run
 if /i "%compiler%"=="clean" goto :clean
-if /i "%compiler%"=="" echo Error: Please type in the compiler, 'gcc', or a command: 'run' or 'clean' (argument 2)
+if /i "%compiler%"=="" echo Error: Please type in the compiler, 'gcc', or a command: 'run' or 'clean' (argument 1)
 echo Error: Unknown command (argument 2)
 goto :end
 
 :gcc
 if /i "%arch%"=="x86" goto :gccx86
 if /i "%arch%"=="x86_64" goto :gccx64
-echo Error: Unknown architecture. Must be either 'x86' or 'x86_64' (argument 3)
+echo Error: Unknown architecture. Must be either 'x86' or 'x86_64' (argument 2)
 goto :end
 
 :gccx86
