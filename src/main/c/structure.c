@@ -88,11 +88,6 @@ dval *dval_copy(dval *d) {
 
 void dval_del(dval *d) {
 	switch(d->type) {
-		case DVAL_LIST:
-			for (int i = 0; i < d->count; i++) {
-				free(d->elements);
-			}
-			break;
 		case DVAL_ERROR:
 		case DVAL_STRING:
 			free(d->str);
