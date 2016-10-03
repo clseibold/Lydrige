@@ -31,10 +31,10 @@ char* readline(char* prompt) {
 #define COL_CYAN "\x1b[36m"
 #define COL_RESET "\x1b[0m"
 
-typedef struct darray_or_dval {
+typedef struct dval_or_darray {
 	bool isArray;
 	dval *result;
-} darray_or_dval;
+} dval_or_darray;
 
 internal dval *read_eval_expr(denv *e, mpc_ast_t *t);
 
@@ -57,11 +57,11 @@ internal int arg_amt(mpc_ast_t *t) {
 }
 
 // Returns array of dvals
-internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
+internal dval_or_darray eval_args(int argc, mpc_ast_t *t, char **ident, denv *e) {
 	dval *args = (dval*) calloc(argc, sizeof(dval));
 	// Check for NULL, and return an error
 	if (args == NULL) {
-		return((darray_or_dval) { .isArray = false, .result = dval_error("Unable to allocate memory for arguments.") });
+		return((dval_or_darray) { false, dval_error("Unable to allocate memory for arguments.") });
 	}
 	unsigned int currentArgPos = 0;
 	for (unsigned int i = 0; i < t->children_num; i++) {
@@ -83,38 +83,38 @@ internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
 			args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
 			if (d->type == DVAL_ERROR) {
 				free(args);
-				return((darray_or_dval) { .isArray = false, d });
+				return((dval_or_darray) { false, d });
 			} else {
 				dval_del(d);
 			}
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "list")) {
 			unsigned int largc = arg_amt(t->children[i]);
-			darray_or_dval elements = test(largc, t->children[i], NULL, e);
+			dval_or_darray elements = eval_args(largc, t->children[i], NULL, e);
 			if (!elements.isArray) { // Error
-				return((darray_or_dval) { false, elements.result });
+				return((dval_or_darray) { false, elements.result });
 			}
 			args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements.result }, largc };
 			currentArgPos++;
 		} else if (strstr(t->children[i]->tag, "statement")) {
 			free(args);
-			return((darray_or_dval) { false, read_eval_expr(e, t->children[i])}); // TODO(BUG): This will result in lines returning only its first statement's value
+			return((dval_or_darray) { false, read_eval_expr(e, t->children[i])}); // TODO(BUG): This will result in lines returning only its first statement's value
 		} else if (strstr(t->children[i]->tag, "command")) { // REPL Only
 			if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
 				running = false;
 				free(args);
-				return((darray_or_dval) { false, dval_error("Program Exited with Result: 1\n (User Interruption)\n") });
+				return((dval_or_darray) { false, dval_error("Program Exited with Result: 1\n (User Interruption)\n") });
 			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
 				printf(" Lydrige Version v0.6.0a\n");
 				free(args);
-				return((darray_or_dval) { false, dval_int(1) });
+				return((dval_or_darray) { false, dval_int(1) });
 			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
 				printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n len - returns length of list as an integer\n");
 				free(args);
-				return((darray_or_dval) { false, dval_int(1) });
+				return((dval_or_darray) { false, dval_int(1) });
 			} else {
 				free(args);
-				return((darray_or_dval) { false, dval_error("Command doesn't exist.") });
+				return((dval_or_darray) { false, dval_error("Command doesn't exist.") });
 			}
 		} else if (strstr(t->children[i]->tag, "value")) {
 			if (strstr(t->children[i]->tag, "ident")) {
@@ -123,7 +123,7 @@ internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
 				dval *v = denv_get(e, t->children[i]->contents);
 				if (v->type == DVAL_ERROR) {
 					free(args);
-					return((darray_or_dval) { false, v });
+					return((dval_or_darray) { false, v });
 				} else {
 					args[currentArgPos] = *v; // TODO: This gets copied
 				}
@@ -135,37 +135,36 @@ internal darray_or_dval test(int argc, mpc_ast_t *t, char **ident, denv *e) {
 				args[currentArgPos] = (dval) { DVAL_CHARACTER, 0, {.character=t->children[i]->contents[1]} };
 			} else if (strstr(t->children[i]->tag, "string")) {
 				char *substring;
-				int substrlen = strlen(t->children[i]->contents) - 2;
+				int substrlen = strlen(t->children[i]->contents) - 1;
 				substring = malloc(substrlen * sizeof(char));
 				memcpy(substring, &t->children[i]->contents[1], substrlen);
-				substring[substrlen] = '\0';
+				substring[substrlen-1] = '\0';
 				args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
 			} else if (strstr(t->children[i]->tag, "qexpr")) {
 				free(args);
-				return((darray_or_dval) { false, dval_error("Qexpressions are not completely implemented yet!") });
+				return((dval_or_darray) { false, dval_error("Qexpressions are not completely implemented yet!") });
 			}
 			currentArgPos++;
 		} else {
 			free(args);
-			return((darray_or_dval) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled.") });
+			return((dval_or_darray) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled.") });
 		}
 	}
-	return((darray_or_dval) { true, args });
+	return((dval_or_darray) { true, args });
 }
 
 internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	char *ident = ""; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
-	dval *result = NULL;
 
 	unsigned int argc = arg_amt(t);
-	darray_or_dval args = test(argc, t, &ident, e);
+	dval_or_darray args = eval_args(argc, t, &ident, e);
 	if (!args.isArray) {
 		return(args.result);
 	}
 	
 	if (strcmp(t->tag, ">") == 0) {
 		free(args.result);
-		return(result);
+		return(NULL);
 	}
 
 	// Function/Lambda call
@@ -185,7 +184,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t) {
 	}
 }
 
-int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy for all bstrings!
+int main(int argc, char** argv) { // TODO: Possible memory leak from not calling bdestroy for all bstrings!
 	Line = mpc_new("line");
 	Command = mpc_new("command"); // REPL-Only commands
 	Statement = mpc_new("statement");
@@ -241,9 +240,9 @@ int main(int argc, char** argv) { // TODO: Memory leak from not calling bdestroy
 				if (result->type == DVAL_ERROR) {
 					printf("Error: %s\n", result->str);
 				} else {
-					bool unknown = print_elem(*result, false);
+					bool known = print_elem(*result, false);
 					printf("\n");
-					if (!unknown) {
+					if (!known) {
 						printf("Error: Cannot print value of type Unknown or Any!");
 					}
 				}
