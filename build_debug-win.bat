@@ -12,7 +12,7 @@ goto :end
 :gcc
 if /i "%arch%"=="x86" goto :gccx86
 if /i "%arch%"=="x86_64" goto :gccx64
-echo Error: Unknown architecture. Must be either 'x86' or 'x86_64' (argument 2)
+echo Error: Unknown architecture. Must enter either 'x86' or 'x86_64' (argument 2)
 goto :end
 
 :gccx86

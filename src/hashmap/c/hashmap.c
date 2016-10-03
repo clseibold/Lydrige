@@ -16,8 +16,9 @@ static int default_compare(void *a, void *b) {
  * wikipedia description
  */
 static uint32_t default_hash(void *a) {
-    size_t len = blength((bstring)a);
-    char *key = bdata((bstring)a);
+	bstring s = (bstring) a;
+    size_t len = blength(s);
+    char *key = bdata(s);
     uint32_t hash = 0;
     uint32_t i = 0;
 
@@ -31,6 +32,7 @@ static uint32_t default_hash(void *a) {
     hash ^= (hash >> 11);
     hash += (hash << 15);
 
+	bdestroy(s);
     return hash;
 }
 
@@ -42,7 +44,8 @@ static uint32_t fnv1a_hash(void *a) {
 		hash ^= bchare(s, i, 0);
 		hash *= FNV_PRIME;
 	}
-
+	
+	bdestroy(s);
 	return hash;
 }
 

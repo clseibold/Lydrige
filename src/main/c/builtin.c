@@ -393,7 +393,7 @@ bool print_elem(dval arg, bool removeQuotations) {
 		case DVAL_LIST:
 			printf("[");
 			for (int i = 0; i < arg.count; i++) {
-				print_elem(arg.elements[i], false);
+				print_elem(arg.elements[i], false); // TODO: Check if known, if not, return false
 				if (i != arg.count - 1) {
 					printf(", ");
 				}
