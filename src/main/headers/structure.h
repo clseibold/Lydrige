@@ -37,6 +37,7 @@ struct dval {
 dval *dval_int(long integer);
 dval *dval_double(double doub);
 dval *dval_character(char character);
+dval *dval_string(char *str);
 dval *dval_error(char *str, ...);
 dval *dval_func(dbuiltin func, int constant);
 dval *dval_list(dval *elements, unsigned int count);
