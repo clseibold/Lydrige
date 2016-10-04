@@ -24,6 +24,17 @@ dval *dval_character(char character) {
 	return(v);
 }
 
+dval *dval_string(char *str) {
+	dval *d = (dval *) malloc(sizeof(dval));
+	d->type = DVAL_STRING;
+	d->constant = 0;
+
+	d->str = (char *) malloc(strlen(str) + 1);
+	strcpy(d->str, str);
+
+	return d;
+}
+
 dval *dval_error(char *str, ...) {
 	dval *d = (dval *) malloc(sizeof(dval));
 	d->type = DVAL_ERROR;
@@ -55,7 +66,7 @@ dval *dval_list(dval *elements, unsigned int count) {
 	return(d);
 }
 
-dval *dval_copy(dval *d) {
+dval *dval_copy(dval *d) { // TODO: Add list and string
 	dval *v = (dval *) malloc(sizeof(dval));
 	v->type = d->type;
 	v->constant = d->constant;

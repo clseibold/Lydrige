@@ -416,6 +416,24 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	return(dval_int(1));
 }
 
+dval *builtin_read(denv *e, dval *args, unsigned int argc) {
+	if (argc < 1 || argc > 1) {
+		return(dval_error("Function 'read' must be passed only 1 argument"));
+	}
+	if (args[0].type != DVAL_STRING) {
+		return(dval_error("Function 'read' must be passed a string for argument 1"));
+	}
+
+	printf("%s", args[0].str);
+	char input[255];
+	/*fgets(input, 255, stdin);
+	char *pos;
+	if ((pos=strchr(input, '\n')) != NULL)
+		*pos = '\0';*/
+	scanf("%s", input);
+	return(dval_string((char *)input));
+}
+
 dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a REPL command?
 #ifndef _WIN32
 	linenoiseClearScreen();
@@ -448,5 +466,6 @@ void denv_add_builtins(denv *e) {
 	denv_add_builtin(e, "join", builtin_join);
 
 	denv_add_builtin(e, "print", builtin_print);
+	denv_add_builtin(e, "read", builtin_read);
 	denv_add_builtin(e, "clear", builtin_clear);
 }
