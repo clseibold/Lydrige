@@ -1,3 +1,14 @@
+/* Lydrige - A simple interpreted programming language inspired by Lisp.
+ * Copyright (c) 2016, Christian Seibold
+ * Under MIT License
+ *
+ * You can find latest source code at:
+ * https://github.com/krixano/Lydrige
+ *
+ * -----------------------------------------------------------------------
+ * -----------------------------------------------------------------------
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -106,6 +117,18 @@ internal dval_or_darray eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
 				return((dval_or_darray) { false, dval_error("Program Exited with Result: 1\n (User Interruption)\n") });
 			} else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
 				printf(" Lydrige Version v0.6.0a\n");
+				printf(" Copyright (c) 2016, Christian Seibold All Rights Reserved\n");
+				printf(" Under MIT License\n");
+				printf("\n");
+				printf(" Uses MPC Library under the BSD-2-Clause License\n");
+				printf(" Copyright (c) 2013, Daniel Holden All Rights Reserved\n");
+				printf(" https://github.com/orangeduck/mpc/\n");
+				printf("\n");
+				printf(" Uses Linenoise Library under the BSD-2-Clause License\n");
+				printf(" Copyright (c) 2010-2014, Salvatore Sanfilippo <antirez at gmail dot com>\n");
+				printf(" Copyright (c) 2010-1013, Pieter Noordhuis <pcnoordhuis at gmail dot com>\n");
+				printf(" https://github.com/antirez/linenoise/\n");
+				printf("\n");
 				free(args);
 				return((dval_or_darray) { false, dval_int(1) });
 			} else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {

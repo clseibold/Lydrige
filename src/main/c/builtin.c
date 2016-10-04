@@ -416,7 +416,7 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 	return(dval_int(1));
 }
 
-dval *builtin_read(denv *e, dval *args, unsigned int argc) {
+dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with strings not being printed correctly using this expression: print (read "> ");
 	if (argc < 1 || argc > 1) {
 		return(dval_error("Function 'read' must be passed only 1 argument"));
 	}
