@@ -10,6 +10,7 @@
 5. [Examples](#Examples-4)
 6. [Compiling the Interpreter and Running Examples](#CompilingtheInterpreterandRunningExamples-5)
 7. [Sublime Syntax Definitons for Lydrige](#SublimeSyntaxDefinitonsforLydrige-6)
+8. [License](#License-7)
 
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Introduction-0'></a>Introduction
@@ -65,3 +66,19 @@ Currently, you can only compile on Linux (with gcc) or Mac OS X (with mac, gcc i
 
 ##  7. <a name='SublimeSyntaxDefinitonsforLydrige-6'></a>Sublime Syntax Definitons for Lydrige
 I have also created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
+
+##  8. <a name='License-7'></a>License
+See LICENSE.md and LICENSE-3RD-PARTY.txt
+
+Lydrige Version v0.6.0a
+Copyright (c) 2016, Christian Seibold All Rights Reserved.
+Under MIT License
+
+Uses MPC Library under the BSD-2-Clause License
+Copyright (c) 2013, Daniel Holden All Rights Reserved
+https://github.com/orangeduck/mpc/
+
+Uses Linenoise Library under the BSD-2-Clause License
+Copyright (c) 2010-2014, Salvatore Sanfilippo <antirez at gmail dot com>
+Copyright (c) 2010-1013, Pieter Noordhuis <pcnoordhuis at gmail dot com>
+https://github.com/antirez/linenoise/
