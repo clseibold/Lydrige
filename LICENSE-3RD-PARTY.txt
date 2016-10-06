@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------------
                           The BSD-2-Clause License
-	applies to:
-	- MPC Library, Copyright (c) 2013, Daniel Holden
-	- Linenoise Library, Copyright (c) 2010-2014, Salvatore Sanfilippo
-						 Copyright (c) 2010-2013, Pieter Noordhuis
+    applies to:
+    - MPC Library, Copyright (c) 2013, Daniel Holden
+    - Linenoise Library, Copyright (c) 2010-2014, Salvatore Sanfilippo
+                         Copyright (c) 2010-2013, Pieter Noordhuis
 ------------------------------------------------------------------------------
 
 Redistribution and use in source and binary forms, with or without

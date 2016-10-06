@@ -9,11 +9,11 @@ run-debug: build/debug/lydrige
 
 build/debug/lydrige: build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
 	mkdir -p build/debug
-	gcc -std=c99 -Wall -g src/main/c/*.c build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a -lreadline -lm -o build/debug/lydrige
+	gcc -std=c99 -Wall -g src/main/c/*.c build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a -lm -o build/debug/lydrige
 
 build/release/lydrige: build/release/libmpc.a build/release/libhashmap.a build/release/liblinenoise.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
 	mkdir -p build/release
-	gcc -std=c99 -Wall -O3 src/main/c/*.c build/release/libmpc.a build/release/libhashmap.a build/release/liblinenoise.a -lreadline -lm -o build/release/lydrige
+	gcc -std=c99 -Wall -O3 src/main/c/*.c build/release/libmpc.a build/release/libhashmap.a build/release/liblinenoise.a -lm -o build/release/lydrige
 
 build/debug/libmpc.a: src/mpc/c/mpc.c src/mpc/headers/mpc.h
 	mkdir -p build/debug/mpc
