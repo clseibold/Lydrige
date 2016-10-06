@@ -32,7 +32,6 @@ static uint32_t default_hash(void *a) {
     hash ^= (hash >> 11);
     hash += (hash << 15);
 
-	bdestroy(s);
     return hash;
 }
 
@@ -45,7 +44,6 @@ static uint32_t fnv1a_hash(void *a) {
 		hash *= FNV_PRIME;
 	}
 	
-	bdestroy(s);
 	return hash;
 }
 
