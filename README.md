@@ -1,5 +1,6 @@
 # Lydrige (Version 0.6.0 alpha)
 <!-- vscode-markdown-toc -->
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/krixano/Lydrige/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/krixano/Lydrige.svg?branch=master)](https://travis-ci.org/krixano/Lydrige)
 [![Waffle.io](https://img.shields.io/waffle/label/evancohen/smart-mirror/in%20progress.svg?maxAge=2592000)](http://waffle.io/krixano/Lydrige)
 
