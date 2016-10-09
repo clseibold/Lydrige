@@ -1,6 +1,6 @@
 # Lydrige (Version 0.6.0 alpha)
 <!-- vscode-markdown-toc -->
-![travis-ci](https://travis-ci.org/krixano/Lydrige.svg?branch=dev)
+[![Build Status](https://travis-ci.org/krixano/Lydrige.svg?branch=master)](https://travis-ci.org/krixano/Lydrige)
 
 ## Contents
 1. [Introduction](#Introduction-0)
