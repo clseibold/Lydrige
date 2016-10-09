@@ -1,4 +1,4 @@
-# Lydrige
+# Lydrige (Version 0.6.0 alpha)
 <!-- vscode-markdown-toc -->
 ![travis-ci](https://travis-ci.org/krixano/Lydrige.svg?branch=dev)
 
@@ -9,8 +9,10 @@
 4. [Data Types](#DataTypes-3)
 5. [Examples](#Examples-4)
 6. [Compiling the Interpreter and Running Examples](#CompilingtheInterpreterandRunningExamples-5)
-7. [Sublime Syntax Definitons for Lydrige](#SublimeSyntaxDefinitonsforLydrige-6)
-8. [License](#License-7)
+   * [Linux/Mac](#Compiling-Linux_Mac)
+   * [Windows](#Compiling-Windows)
+   * [New Build System (Derevel)](#Compiling-New_Build_System)
+7. [License](#License-7)
 
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Introduction-0'></a>Introduction
@@ -24,7 +26,7 @@ You can find even more information about this language on my website at [http://
 * And Changelogs for all versions of the language, including alpha versions
 
 ##  2. <a name='BasicSyntax-1'></a>Basic Syntax
-The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
+The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and is separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
 Here is an example of the syntax of a simple print statement:
 `(print "This number evaluates to" (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
 * The syntax has now been slightly modified. Basically, files are made up of statements OR expression. A statement is defined as multiple expressions with a semicolon at the end. However, statements are evaluated as if they were one big expression. This allows us to have a syntax more similar to that of C-based langauges. Here is the print statement using the new syntax. It is also important to note that the above syntax and this new syntax will both be allowed by the interpreter and the result will be the same.
@@ -53,7 +55,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
 
 ##  5. <a name='Examples-4'></a>Examples
-There are examples of programs/functions written in this language in the `examples directory`. This directory also includes *prelude.lydg*, the Prelude for the language; Is is auto-loaded for the REPL and every program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`. 
+There are examples of programs/functions written in this language in the `examples directory`. Note that this directory contains code that only works for v0.5.0! It will not work with this version! This directory also includes *prelude.lydg*, the Prelude for the language, which is auto-loaded in the REPL and in every lydrige program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`. 
 
 Until Lydrige is fully rewritten, these examples won't currently work. However, some examples that do currently work are provided below:
 * `print 5.2;`
@@ -62,12 +64,16 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 * `print (+ 1 (get 0 [3, 2, 2]));`
 
 ##  6. <a name='CompilingtheInterpreterandRunningExamples-5'></a>Compiling the Interpreter and Running Examples
-Currently, you can only compile on Linux (with gcc) or Mac OS X (with mac, gcc is aliased to clang). You simple run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
+### <a name='Compiling-Linux_Mac'></a>Linux/Mac (requires gcc or clang)
+Run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
 
-##  7. <a name='SublimeSyntaxDefinitonsforLydrige-6'></a>Sublime Syntax Definitons for Lydrige
-I have also created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
+### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64)
+Run `build_debug-win.bat gcc x86_64` for 64-bit, or `build_debug-win.bat gcc x86` for 32-bit. To start the program, run `build_debug-win.bat run`.
 
-##  8. <a name='License-7'></a>License
+### <a name='Compiling-New_Build_System'></a>New Build System (Derevel)
+I am working on a new project, called Derevel, which is a simple and fast build system for small C projects which requires minimal configuration. Once it is more developed, I intend to use it for this project! You can find more information about Derevel here: [https://github.com/krixano/derevel](https://github.com/krixano/derevel).
+
+##  7. <a name='License-7'></a>License
 See LICENSE.md and LICENSE-3RD-PARTY.txt
 
 Lydrige Version v0.6.0a
