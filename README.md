@@ -13,6 +13,7 @@
 6. [Compiling the Interpreter and Running Examples](#CompilingtheInterpreterandRunningExamples-5)
    * [Linux/Mac](#Compiling-Linux_Mac)
    * [Windows](#Compiling-Windows)
+   * [FreeBSD](#Compiling-FreeBSD)
    * [New Build System (Derevel)](#Compiling-New_Build_System)
 7. [License](#License-7)
 
@@ -71,6 +72,9 @@ Run `make debug` to make the debug build or `make release` to make the release b
 
 ### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64)
 Run `build_debug-win.bat gcc x86_64` for 64-bit, or `build_debug-win.bat gcc x86` for 32-bit. To start the program, run `build_debug-win.bat run`.
+
+### <a name='Compiling-FreeBSD'></a>FreeBSD (requires devel/gmake)
+You must install `devel/gmake` in order to use the Makefile. Run `gmake debug` to make the debug build or `gmake release` to make the release build. To run the debug build, enter `gmake run-debug`, and for the release build, enter `gmake run`.
 
 ### <a name='Compiling-New_Build_System'></a>New Build System (Derevel)
 I am working on a new project, called Derevel, which is a simple and fast build system for small C projects which requires minimal configuration. Once it is more developed, I intend to use it for this project! You can find more information about Derevel here: [https://github.com/krixano/derevel](https://github.com/krixano/derevel).
