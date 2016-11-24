@@ -70,8 +70,12 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 ### <a name='Compiling-Linux_Mac'></a>Linux/Mac (requires gcc or clang)
 Run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
 
-### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64)
-Run `build_debug-win.bat gcc x86_64` for 64-bit, or `build_debug-win.bat gcc x86` for 32-bit. To start the program, run `build_debug-win.bat run`.
+### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64 or clang)
+GCC: Run `build_debug-win.bat gcc x86_64` for 64-bit, or `build_debug-win.bat gcc x86` for 32-bit.
+
+Clang: Run `build_debug-win.bat clang x86_64` for 64-bit, or `build_debug-win.bat clang x86` for 32-bit.
+
+To start the program, run `build_debug-win.bat run`.
 
 ### <a name='Compiling-FreeBSD'></a>FreeBSD (requires devel/gmake)
 You must install `devel/gmake` in order to use the Makefile. Run `gmake debug` to make the debug build or `gmake release` to make the release build. To run the debug build, enter `gmake run-debug`, and for the release build, enter `gmake run`.
