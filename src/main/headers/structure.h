@@ -52,9 +52,7 @@ typedef struct dval dval;
 typedef struct denv denv;
 typedef dval *(*dbuiltin)(denv*, dval*, unsigned int); // Dval Array and argc
 
-struct dval {
-	DVAL_TYPE type;
-	int constant;
+struct dval { // TODO: Reorder to use least amount of memory!
 	union {
 		int integer;
 		double doub;
@@ -64,6 +62,8 @@ struct dval {
 		dval *elements; // For qexpressions and other list-like elements
 	};
 	unsigned int count; // For qexpressions and other list-like elements and strings
+	int constant;
+	DVAL_TYPE type;
 };
 
 dval *dval_int(long integer);
