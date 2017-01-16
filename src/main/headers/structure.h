@@ -45,7 +45,7 @@
 #define false 0
 
 typedef enum DVAL_TYPE {
-	DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_CHARACTER, DVAL_STRING, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
+    DVAL_ANY, DVAL_INT, DVAL_DOUBLE, DVAL_CHARACTER, DVAL_STRING, DVAL_ERROR, DVAL_FUNC, DVAL_LIST
 } DVAL_TYPE;
 
 typedef struct dval dval;
@@ -53,17 +53,17 @@ typedef struct denv denv;
 typedef dval *(*dbuiltin)(denv*, dval*, unsigned int); // Dval Array and argc
 
 struct dval { // TODO: Reorder to use least amount of memory!
-	union {
-		int integer;
-		double doub;
-		char character;
-		char *str;
-		dbuiltin func;
-		dval *elements; // For qexpressions and other list-like elements
-	};
-	unsigned int count; // For qexpressions and other list-like elements and strings
-	int constant;
-	DVAL_TYPE type;
+    DVAL_TYPE type;
+    int constant;
+    union {
+        int integer;
+        double doub;
+        char character;
+        char *str;
+        dbuiltin func;
+        dval *elements; // For qexpressions and other list-like elements
+    };
+    unsigned int count; // For qexpressions and other list-like elements and strings
 };
 
 dval *dval_int(long integer);
@@ -77,8 +77,8 @@ void dval_del(dval *d);
 dval *dval_copy(dval *d);
 
 struct denv {
-	denv *parent;
-	Hashmap *map;
+    denv *parent;
+    Hashmap *map;
 };
 
 denv *denv_new(void);
