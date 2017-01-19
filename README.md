@@ -71,17 +71,14 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 Run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
 
 ### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64 or clang)
-GCC: Run `build_debug-win.bat gcc x86_64` for 64-bit, or `build_debug-win.bat gcc x86` for 32-bit.
+**GCC:** Run `build.bat gcc x64` for 64-bit, or `build.bat gcc x86` for 32-bit.
+**Clang:** Run `build.bat clang x64` for 64-bit, or `build.bat clang x86` for 32-bit.
+**MSVC:** Run `build.bat msvc x64` for 64-bit, or `build.bat` for 32-bit.
 
-Clang: Run `build_debug-win.bat clang x86_64` for 64-bit, or `build_debug-win.bat clang x86` for 32-bit.
-
-To start the program, run `build_debug-win.bat run`.
+To start the program, run `build.bat run`.
 
 ### <a name='Compiling-FreeBSD'></a>FreeBSD (requires devel/gmake)
 You must install `devel/gmake` in order to use the Makefile. Run `gmake debug` to make the debug build or `gmake release` to make the release build. To run the debug build, enter `gmake run-debug`, and for the release build, enter `gmake run`.
-
-### <a name='Compiling-New_Build_System'></a>New Build System (Derevel)
-I am working on a new project, called Derevel, which is a simple and fast build system for small C projects which requires minimal configuration. Once it is more developed, I intend to use it for this project! You can find more information about Derevel here: [https://github.com/krixano/derevel](https://github.com/krixano/derevel).
 
 ##  7. <a name='License-7'></a>License
 See LICENSE.md and LICENSE-3RD-PARTY.txt
