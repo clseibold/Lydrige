@@ -14,7 +14,6 @@
    * [Linux/Mac](#Compiling-Linux_Mac)
    * [Windows](#Compiling-Windows)
    * [FreeBSD](#Compiling-FreeBSD)
-   * [New Build System (Derevel)](#Compiling-New_Build_System)
 7. [License](#License-7)
 
 <!-- /vscode-markdown-toc -->
