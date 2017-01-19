@@ -35,8 +35,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../mpc/headers/mpc.h"
-#include "../../hashmap/headers/hashmap.h"
+#include "headers/mpc.h"
+#include "headers/hashmap.h"
 
 #define internal static
 #define global static

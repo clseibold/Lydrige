@@ -20,47 +20,13 @@ run: build/release/lydrige
 run-debug: build/debug/lydrige
 	./build/debug/lydrige
 
-build/debug/lydrige: build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
+build/debug/lydrige: src/main.c src/builtin.c src/structure.c src/headers/builtin.h src/headers/structure.h src/bstrlib.c src/darray.c src/hashmap.c src/mpc.c src/structure.c src/headers/bstrlib.h src/headers/darray.h src/headers/dbg.h src/headers/hashmap.h src/headers/linenoise.h src/headers/mpc.h src/unix/linenoise.c
 	mkdir -p build/debug
-	$(cc) -std=c99 -Wall -g src/main/c/*.c build/debug/libmpc.a build/debug/libhashmap.a build/debug/liblinenoise.a -lm -o build/debug/lydrige
+	$(cc) -std=c99 -Wall -g src/*.c src/unix/*.c -lm -o build/debug/lydrige
 
-build/release/lydrige: build/release/libmpc.a build/release/libhashmap.a build/release/liblinenoise.a src/main/c/main.c src/main/c/builtin.c src/main/c/structure.c src/main/headers/builtin.h src/main/headers/structure.h
+build/release/lydrige: src/main.c src/builtin.c src/structure.c src/headers/builtin.h src/headers/structure.h src/bstrlib.c src/darray.c src/hashmap.c src/mpc.c src/structure.c src/headers/bstrlib.h src/headers/darray.h src/headers/dbg.h src/headers/hashmap.h src/headers/linenoise.h src/headers/mpc.h src/unix/linenoise.c
 	mkdir -p build/release
-	$(cc) -std=c99 -Wall -O3 src/main/c/*.c build/release/libmpc.a build/release/libhashmap.a build/release/liblinenoise.a -lm -o build/release/lydrige
-
-build/debug/libmpc.a: src/mpc/c/mpc.c src/mpc/headers/mpc.h
-	mkdir -p build/debug/mpc
-	$(cc) -c -std=c99 -Wall -g src/mpc/c/mpc.c -o build/debug/mpc/mpc.o
-	ar -cvq build/debug/libmpc.a build/debug/mpc/*.o
-
-build/release/libmpc.a: src/mpc/c/mpc.c src/mpc/headers/mpc.h
-	mkdir -p build/release/mpc
-	$(cc) -c -std=c99 -Wall -O3 src/mpc/c/mpc.c -o build/release/mpc/mpc.o
-	ar -cvq build/release/libmpc.a build/release/mpc/*.o
-
-build/debug/libhashmap.a: src/hashmap/c/bstrlib.c src/hashmap/c/darray.c src/hashmap/c/hashmap.c src/hashmap/headers/bstrlib.h src/hashmap/headers/darray.h src/hashmap/headers/dbg.h src/hashmap/headers/hashmap.h
-	mkdir -p build/debug/hashmap
-	cd build/debug/hashmap/ ; \
-	$(cc) -c -std=c99 -Wall -g ../../../src/hashmap/c/*.c; \
-	ar -cvq ../libhashmap.a *.o; \
-	cd ../../../ ;
-
-build/release/libhashmap.a: src/hashmap/c/bstrlib.c src/hashmap/c/darray.c src/hashmap/c/hashmap.c src/hashmap/headers/bstrlib.h src/hashmap/headers/darray.h src/hashmap/headers/dbg.h src/hashmap/headers/hashmap.h
-	mkdir -p build/release/hashmap
-	cd build/release/hashmap/ ; \
-	$(cc) -c -std=c99 -Wall -O3 ../../../src/hashmap/c/*.c; \
-	ar -cvq ../libhashmap.a *.o; \
-	cd ../../../ ;
-
-build/debug/liblinenoise.a: src/linenoise/c/linenoise.c src/linenoise/headers/linenoise.h
-	mkdir -p build/debug/linenoise
-	$(cc) -c -std=c99 -Wall -g src/linenoise/c/linenoise.c -o build/debug/linenoise/linenoise.o
-	ar -cvq build/debug/liblinenoise.a build/debug/linenoise/*.o
-
-build/release/liblinenoise.a: src/linenoise/c/linenoise.c src/linenoise/headers/linenoise.h
-	mkdir -p build/release/linenoise
-	$(cc) -c -std=c99 -Wall -O3 src/linenoise/c/linenoise.c -o build/release/linenoise/linenoise.o
-	ar -cvq build/release/liblinenoise.a build/release/linenoise/*.o
+	$(cc) -std=c99 -Wall -O3 src/main/c/*.c src/unix/*.c -lm -o build/release/lydrige
 
 clean:
 	$(RM) -r build/
