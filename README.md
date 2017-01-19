@@ -71,8 +71,8 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 Run `make debug` to make the debug build or `make release` to make the release build. To run the debug build, enter `make run-debug`, and for the release build, enter `make run`.
 
 ### <a name='Compiling-Windows'></a>Windows (requires mingw/mingw-w64 or clang)
-**GCC:** Run `build.bat gcc x64` for 64-bit, or `build.bat gcc x86` for 32-bit.
-**Clang:** Run `build.bat clang x64` for 64-bit, or `build.bat clang x86` for 32-bit.
+**GCC:** Run `build.bat gcc x64` for 64-bit, or `build.bat gcc x86` for 32-bit.<br>
+**Clang:** Run `build.bat clang x64` for 64-bit, or `build.bat clang x86` for 32-bit.<br>
 **MSVC:** Run `build.bat msvc x64` for 64-bit, or `build.bat` for 32-bit.
 
 To start the program, run `build.bat run`.
