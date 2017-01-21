@@ -133,7 +133,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 args[currentArgPos] = (dval) { DVAL_EXPR, 0, { .elements = elements.result }, largc };
                 currentArgPos++;
             } else {
-                dval *d = read_eval_expr(e, t->children[i], false);
+                dval *d = read_eval_expr(e, t->children[i]);
                 args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
                 if (d->type == DVAL_ERROR) {
                     free(args);
@@ -309,7 +309,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               "string : /\"(\\\\.|[^\"])*\"/ ;"
               "ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
               "list : '[' (<value> (',' <value>)*)? ']' ;"
-              "qexpr : '{' (<value> (',' <value>)*)? '}' ;",
+              "qexpr : '{' <ident> <value>* '}' ;",
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
     
     if (argc == 1) {

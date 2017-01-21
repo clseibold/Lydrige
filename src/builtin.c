@@ -471,7 +471,7 @@ bool print_elem(dval arg, bool removeQuotations) {
             for (int i = 0; i < arg.count; i++) {
                 print_elem(arg.elements[i], false);
                 if (i != arg.count - 1) {
-                    printf(", ");
+                    printf(" ");
                 }
             }
             printf("}");
