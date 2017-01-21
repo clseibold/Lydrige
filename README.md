@@ -64,6 +64,7 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 * `print (+ 3 4.4);`
 * `print (join [5, 4, 3, 3] [2, 2, 3]);`
 * `print (+ 1 (get 0 [3, 2, 2]));`
+* `print {3, 3, test, (unbound 3 3)};`
 
 ##  6. <a name='CompilingtheInterpreterandRunningExamples-5'></a>Compiling the Interpreter and Running Examples
 ### <a name='Compiling-Linux_Mac'></a>Linux/Mac (requires gcc or clang)
