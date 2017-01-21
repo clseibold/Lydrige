@@ -139,25 +139,44 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
             if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
                 running = false;
                 free(args);
-                return((dval_or_darray) { false, dval_error("Program Exited with Result: 1\n (User Interruption)\n") });
+                return((dval_or_darray) { false, dval_error("Program Exited with Result: 1\n"
+                                                            "(User Interruption)\n") });
             } else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
-                printf(" Lydrige Version v0.6.0a\n");
-                printf(" Copyright (c) 2016, Christian Seibold All Rights Reserved\n");
-                printf(" Under MIT License\n");
+                printf("Lydrige Version v0.6.0a\n");
+                printf("Copyright (c) 2016-2017, Christian Seibold All Rights Reserved\n");
+                printf("Under MIT License\n");
                 printf("\n");
-                printf(" Uses MPC Library under the BSD-2-Clause License\n");
-                printf(" Copyright (c) 2013, Daniel Holden All Rights Reserved\n");
-                printf(" https://github.com/orangeduck/mpc/\n");
+                printf("Uses MPC Library under the BSD-2-Clause License\n");
+                printf("Copyright (c) 2013, Daniel Holden All Rights Reserved\n");
+                printf("https://github.com/orangeduck/mpc/\n");
                 printf("\n");
-                printf(" Uses Linenoise Library under the BSD-2-Clause License\n");
-                printf(" Copyright (c) 2010-2014, Salvatore Sanfilippo <antirez at gmail dot com>\n");
-                printf(" Copyright (c) 2010-1013, Pieter Noordhuis <pcnoordhuis at gmail dot com>\n");
-                printf(" https://github.com/antirez/linenoise/\n");
-                printf("\n");
+                printf("Uses Linenoise Library under the BSD-2-Clause License\n");
+                printf("Copyright (c) 2010-2014, Salvatore Sanfilippo <antirez at gmail dot com>\n");
+                printf("Copyright (c) 2010-1013, Pieter Noordhuis <pcnoordhuis at gmail dot com>\n");
+                printf("https://github.com/antirez/linenoise/\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
-                printf(" basic operators (+, -, *, /, mod)\n succ - returns succession of given number (num + 1)\n list - returns list with given args as its elements\n print - prints out arguments\n len - returns length of list as an integer\n");
+                printf("basic operators (+, -, *, /, mod)\n"
+                       "'succ n'      - returns succession of number n (num + 1)\n"
+                       "'list &a'     - returns list with given args as its elements\n"
+                       "'len l'       - returns length of given list as an integer\n"
+                       "'get i l'     - returns element at index i from list\n"
+                       "'set'         - \n"
+                       "'first l'     - returns first element of given list\n"
+                       "'last'        - returns last element of given list\n"
+                       "'head'        - returns list of all but last element of given list\n"
+                       "'tail'        - returns list of all but first element of given list\n"
+                       "'join &l'     - returns list of given lists joined together\n"
+                       "'print e'     - prints out given arguments\n"
+                       "'read prompt' - returns given input from the user. Will print out given string prompt\n");
+                free(args);
+                return((dval_or_darray) { false, dval_int(1) });
+            } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
+                printf("'version'  - version and copyright info\n"
+                       "'builtins' - list all builtin functions\n"
+                       "'commands' - list all REPL command, each should be prefaced with ':'\n"
+                       "'exit'     - exit the REPL\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else {
@@ -266,7 +285,8 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
     
     if (argc == 1) {
         puts("Lydrige REPL - v0.6.0a");
-        puts("Type ':exit' to Exit the REPL\n");
+        puts("Type ':exit' to Exit the REPL");
+        puts("Type ':builtins' to get a list of builtin functions\n");
         
         denv *e = denv_new();
         denv_add_builtins(e);
@@ -289,8 +309,11 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
                 //mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
                 if (result->type == DVAL_ERROR) {
+                    printf("\n");
                     printf("Error: %s\n", result->str);
                 } else {
+                    printf("\n");
+                    printf(" -> ");
                     bool known = print_elem(*result, false);
                     printf("\n");
                     if (!known) {
