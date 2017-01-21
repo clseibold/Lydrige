@@ -53,7 +53,12 @@ typedef enum DVAL_TYPE {
     DVAL_ERROR,
     DVAL_INFO,
     DVAL_FUNC,
-    DVAL_LIST
+    DVAL_LIST,
+    
+    // TODO: Not sure how to handle qexprs better?
+    DVAL_EXPR, // Uses elements
+    DVAL_QEXPR, // Uses elements
+    DVAL_IDENT // Uses str
 } DVAL_TYPE;
 
 typedef struct dval dval;
@@ -69,7 +74,8 @@ struct dval { // TODO: Reorder to use least amount of memory!
         char character;
         char *str;
         dbuiltin func;
-        dval *elements; // For qexpressions and other list-like elements
+        // TODO: Not sure how to handle qexprs better?
+        dval *elements; // For qexpressions, expressions and other list-like elements
     };
     unsigned int count; // For qexpressions and other list-like elements and strings
 };

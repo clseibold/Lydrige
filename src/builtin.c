@@ -400,40 +400,94 @@ dval *builtin_join(denv *a, dval *args, unsigned int argc) {
 bool print_elem(dval arg, bool removeQuotations) {
     switch (arg.type) {
         case DVAL_INT:
-        printf("%d", arg.integer);
-        return true;
+        {
+            printf("%d", arg.integer);
+            return true;
+        } break;
+        
         case DVAL_DOUBLE:
-        printf("%f", arg.doub);
-        return true;
+        {
+            printf("%f", arg.doub);
+            return true;
+        } break;
+        
         case DVAL_CHARACTER:
-        if (removeQuotations) {
-            printf("%c", arg.character);
-        } else {
-            printf("'%c'", arg.character);
-        }
-        return true;
-        case DVAL_STRING:
-        if (removeQuotations) {
-            printf("%s", arg.str);
-        } else {
-            printf("\"%s\"", arg.str);
-        }
-        return true;
-        case DVAL_FUNC:
-        printf("(Func)");
-        return true;
-        case DVAL_LIST:
-        printf("[");
-        for (int i = 0; i < arg.count; i++) {
-            print_elem(arg.elements[i], false); // TODO: Check if known, if not, return false
-            if (i != arg.count - 1) {
-                printf(", ");
+        {
+            if (removeQuotations) {
+                printf("%c", arg.character);
+            } else {
+                printf("'%c'", arg.character);
             }
-        }
-        printf("]");
-        return true;
+            return true;
+        } break;
+        
+        case DVAL_STRING:
+        {
+            if (removeQuotations) {
+                printf("%s", arg.str);
+            } else {
+                printf("\"%s\"", arg.str);
+            }
+            return true;
+        } break;
+        
+        case DVAL_FUNC:
+        {
+            printf("(Func)");
+            return true;
+        } break;
+        
+        case DVAL_LIST:
+        {
+            printf("[");
+            for (int i = 0; i < arg.count; i++) {
+                print_elem(arg.elements[i], false);
+                if (i != arg.count - 1) {
+                    printf(", ");
+                }
+            }
+            printf("]");
+            return true;
+        } break;
+        
+        case DVAL_EXPR:
+        {
+            printf("(");
+            for (int i = 0; i < arg.count; i++) {
+                print_elem(arg.elements[i], false);
+                if (i != arg.count - 1 && i != 0) {
+                    printf(", ");
+                } else if (i == 0) {
+                    printf(" ");
+                }
+            }
+            printf(")");
+            return true;
+        } break;
+        
+        case DVAL_QEXPR:
+        {
+            printf("{");
+            for (int i = 0; i < arg.count; i++) {
+                print_elem(arg.elements[i], false);
+                if (i != arg.count - 1) {
+                    printf(", ");
+                }
+            }
+            printf("}");
+            return true;
+        } break;
+        
+        case DVAL_IDENT:
+        {
+            printf("%s", arg.str);
+            return true;
+        } break;
+        
         default:
-        return false;
+        {
+            return false;
+        }
     }
 }
 

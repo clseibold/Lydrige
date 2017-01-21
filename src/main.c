@@ -72,7 +72,7 @@ internal dval *read_eval_expr(denv *e, mpc_ast_t *t);
 
 // Returns int of amount of args
 internal int 
-arg_amt(mpc_ast_t *t)
+arg_amt(mpc_ast_t *t, bool isQExpr)
 {
     unsigned int argc = 0;
     for (unsigned int i = 0; i < t->children_num; i++) {
@@ -83,8 +83,10 @@ arg_amt(mpc_ast_t *t)
         else if (strcmp(t->children[i]->contents, "]") == 0) continue;
         else if (strcmp(t->children[i]->contents, ",") == 0) continue;
         else if (strcmp(t->children[i]->contents, ";") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "{") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "}") == 0) continue;
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
-        if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value")) continue;
+        if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && !isQExpr) continue;
         argc++;
     }
     return argc;
@@ -92,7 +94,7 @@ arg_amt(mpc_ast_t *t)
 
 // Returns array of dvals
 internal dval_or_darray
-eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
+eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
 {
     dval *args = (dval*) calloc(argc, sizeof(dval));
     // Check for NULL, and return an error
@@ -108,26 +110,51 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
         else if (strcmp(t->children[i]->contents, "]") == 0) continue;
         else if (strcmp(t->children[i]->contents, ",") == 0) continue;
         else if (strcmp(t->children[i]->contents, ";") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "{") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "}") == 0) continue;
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
+        if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && isQExpr) {
+            args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str = t->children[i]->contents} };
+            currentArgPos++;
+            continue;
+        }
         if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && ident != NULL) {
             *ident = t->children[i]->contents;
             continue;
         }
         
         if (strstr(t->children[i]->tag, "expression")) {
-            dval *d = read_eval_expr(e, t->children[i]);
-            args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
-            if (d->type == DVAL_ERROR) {
-                free(args);
-                return((dval_or_darray) { false, d });
+            if (isQExpr) {
+                unsigned int largc = arg_amt(t->children[i], true);
+                dval_or_darray elements = eval_args(largc, t->children[i], NULL, e, true);
+                if (!elements.isArray) { // If not an array, then it returned an error
+                    return((dval_or_darray) { false, elements.result });
+                }
+                args[currentArgPos] = (dval) { DVAL_EXPR, 0, { .elements = elements.result }, largc };
+                currentArgPos++;
             } else {
-                dval_del(d);
+                dval *d = read_eval_expr(e, t->children[i], false);
+                args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
+                if (d->type == DVAL_ERROR) {
+                    free(args);
+                    return((dval_or_darray) { false, d });
+                } else {
+                    dval_del(d);
+                }
+                currentArgPos++;
             }
+        } else if (strstr(t->children[i]->tag, "qexpr")) {
+            unsigned int largc = arg_amt(t->children[i], true);
+            dval_or_darray elements = eval_args(largc, t->children[i], NULL, e, true);
+            if (!elements.isArray) { // If not an array, then it returned an error
+                return((dval_or_darray) { false, elements.result });
+            }
+            args[currentArgPos] = (dval) { DVAL_QEXPR, 0, { .elements = elements.result }, largc };
             currentArgPos++;
-        } else if (strstr(t->children[i]->tag, "list")) {
-            unsigned int largc = arg_amt(t->children[i]);
-            dval_or_darray elements = eval_args(largc, t->children[i], NULL, e);
-            if (!elements.isArray) { // Error
+        } else if (strstr(t->children[i]->tag, "list")) { // TODO
+            unsigned int largc = arg_amt(t->children[i], isQExpr);
+            dval_or_darray elements = eval_args(largc, t->children[i], NULL, e, isQExpr);
+            if (!elements.isArray) { // If not an array, then it returned an error
                 return((dval_or_darray) { false, elements.result });
             }
             args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements.result }, largc };
@@ -187,12 +214,17 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
             if (strstr(t->children[i]->tag, "ident")) {
                 // TODO(FUTURE): Handle unary operators here
                 // Evaluate identifier here, and add result to args
-                dval *v = denv_get(e, t->children[i]->contents);
-                if (v->type == DVAL_ERROR) {
-                    free(args);
-                    return((dval_or_darray) { false, v });
+                
+                if (isQExpr) {
+                    args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str=t->children[i]->contents } };
                 } else {
-                    args[currentArgPos] = *v; // TODO: This gets copied
+                    dval *v = denv_get(e, t->children[i]->contents);
+                    if (v->type == DVAL_ERROR) {
+                        free(args);
+                        return((dval_or_darray) { false, v });
+                    } else {
+                        args[currentArgPos] = *v; // TODO: This gets copied
+                    }
                 }
             } else if (strstr(t->children[i]->tag, "integer")) {
                 args[currentArgPos] = (dval) { DVAL_INT, 0, {strtol(t->children[i]->contents, NULL, 10)} };
@@ -207,14 +239,11 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
                 memcpy(substring, &t->children[i]->contents[1], substrlen);
                 substring[substrlen-1] = '\0';
                 args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
-            } else if (strstr(t->children[i]->tag, "qexpr")) {
-                free(args);
-                return((dval_or_darray) { false, dval_error("Qexpressions are not completely implemented yet!") });
             }
             currentArgPos++;
         } else {
             free(args);
-            return((dval_or_darray) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled.") });
+            return((dval_or_darray) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled. [%s]", t->children[i]->tag) });
         }
     }
     return((dval_or_darray) { true, args });
@@ -225,8 +254,8 @@ internal dval
 {
     char *ident = ""; // TODO(Future): Eventually allow lambdas for function calls (also evaluate identifiers to be builtin functions or lambdas)
     
-    unsigned int argc = arg_amt(t);
-    dval_or_darray args = eval_args(argc, t, &ident, e);
+    unsigned int argc = arg_amt(t, false);
+    dval_or_darray args = eval_args(argc, t, &ident, e, false);
     if (!args.isArray) {
         return(args.result);
     }
@@ -280,7 +309,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               "string : /\"(\\\\.|[^\"])*\"/ ;"
               "ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
               "list : '[' (<value> (',' <value>)*)? ']' ;"
-              "qexpr : \"'(\" <ident> <value>* ')' ;",
+              "qexpr : '{' (<value> (',' <value>)*)? '}' ;",
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
     
     if (argc == 1) {
@@ -306,7 +335,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
             
             mpc_result_t r;
             if (mpc_parse("<stdin>", input, Line, &r)) {
-                //mpc_ast_print((mpc_ast_t*) r.output); puts("");
+                // mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
                 if (result->type == DVAL_ERROR) {
                     printf("\n");
