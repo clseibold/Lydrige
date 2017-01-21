@@ -85,6 +85,7 @@ arg_amt(mpc_ast_t *t, bool isQExpr)
         else if (strcmp(t->children[i]->contents, ";") == 0) continue;
         else if (strcmp(t->children[i]->contents, "{") == 0) continue;
         else if (strcmp(t->children[i]->contents, "}") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "'") == 0) continue;
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
         if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && !isQExpr) continue;
         argc++;
@@ -112,6 +113,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
         else if (strcmp(t->children[i]->contents, ";") == 0) continue;
         else if (strcmp(t->children[i]->contents, "{") == 0) continue;
         else if (strcmp(t->children[i]->contents, "}") == 0) continue;
+        else if (strcmp(t->children[i]->contents, "'") == 0) continue;
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
         if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && isQExpr) {
             args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str = t->children[i]->contents} };
@@ -211,7 +213,9 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 return((dval_or_darray) { false, dval_error("Command doesn't exist.") });
             }
         } else if (strstr(t->children[i]->tag, "value")) {
-            if (strstr(t->children[i]->tag, "ident")) {
+            if (strstr(t->children[i]->tag, "qident")) {
+                args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str=t->children[i]->children[1]->contents } };
+            } else if (strstr(t->children[i]->tag, "ident")) {
                 // TODO(FUTURE): Handle unary operators here
                 // Evaluate identifier here, and add result to args
                 
@@ -294,6 +298,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
     Character = mpc_new("character");
     String = mpc_new("string");
     Identifier = mpc_new("ident");
+    QIdentifier = mpc_new("qident");
     List = mpc_new("list");
     Qexpression = mpc_new("qexpr");
     
@@ -302,15 +307,16 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               "command : ':' <ident> ;"
               "statement : <ident> <value>* ';' ;"
               "expression : '(' <ident> <value>* ')' ;"
-              "value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <list> | <qexpr> ;"
+              "value : <double> | <integer> | <character> | <string> | <expression> | <ident> | <qident> | <list> | <qexpr> ;"
               "double : /-?[0-9]+\\.[0-9]+/ ;"
               "integer : /-?[0-9]+/ ;"
               "character : /\'(\\\\.|[^\"])\'/ ;"
               "string : /\"(\\\\.|[^\"])*\"/ ;"
               "ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
+              "qident : '\\'' /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ ;"
               "list : '[' (<value> (',' <value>)*)? ']' ;"
               "qexpr : '{' <ident> <value>* '}' ;",
-              Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
+              Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);
     
     if (argc == 1) {
         puts("Lydrige REPL - v0.6.0a");
@@ -335,7 +341,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
             
             mpc_result_t r;
             if (mpc_parse("<stdin>", input, Line, &r)) {
-                // mpc_ast_print((mpc_ast_t*) r.output); puts("");
+                //mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
                 if (result->type == DVAL_ERROR) {
                     printf("\n");
@@ -370,6 +376,6 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
         // Read file and evaluate each line here!
     }
     
-    mpc_cleanup(12, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, List, Qexpression);
+    mpc_cleanup(12, Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);
     return(0);
 }

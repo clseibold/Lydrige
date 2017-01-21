@@ -480,7 +480,7 @@ bool print_elem(dval arg, bool removeQuotations) {
         
         case DVAL_IDENT:
         {
-            printf("%s", arg.str);
+            printf("'%s", arg.str);
             return true;
         } break;
         

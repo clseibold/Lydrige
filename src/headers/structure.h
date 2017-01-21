@@ -110,6 +110,7 @@ mpc_parser_t *Integer;
 mpc_parser_t *Character;
 mpc_parser_t *String;
 mpc_parser_t *Identifier;
+mpc_parser_t *QIdentifier;
 mpc_parser_t *List;
 mpc_parser_t *Qexpression;
 
