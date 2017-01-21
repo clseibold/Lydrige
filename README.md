@@ -83,7 +83,7 @@ You must install `devel/gmake` in order to use the Makefile. Run `gmake debug` t
 See LICENSE.md and LICENSE-3RD-PARTY.txt
 
 Lydrige Version v0.6.0a
-Copyright (c) 2016, Christian Seibold All Rights Reserved.
+Copyright (c) 2016-2017, Christian Seibold All Rights Reserved.
 Under MIT License
 
 Uses MPC Library under the BSD-2-Clause License
