@@ -173,10 +173,10 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
-                printf("'version'  - version and copyright info\n"
-                       "'builtins' - list all builtin functions\n"
-                       "'commands' - list all REPL command, each should be prefaced with ':'\n"
-                       "'exit'     - exit the REPL\n");
+                printf(COL_YELLOW "'version'" COL_RESET "  - version and copyright info\n"
+                       COL_YELLOW "'builtins'" COL_RESET " - list all builtin functions\n"
+                       COL_YELLOW "'commands'" COL_RESET " - list all REPL command, each should be prefaced with ':'\n"
+                       COL_YELLOW "'exit'" COL_RESET "     - exit the REPL\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else {
