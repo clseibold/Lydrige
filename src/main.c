@@ -139,8 +139,8 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
             if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
                 running = false;
                 free(args);
-                return((dval_or_darray) { false, dval_error("Program Exited with Result: 1\n"
-                                                            "(User Interruption)\n") });
+                return((dval_or_darray) { false, dval_info("Program Exited with Result: 1\n"
+                                                           "(User Interruption)\n") });
             } else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
                 printf("Lydrige Version v0.6.0a\n");
                 printf("Copyright (c) 2016-2017, Christian Seibold All Rights Reserved\n");
@@ -158,18 +158,18 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e)
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
                 printf("basic operators (+, -, *, /, mod)\n"
-                       "'succ n'      - returns succession of number n (num + 1)\n"
-                       "'list &a'     - returns list with given args as its elements\n"
-                       "'len l'       - returns length of given list as an integer\n"
-                       "'get i l'     - returns element at index i from list\n"
-                       "'set'         - \n"
-                       "'first l'     - returns first element of given list\n"
-                       "'last'        - returns last element of given list\n"
-                       "'head'        - returns list of all but last element of given list\n"
-                       "'tail'        - returns list of all but first element of given list\n"
-                       "'join &l'     - returns list of given lists joined together\n"
-                       "'print e'     - prints out given arguments\n"
-                       "'read prompt' - returns given input from the user. Will print out given string prompt\n");
+                       COL_YELLOW "'succ n'" COL_RESET "      - returns succession of number n (num + 1)\n"
+                       COL_YELLOW "'list &a'" COL_RESET "     - returns list with given args as its elements\n"
+                       COL_YELLOW "'len l'" COL_RESET "       - returns length of given list as an integer\n"
+                       COL_YELLOW "'get i l'" COL_RESET "     - returns element at index i from list\n"
+                       COL_YELLOW "'set'" COL_RESET "         - \n"
+                       COL_YELLOW "'first l'" COL_RESET "     - returns first element of given list\n"
+                       COL_YELLOW "'last'" COL_RESET "        - returns last element of given list\n"
+                       COL_YELLOW "'head'" COL_RESET "        - returns list of all but last element of given list\n"
+                       COL_YELLOW "'tail'" COL_RESET "        - returns list of all but first element of given list\n"
+                       COL_YELLOW "'join &l'" COL_RESET "     - returns list of given lists joined together\n"
+                       COL_YELLOW "'print e'" COL_RESET "     - prints out given arguments\n"
+                       COL_YELLOW "'read prompt'" COL_RESET " - returns given input from the user. Will print out given string prompt\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
@@ -298,7 +298,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
         
         while (running) {
 #ifdef _WIN32
-            char *input = readline("Lydrige> ");
+            char *input = readline(COL_GREEN "Lydrige> " COL_RESET);
 #else
             char *input = linenoise("Lydrige> ");
             linenoiseHistoryAdd(input);
@@ -310,14 +310,17 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
                 if (result->type == DVAL_ERROR) {
                     printf("\n");
-                    printf("Error: %s\n", result->str);
+                    printf(COL_RED "Error: %s\n" COL_RESET, result->str);
+                } else if (result->type == DVAL_INFO) {
+                    printf("\n");
+                    printf(COL_BLUE "Info: %s\n" COL_RESET, result->str);
                 } else {
                     printf("\n");
                     printf(" -> ");
                     bool known = print_elem(*result, false);
                     printf("\n");
                     if (!known) {
-                        printf("Error: Cannot print value of type Unknown or Any!");
+                        printf(COL_RED "Error: Cannot print value of type Unknown or Any!" COL_RESET);
                     }
                 }
                 dval_del(result);

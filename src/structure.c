@@ -81,6 +81,20 @@ dval *dval_error(char *str, ...) {
     return d;
 }
 
+dval *dval_info(char *str, ...) {
+    dval *d = (dval *) malloc(sizeof(dval));
+    d->type = DVAL_INFO;
+    
+    va_list va;
+    va_start(va, str);
+    d->str = (char *) malloc(512);
+    vsnprintf(d->str, 511, str, va);
+    d->str = (char *) realloc(d->str, strlen(d->str) + 1);
+    va_end(va);
+    
+    return d;
+}
+
 dval *dval_func(dbuiltin func, int constant) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_FUNC;
