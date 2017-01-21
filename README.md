@@ -55,6 +55,8 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `double` - number with decimal (ex: `12.0`)
 * `char`   - character surrounded by single quotes (ex: `'c'`)
 * `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
+* `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
+* `qidentifier` - An identifier that acts like a qexpression. The identifier is not automatically evaluated until passed to the eval function, or a function that does this (for example, the `def` function). (ex: `'ident_name` is an identifier that is not evaluated until passed into a function that does so)
 
 ##  5. <a name='Examples-4'></a>Examples
 There are examples of programs/functions written in this language in the `examples directory`. Note that this directory contains code that only works for v0.5.0! It will not work with this version! This directory also includes *prelude.lydg*, the Prelude for the language, which is auto-loaded in the REPL and in every lydrige program. You can also find files for each of the Standard Library "modules" in the `stdlib directory`. 
