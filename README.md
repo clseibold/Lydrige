@@ -18,7 +18,7 @@
 
 <!-- /vscode-markdown-toc -->
 ##  1. <a name='Introduction-0'></a>Introduction
-Lydrige is a statically typed interpreted programming language inspired by lisp. It is a fairly simple language which makes it suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions.
+Lydrige is a simple statically typed interpreted programming language inspired by Lisp. Although originally inspired by Lisp, there are some changes which make the Syntax of the language appear more C-like. Right now the language supports: functions, lists, list-manipulation, input, string, casting, casting a string into different values (string to int, etc.), and more!
 
 You can find even more information about this language on my website at [http://krixano.x10host.com/Lydrige](http://krixano.x10host.com/Lydrige), which includes:
 * Documentation on the Prelude, the Standard Library, and Builtin Functions
