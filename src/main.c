@@ -313,7 +313,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
                     printf(COL_RED "Error: %s\n" COL_RESET, result->str);
                 } else if (result->type == DVAL_INFO) {
                     printf("\n");
-                    printf(COL_BLUE "Info: %s\n" COL_RESET, result->str);
+                    printf(COL_CYAN "Info: %s\n" COL_RESET, result->str);
                 } else {
                     printf("\n");
                     printf(" -> ");
