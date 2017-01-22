@@ -30,7 +30,7 @@
  * -----------------------------------------------------------------------
  */
 
-#include "headers/structure.h"
+#include <structure.h>
 
 dval *dval_int(long integer) {
     dval *d = (dval *) malloc(sizeof(dval));

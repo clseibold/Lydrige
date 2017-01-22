@@ -35,9 +35,9 @@
 
 #include <string.h>
 
-#include "structure.h"
-#include "bstrlib.h"
-#include "linenoise.h"
+#include <structure.h>
+#include <bstrlib.h>
+#include <linenoise.h>
 
 dval *denv_put(denv *e, char *k, dval *v, int constant);
 dval *denv_get(denv *e, char *k);

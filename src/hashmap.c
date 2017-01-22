@@ -1,8 +1,8 @@
 #undef NDEBUG
 #include <stdint.h>
-#include "headers/hashmap.h"
-#include "headers/dbg.h"
-#include "headers/bstrlib.h"
+#include <hashmap.h>
+#include <dbg.h>
+#include <bstrlib.h>
 
 const uint32_t FNV_PRIME = 16777619;
 const uint32_t FNV_OFFSET_BASIS = 2166136261;

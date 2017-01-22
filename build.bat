@@ -3,9 +3,15 @@
 set compiler=%1
 set command=%compiler%
 set arch=%2
-if exist "..\..\src\win32\*" (
+if exist "..\..\src\win32\NUL" (
    set win32sources="..\..\src\win32\*.c"
 )
+if not exist "..\..\src\libs\NUL" goto :continue
+   set libc="..\..\src\libs\*.c"
+   set libh="-I..\..\src\libs"
+   set msvclibh="/I..\..\src\libs"
+
+:continue
 if /i "%compiler%"=="gcc" goto :gcc
 if /i "%compiler%"=="clang" goto :clang
 if /i "%compiler%"=="msvc" goto :msvc
@@ -29,7 +35,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using GCC
-gcc -m32 -Wall -g ..\..\src\*.c %win32sources%  -I..\..\src\headers\ -o lydrige.exe
+gcc -m32 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -37,7 +43,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using GCC
-gcc -m64 -Wall -g ..\..\src\*.c %win32sources% -I..\..\src\headers\ -o lydrige.exe
+gcc -m64 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -53,7 +59,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using Clang for Windows
-clang -m32 -Wall -g ..\..\src\*.c %win32sources%  -I..\..\src\headers\ -o lydrige.exe
+clang -m32 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -61,7 +67,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using Clang for Windows
-clang -m64 -Wall -g ..\..\src\*.c %win32sources%  -I..\..\src\headers\ -o lydrige.exe
+clang -m64 -Wall -g ..\..\src\*.c %win32sources% %libc%  -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -95,7 +101,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using MSVC
-cl /D_CRT_SECURE_NO_WARNINGS  /nologo /Wall /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources%  /I..\..\src\headers\ /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
+cl /nologo /Wall /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
 cd ..\.. 
 goto :end
 
@@ -144,3 +150,7 @@ rmdir /S build
 
 
 :end
+set "win32sources="
+set "libc="
+set "libh="
+set "msvclibh="

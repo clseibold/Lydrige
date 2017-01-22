@@ -48,12 +48,12 @@ char* readline(char* prompt) {
 }
 
 #else
-#include "headers/linenoise.h"
+#include <linenoise.h>
 #endif
 
-#include "headers/mpc.h"
-#include "headers/structure.h"
-#include "headers/builtin.h"
+#include <mpc.h>
+#include <structure.h>
+#include <builtin.h>
 
 #define COL_RED "\x1b[31m"
 #define COL_GREEN "\x1b[32m"
