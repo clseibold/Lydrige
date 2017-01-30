@@ -33,14 +33,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <colors.h>
 
 #ifdef _WIN32
 #include <windows.h>
 
-#define FOREGROUND_WHITE FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE
-#define FOREGROUND_CYAN FOREGROUND_GREEN|FOREGROUND_BLUE
-
-static HANDLE hConsole; // Used for coloring output on Windows
 static char buffer[2048];
 
 char* readline() {
@@ -58,14 +55,6 @@ char* readline() {
 #include <mpc.h>
 #include <structure.h>
 #include <builtin.h>
-
-#define COL_RED "\x1b[31m" // Error
-#define COL_GREEN "\x1b[32m" // Prompt, Success?
-#define COL_YELLOW "\x1b[33m" // Function and Variable Names?
-#define COL_BLUE "\x1b[34m"
-#define COL_MAGENTA "\x1b[35m" // Function args
-#define COL_CYAN "\x1b[36m" // Information
-#define COL_RESET "\x1b[0m" // Statements, etc.
 
 typedef struct dval_or_darray {
     bool isArray;
@@ -190,26 +179,28 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
-                printf(COL_YELLOW "basic operators " COL_CYAN "[+, -, *, /, mod, ^]" COL_RESET "          returns result of respective operation\n"
-                       COL_YELLOW "succ  :num      " COL_MAGENTA "[n  :num]" COL_RESET "                     returns succession of number [n] (num + 1)\n"
-                       COL_YELLOW "list  :array    " COL_MAGENTA "[&v :any]" COL_RESET "                     returns list with given values [&v] as its elements\n"
-                       COL_YELLOW "len   :int      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns length of given list [l] as an integer\n"
-                       COL_YELLOW "get   :any      " COL_MAGENTA "[i  :int,  l :array]" COL_RESET "          returns element at given index [i] from given list [l]\n"
-                       COL_YELLOW "set   :any      " COL_MAGENTA "[i  :int,  v: any,  l :array]" COL_RESET " returns copy of given list [l] with the element at given index [i] replaced with given value [v]\n"
-                       COL_YELLOW "first :any      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns first element of given list [l]\n"
-                       COL_YELLOW "last  :any      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns last element of given list [l]\n"
-                       COL_YELLOW "head  :array    " COL_MAGENTA "[l  :array]" COL_RESET "                   returns list of all but last element of given list [l]\n"
-                       COL_YELLOW "tail  :array    " COL_MAGENTA "[l  :array]" COL_RESET "                   returns list of all but first element of given list [l]\n"
-                       COL_YELLOW "join  :array    " COL_MAGENTA "[&l :array]" COL_RESET "                   returns list of given lists [&l] joined together\n"
-                       COL_YELLOW "print :int      " COL_MAGENTA "[&v :any]" COL_RESET "                     prints out given values [&v], returns 1\n"
-                       COL_YELLOW "read  :string   " COL_MAGENTA "[prompt :string]" COL_RESET "              returns input from the user, will print out given string [prompt]\n");
+                colors_printf(COLOR_YELLOW, "basic operators "); colors_printf(COLOR_CYAN, "[+, -, *, /, mod, ^]"); printf("          returns result of respective operation\n");
+                colors_printf(COLOR_YELLOW, "succ  :num      "); colors_printf(COLOR_MAGENTA, "[n  :num]"); printf("                     returns succession of number [n] (num + 1)\n");
+                colors_printf(COLOR_YELLOW, "list  :array    "); colors_printf(COLOR_MAGENTA, "[&v :any]"); printf("                     returns list with given values [&v] as its elements\n");
+                colors_printf(COLOR_YELLOW, "len   :int      "); colors_printf(COLOR_MAGENTA, "[l  :array]"); printf("                   returns length of given list [l] as an integer\n");
+                colors_printf(COLOR_YELLOW, "get   :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  l :array]"); printf("          returns element at given index [i] from given list [l]\n");
+                colors_printf(COLOR_YELLOW, "set   :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  v: any,  l :array]"); printf(" returns copy of given list [l] with the element at given index [i] replaced with given value [v]\n");
+                colors_printf(COLOR_YELLOW, "first :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]"); printf("                   returns first element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "last  :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]"); printf("                   returns last element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "head  :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]"); printf("                   returns list of all but last element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "tail  :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]"); printf("                   returns list of all but first element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "join  :array    "); colors_printf(COLOR_MAGENTA, "[&l :array]"); printf("                   returns list of given lists [&l] joined together\n");
+                colors_printf(COLOR_YELLOW, "print :int      "); colors_printf(COLOR_MAGENTA, "[&v :any]"); printf("                     prints out given values [&v], returns 1\n");
+                colors_printf(COLOR_YELLOW, "read  :string   "); colors_printf(COLOR_MAGENTA, "[prompt :string]"); printf("              returns input from the user, will print out given string [prompt]\n");
+                
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
-                printf(COL_YELLOW "version" COL_RESET "   version and copyright info\n"
-                       COL_YELLOW "builtins" COL_RESET "  list all builtin functions\n"
-                       COL_YELLOW "commands" COL_RESET "  list all REPL command, each should be prefaced with ':'\n"
-                       COL_YELLOW "exit" COL_RESET "      exit the REPL\n");
+                colors_printf(COLOR_YELLOW, "version"); printf("   version and copyright info\n");
+                colors_printf(COLOR_YELLOW, "builtins"); printf("  list all builtin functions\n");
+                colors_printf(COLOR_YELLOW, "commands"); printf("  list all REPL command, each should be prefaced with ':'\n");
+                colors_printf(COLOR_YELLOW, "exit"); printf("      exit the REPL\n");
+                
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else {
@@ -292,66 +283,34 @@ internal dval
 
 void printStart(void)
 {
-#ifdef _WIN32
-    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
-    puts("Lydrige REPL - v0.6.0a");
-    SetConsoleTextAttribute(hConsole, FOREGROUND_CYAN);
-    puts("Type ':exit' to Exit the REPL");
-    puts("Type ':builtins' to get a list of builtin functions\n");
-    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
-#else
-    puts(COL_GREEN "Lydrige REPL - v0.6.0a" COL_RESET);
-    puts("");
-    puts(COL_CYAN "Type ':exit' to Exit the REPL" COL_RESET);
-    puts(COL_CYAN "Type ':builtins' to get a list of builtin functions\n" COL_RESET);
-#endif
+    colors_printf(COLOR_GREEN, "Lydrige REPL - v0.6.0a\n");
+    setColor(COLOR_CYAN);
+    printf("Type ':exit' to Exit the REPL\n");
+    printf("Type ':builtins' to get a list of builtin functions\n");
+    printf("\n");
+    resetColor();
 }
 
 void win32PrintPrompt(void)
 {
-    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
-    printf("Lydrige> ");
-    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
+    colors_printf(COLOR_GREEN, "Lydrige> ");
 }
 
 void printREPLResult(dval *result)
 {
     printf("\n");
-#ifdef _WIN32
     if (result->type == DVAL_ERROR) {
-        SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
-        printf("Error: %s\n", result->str);
+        colors_printf(COLOR_RED, "Error: %s\n", result->str);
     } else if (result->type == DVAL_INFO) {
-        SetConsoleTextAttribute(hConsole, FOREGROUND_CYAN);
-        printf("Info: %s\n", result->str);
+        colors_printf(COLOR_CYAN, "Info: %s\n", result->str);
     } else {
-        SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
         printf(" -> ");
         bool known = print_elem(*result, false);
         printf("\n");
         if (!known) {
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
-            printf("Error: Cannot print value of type Unknown or Any!\n");
+            colors_printf(COLOR_RED, "Error: Cannot print value of type Unknown or Any!\n");
         }
     }
-    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
-#else
-    if (result->type == DVAL_ERROR) {
-        printf("\n");
-        printf(COL_RED "Error: %s\n" COL_RESET, result->str);
-    } else if (result->type == DVAL_INFO) {
-        printf("\n");
-        printf(COL_CYAN "Info: %s\n" COL_RESET, result->str);
-    } else {
-        printf("\n");
-        printf(" -> ");
-        bool known = print_elem(*result, false);
-        printf("\n");
-        if (!known) {
-            printf(COL_RED "Error: Cannot print value of type Unknown or Any!\n" COL_RESET);
-        }
-    }
-#endif
 }
 
 int main(int argc, char** argv) // TODO: Possible memory leak from not calling bdestroy for all bstrings!
