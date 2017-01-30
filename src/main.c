@@ -35,11 +35,15 @@
 #include <string.h>
 
 #ifdef _WIN32
+#include <windows.h>
 
+#define FOREGROUND_WHITE FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE
+#define FOREGROUND_CYAN FOREGROUND_GREEN|FOREGROUND_BLUE
+
+static HANDLE hConsole; // Used for coloring output on Windows
 static char buffer[2048];
 
-char* readline(char* prompt) {
-    fputs(prompt, stdout);
+char* readline() {
     fgets(buffer, 2048, stdin);
     char *cpy = (char *) malloc(strlen(buffer)+1);
     strcpy(cpy, buffer);
@@ -286,8 +290,76 @@ internal dval
     }
 }
 
+void printStart(void)
+{
+#ifdef _WIN32
+    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    puts("Lydrige REPL - v0.6.0a");
+    SetConsoleTextAttribute(hConsole, FOREGROUND_CYAN);
+    puts("Type ':exit' to Exit the REPL");
+    puts("Type ':builtins' to get a list of builtin functions\n");
+    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
+#else
+    puts(COL_GREEN "Lydrige REPL - v0.6.0a" COL_RESET);
+    puts("");
+    puts(COL_CYAN "Type ':exit' to Exit the REPL" COL_RESET);
+    puts(COL_CYAN "Type ':builtins' to get a list of builtin functions\n" COL_RESET);
+#endif
+}
+
+void win32PrintPrompt(void)
+{
+    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Lydrige> ");
+    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
+}
+
+void printREPLResult(dval *result)
+{
+    printf("\n");
+#ifdef _WIN32
+    if (result->type == DVAL_ERROR) {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+        printf("Error: %s\n", result->str);
+    } else if (result->type == DVAL_INFO) {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_CYAN);
+        printf("Info: %s\n", result->str);
+    } else {
+        SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
+        printf(" -> ");
+        bool known = print_elem(*result, false);
+        printf("\n");
+        if (!known) {
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("Error: Cannot print value of type Unknown or Any!\n");
+        }
+    }
+    SetConsoleTextAttribute(hConsole, FOREGROUND_WHITE);
+#else
+    if (result->type == DVAL_ERROR) {
+        printf("\n");
+        printf(COL_RED "Error: %s\n" COL_RESET, result->str);
+    } else if (result->type == DVAL_INFO) {
+        printf("\n");
+        printf(COL_CYAN "Info: %s\n" COL_RESET, result->str);
+    } else {
+        printf("\n");
+        printf(" -> ");
+        bool known = print_elem(*result, false);
+        printf("\n");
+        if (!known) {
+            printf(COL_RED "Error: Cannot print value of type Unknown or Any!\n" COL_RESET);
+        }
+    }
+#endif
+}
+
 int main(int argc, char** argv) // TODO: Possible memory leak from not calling bdestroy for all bstrings!
 {
+#ifdef _WIN32
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
+    
     Line = mpc_new("line");
     Command = mpc_new("command");
     Statement = mpc_new("statement");
@@ -319,10 +391,8 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);
     
     if (argc == 1) {
-        puts(COL_GREEN "Lydrige REPL - v0.6.0a" COL_RESET);
-        puts("");
-        puts(COL_CYAN "Type ':exit' to Exit the REPL" COL_RESET);
-        puts(COL_CYAN "Type ':builtins' to get a list of builtin functions\n" COL_RESET);
+        // REPL
+        printStart();
         
         denv *e = denv_new();
         denv_add_builtins(e);
@@ -334,7 +404,8 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
         
         while (running) {
 #ifdef _WIN32
-            char *input = readline(COL_GREEN "Lydrige> " COL_RESET);
+            win32PrintPrompt();
+            char *input = readline();
 #else
             char *input = linenoise("Lydrige> ");
             linenoiseHistoryAdd(input);
@@ -344,21 +415,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
             if (mpc_parse("<stdin>", input, Line, &r)) {
                 //mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
-                if (result->type == DVAL_ERROR) {
-                    printf("\n");
-                    printf(COL_RED "Error: %s\n" COL_RESET, result->str);
-                } else if (result->type == DVAL_INFO) {
-                    printf("\n");
-                    printf(COL_CYAN "Info: %s\n" COL_RESET, result->str);
-                } else {
-                    printf("\n");
-                    printf(" -> ");
-                    bool known = print_elem(*result, false);
-                    printf("\n");
-                    if (!known) {
-                        printf(COL_RED "Error: Cannot print value of type Unknown or Any!" COL_RESET);
-                    }
-                }
+                printREPLResult(result);
                 dval_del(result);
                 mpc_ast_delete((mpc_ast_t *) r.output);
             } else {
