@@ -31,6 +31,8 @@
  */
 
 #include <builtin.h>
+#include <colors.h>
+#include <stdlib.h>
 
 /*
 * k - key
@@ -540,7 +542,9 @@ dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with s
 }
 
 dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a REPL command?
-#ifndef _WIN32
+#ifdef _WIN32
+    system("cls"); // TODO: Change this?
+#else
     linenoiseClearScreen();
 #endif
     return(dval_int(1));

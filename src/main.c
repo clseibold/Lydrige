@@ -45,6 +45,7 @@ char* readline() {
     char *cpy = (char *) malloc(strlen(buffer)+1);
     strcpy(cpy, buffer);
     cpy[strlen(cpy)-1] = '\0';
+    
     return cpy;
 }
 
@@ -81,8 +82,10 @@ arg_amt(mpc_ast_t *t, bool isQExpr)
         else if (strcmp(t->children[i]->contents, "'") == 0) continue;
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
         if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && !isQExpr) continue;
+        
         argc++;
     }
+    
     return argc;
 }
 
@@ -91,10 +94,12 @@ internal dval_or_darray
 eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
 {
     dval *args = (dval*) calloc(argc, sizeof(dval));
+    
     // Check for NULL, and return an error
     if (args == NULL) {
         return((dval_or_darray) { false, dval_error("Unable to allocate memory for arguments.") });
     }
+    
     unsigned int currentArgPos = 0;
     for (unsigned int i = 0; i < t->children_num; i++) {
         if (strcmp(t->children[i]->contents, "(") == 0) continue;
@@ -110,6 +115,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
         else if (strcmp(t->children[i]->tag, "regex") == 0) continue;
         if (strstr(t->children[i]->tag, "ident") && !strstr(t->children[i]->tag, "value") && isQExpr) {
             args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str = t->children[i]->contents} };
+            
             currentArgPos++;
             continue;
         }
@@ -125,10 +131,12 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 if (!elements.isArray) { // If not an array, then it returned an error
                     return((dval_or_darray) { false, elements.result });
                 }
+                
                 args[currentArgPos] = (dval) { DVAL_EXPR, 0, { .elements = elements.result }, largc };
                 currentArgPos++;
             } else {
                 dval *d = read_eval_expr(e, t->children[i]);
+                
                 args[currentArgPos] = *d; // TODO: This gets coppied over. Is there a better way?
                 if (d->type == DVAL_ERROR) {
                     free(args);
@@ -144,6 +152,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
             if (!elements.isArray) { // If not an array, then it returned an error
                 return((dval_or_darray) { false, elements.result });
             }
+            
             args[currentArgPos] = (dval) { DVAL_QEXPR, 0, { .elements = elements.result }, largc };
             currentArgPos++;
         } else if (strstr(t->children[i]->tag, "list")) { // TODO
@@ -152,6 +161,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
             if (!elements.isArray) { // If not an array, then it returned an error
                 return((dval_or_darray) { false, elements.result });
             }
+            
             args[currentArgPos] = (dval) { DVAL_LIST, 0, { .elements = elements.result }, largc };
             currentArgPos++;
         } else if (strstr(t->children[i]->tag, "statement")) {
@@ -160,6 +170,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
         } else if (strstr(t->children[i]->tag, "command")) { // REPL Only
             if (strcmp(t->children[i]->children[1]->contents, "exit") == 0) {
                 running = false;
+                
                 free(args);
                 return((dval_or_darray) { false, dval_info("Program Exited with Result: 1\n"
                                                            "(User Interruption)\n") });
@@ -176,6 +187,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 printf("Copyright (c) 2010-2014, Salvatore Sanfilippo <antirez at gmail dot com>\n");
                 printf("Copyright (c) 2010-1013, Pieter Noordhuis <pcnoordhuis at gmail dot com>\n");
                 printf("https://github.com/antirez/linenoise/\n");
+                
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
@@ -218,6 +230,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                     args[currentArgPos] = (dval) { DVAL_IDENT, 0, { .str=t->children[i]->contents } };
                 } else {
                     dval *v = denv_get(e, t->children[i]->contents);
+                    
                     if (v->type == DVAL_ERROR) {
                         free(args);
                         return((dval_or_darray) { false, v });
@@ -237,14 +250,17 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 substring = malloc(substrlen * sizeof(char));
                 memcpy(substring, &t->children[i]->contents[1], substrlen);
                 substring[substrlen-1] = '\0';
+                
                 args[currentArgPos] = (dval) { DVAL_STRING, 0, {.str=substring}, 30 };
             }
+            
             currentArgPos++;
         } else {
             free(args);
             return((dval_or_darray) { false, dval_error("[Interpreter] A value type was added to the parser but its evaluation is not handled. [%s]", t->children[i]->tag) });
         }
     }
+    
     return((dval_or_darray) { true, args });
 }
 
@@ -268,6 +284,7 @@ internal dval
     dval *func = denv_get(e, ident);
     if (func->type == DVAL_FUNC) {
         dval *v = func->func(e, args.result, argc);
+        
         free(args.result);
         free(func);
         return(v);
@@ -284,6 +301,7 @@ internal dval
 void printStart(void)
 {
     colors_printf(COLOR_GREEN, "Lydrige REPL - v0.6.0a\n");
+    
     setColor(COLOR_CYAN);
     printf("Type ':exit' to Exit the REPL\n");
     printf("Type ':builtins' to get a list of builtin functions\n");
@@ -299,14 +317,18 @@ void win32PrintPrompt(void)
 void printREPLResult(dval *result)
 {
     printf("\n");
+    
     if (result->type == DVAL_ERROR) {
         colors_printf(COLOR_RED, "Error: %s\n", result->str);
     } else if (result->type == DVAL_INFO) {
         colors_printf(COLOR_CYAN, "Info: %s\n", result->str);
     } else {
         printf(" -> ");
+        
         bool known = print_elem(*result, false);
+        
         printf("\n");
+        
         if (!known) {
             colors_printf(COLOR_RED, "Error: Cannot print value of type Unknown or Any!\n");
         }
@@ -374,13 +396,16 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
             if (mpc_parse("<stdin>", input, Line, &r)) {
                 //mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
+                
                 printREPLResult(result);
+                
                 dval_del(result);
                 mpc_ast_delete((mpc_ast_t *) r.output);
             } else {
                 mpc_err_print(r.error);
                 mpc_err_delete(r.error);
             }
+            
 #ifdef _WIN32
             free(input);
 #else
