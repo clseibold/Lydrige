@@ -219,7 +219,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
                 colors_printf(COLOR_YELLOW, "version"); printf("   version and copyright info\n");
-                colors_printf(COLOR_YELLOW, "clear"); printf("     clears the screen");
+                colors_printf(COLOR_YELLOW, "clear"); printf("     clears the screen\n");
                 colors_printf(COLOR_YELLOW, "builtins"); printf("  list all builtin functions\n");
                 colors_printf(COLOR_YELLOW, "commands"); printf("  list all REPL command, each should be prefaced with ':'\n");
                 colors_printf(COLOR_YELLOW, "exit"); printf("      exit the REPL\n");
@@ -311,7 +311,7 @@ internal dval
 
 void printStart(void)
 {
-    colors_printf(COLOR_GREEN, "Lydrige REPL - v0.6.0a\n");
+    colors_printf(COLOR_GREEN, "Lydrige REPL - v0.6.0a\n\n");
     
     setColor(COLOR_CYAN);
     printf("Type ':exit' to Exit the REPL\n");
