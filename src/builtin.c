@@ -32,7 +32,13 @@
 
 #include <builtin.h>
 
-dval *denv_put(denv *e, char *k, dval *v, int constant) { // Doesn't delete v
+/*
+* k - key
+* v - value
+* constant - not editable/modifiable
+* You must delete v yourself, the function will not do this for you
+*/
+dval *denv_put(denv *e, char *k, dval *v, int constant) {
     dval *t;
     bstring k_bstr = bfromcstr(k);
     dval *item = (dval *) Hashmap_get(e->map, k_bstr);
@@ -397,6 +403,19 @@ dval *builtin_join(denv *a, dval *args, unsigned int argc) {
     return(list);
 }
 
+dval *builtin_def(denv *a, dval *args, unsigned int argc) {
+    if (argc <= 1 || argc > 2) {
+        return(dval_error("Function 'def' must be passed only 2 arguments."));
+    }
+    if (args[0].type != DVAL_IDENT) {
+        return(dval_error("Function 'def' must be passed an unbound identifier for argument 1"));
+    }
+    
+    
+    
+    return(dval_info("Function 'def' has not been implemented yet."));
+}
+
 bool print_elem(dval arg, bool removeQuotations) {
     switch (arg.type) {
         case DVAL_INT:
@@ -539,6 +558,7 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "*", builtin_multiply);
     denv_add_builtin(e, "/", builtin_divide);
     denv_add_builtin(e, "mod", builtin_mod);
+    // TODO: Add Power Operation [^]
     denv_add_builtin(e, "succ", builtin_succ);
     
     denv_add_builtin(e, "list", builtin_list);
@@ -550,6 +570,8 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "head", builtin_head);
     denv_add_builtin(e, "tail", builtin_tail);
     denv_add_builtin(e, "join", builtin_join);
+    
+    denv_add_builtin(e, "def", builtin_def);
     
     denv_add_builtin(e, "print", builtin_print);
     denv_add_builtin(e, "read", builtin_read);

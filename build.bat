@@ -35,7 +35,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using GCC
-gcc -m32 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
+gcc -m32 -Wall -g -D_CRT_SECURE_NO_WARNINGS ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -43,7 +43,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using GCC
-gcc -m64 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
+gcc -m64 -Wall -g -D_CRT_SECURE_NO_WARNINGS ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -59,7 +59,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using Clang for Windows
-clang -m32 -Wall -g ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
+clang -m32 -Wall -g -D_CRT_SECURE_NO_WARNINGS ..\..\src\*.c %win32sources% %libc% -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -67,7 +67,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using Clang for Windows
-clang -m64 -Wall -g ..\..\src\*.c %win32sources% %libc%  -I..\..\src\headers\ %libh% -o lydrige.exe
+clang -m64 -Wall -g -D_CRT_SECURE_NO_WARNINGS ..\..\src\*.c %win32sources% %libc%  -I..\..\src\headers\ %libh% -o lydrige.exe
 cd ..\.. 
 goto :end
 
@@ -101,7 +101,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using MSVC
-cl /nologo /Wall /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
+cl /D_CRT_SECURE_NO_WARNINGS /nologo /Wall /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
 cd ..\.. 
 goto :end
 

@@ -55,13 +55,13 @@ char* readline(char* prompt) {
 #include <structure.h>
 #include <builtin.h>
 
-#define COL_RED "\x1b[31m"
-#define COL_GREEN "\x1b[32m"
-#define COL_YELLOW "\x1b[33m"
+#define COL_RED "\x1b[31m" // Error
+#define COL_GREEN "\x1b[32m" // Prompt, Success?
+#define COL_YELLOW "\x1b[33m" // Function and Variable Names?
 #define COL_BLUE "\x1b[34m"
-#define COL_MAGENTA "\x1b[35m"
-#define COL_CYAN "\x1b[36m"
-#define COL_RESET "\x1b[0m"
+#define COL_MAGENTA "\x1b[35m" // Function args
+#define COL_CYAN "\x1b[36m" // Information
+#define COL_RESET "\x1b[0m" // Statements, etc.
 
 typedef struct dval_or_darray {
     bool isArray;
@@ -186,26 +186,26 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
-                printf("basic operators (+, -, *, /, mod)\n"
-                       COL_YELLOW "'succ n'" COL_RESET "      - returns succession of number n (num + 1)\n"
-                       COL_YELLOW "'list &a'" COL_RESET "     - returns list with given args as its elements\n"
-                       COL_YELLOW "'len l'" COL_RESET "       - returns length of given list as an integer\n"
-                       COL_YELLOW "'get i l'" COL_RESET "     - returns element at index i from list\n"
-                       COL_YELLOW "'set'" COL_RESET "         - \n"
-                       COL_YELLOW "'first l'" COL_RESET "     - returns first element of given list\n"
-                       COL_YELLOW "'last'" COL_RESET "        - returns last element of given list\n"
-                       COL_YELLOW "'head'" COL_RESET "        - returns list of all but last element of given list\n"
-                       COL_YELLOW "'tail'" COL_RESET "        - returns list of all but first element of given list\n"
-                       COL_YELLOW "'join &l'" COL_RESET "     - returns list of given lists joined together\n"
-                       COL_YELLOW "'print e'" COL_RESET "     - prints out given arguments\n"
-                       COL_YELLOW "'read prompt'" COL_RESET " - returns given input from the user. Will print out given string prompt\n");
+                printf(COL_YELLOW "basic operators " COL_CYAN "[+, -, *, /, mod, ^]" COL_RESET "          returns result of respective operation\n"
+                       COL_YELLOW "succ  :num      " COL_MAGENTA "[n  :num]" COL_RESET "                     returns succession of number [n] (num + 1)\n"
+                       COL_YELLOW "list  :array    " COL_MAGENTA "[&v :any]" COL_RESET "                     returns list with given values [&v] as its elements\n"
+                       COL_YELLOW "len   :int      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns length of given list [l] as an integer\n"
+                       COL_YELLOW "get   :any      " COL_MAGENTA "[i  :int,  l :array]" COL_RESET "          returns element at given index [i] from given list [l]\n"
+                       COL_YELLOW "set   :any      " COL_MAGENTA "[i  :int,  v: any,  l :array]" COL_RESET " returns copy of given list [l] with the element at given index [i] replaced with given value [v]\n"
+                       COL_YELLOW "first :any      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns first element of given list [l]\n"
+                       COL_YELLOW "last  :any      " COL_MAGENTA "[l  :array]" COL_RESET "                   returns last element of given list [l]\n"
+                       COL_YELLOW "head  :array    " COL_MAGENTA "[l  :array]" COL_RESET "                   returns list of all but last element of given list [l]\n"
+                       COL_YELLOW "tail  :array    " COL_MAGENTA "[l  :array]" COL_RESET "                   returns list of all but first element of given list [l]\n"
+                       COL_YELLOW "join  :array    " COL_MAGENTA "[&l :array]" COL_RESET "                   returns list of given lists [&l] joined together\n"
+                       COL_YELLOW "print :int      " COL_MAGENTA "[&v :any]" COL_RESET "                     prints out given values [&v], returns 1\n"
+                       COL_YELLOW "read  :string   " COL_MAGENTA "[prompt :string]" COL_RESET "              returns input from the user, will print out given string [prompt]\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
-                printf(COL_YELLOW "'version'" COL_RESET "  - version and copyright info\n"
-                       COL_YELLOW "'builtins'" COL_RESET " - list all builtin functions\n"
-                       COL_YELLOW "'commands'" COL_RESET " - list all REPL command, each should be prefaced with ':'\n"
-                       COL_YELLOW "'exit'" COL_RESET "     - exit the REPL\n");
+                printf(COL_YELLOW "version" COL_RESET "   version and copyright info\n"
+                       COL_YELLOW "builtins" COL_RESET "  list all builtin functions\n"
+                       COL_YELLOW "commands" COL_RESET "  list all REPL command, each should be prefaced with ':'\n"
+                       COL_YELLOW "exit" COL_RESET "      exit the REPL\n");
                 free(args);
                 return((dval_or_darray) { false, dval_int(1) });
             } else {
@@ -319,9 +319,10 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);
     
     if (argc == 1) {
-        puts("Lydrige REPL - v0.6.0a");
-        puts("Type ':exit' to Exit the REPL");
-        puts("Type ':builtins' to get a list of builtin functions\n");
+        puts(COL_GREEN "Lydrige REPL - v0.6.0a" COL_RESET);
+        puts("");
+        puts(COL_CYAN "Type ':exit' to Exit the REPL" COL_RESET);
+        puts(COL_CYAN "Type ':builtins' to get a list of builtin functions\n" COL_RESET);
         
         denv *e = denv_new();
         denv_add_builtins(e);
