@@ -189,7 +189,17 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 printf("https://github.com/antirez/linenoise/\n");
                 
                 free(args);
-                return((dval_or_darray) { false, dval_int(1) });
+                return((dval_or_darray) { false, 0 });
+            } else if (strcmp(t->children[i]->children[1]->contents, "clear") == 0) {
+                // TODO: Use builtin_clear(null, null, 0) instead?
+#ifdef _WIN32
+                system("cls");
+#else
+                linenoiseClearScreen();
+#endif
+                
+                free(args);
+                return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
                 colors_printf(COLOR_YELLOW, "basic operators "); colors_printf(COLOR_CYAN, "[+, -, *, /, mod, ^]"); printf("          returns result of respective operation\n");
                 colors_printf(COLOR_YELLOW, "succ  :num      "); colors_printf(COLOR_MAGENTA, "[n  :num]"); printf("                     returns succession of number [n] (num + 1)\n");
@@ -206,15 +216,16 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 colors_printf(COLOR_YELLOW, "read  :string   "); colors_printf(COLOR_MAGENTA, "[prompt :string]"); printf("              returns input from the user, will print out given string [prompt]\n");
                 
                 free(args);
-                return((dval_or_darray) { false, dval_int(1) });
+                return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
                 colors_printf(COLOR_YELLOW, "version"); printf("   version and copyright info\n");
+                colors_printf(COLOR_YELLOW, "clear"); printf("     clears the screen");
                 colors_printf(COLOR_YELLOW, "builtins"); printf("  list all builtin functions\n");
                 colors_printf(COLOR_YELLOW, "commands"); printf("  list all REPL command, each should be prefaced with ':'\n");
                 colors_printf(COLOR_YELLOW, "exit"); printf("      exit the REPL\n");
                 
                 free(args);
-                return((dval_or_darray) { false, dval_int(1) });
+                return((dval_or_darray) { false, 0 });
             } else {
                 free(args);
                 return((dval_or_darray) { false, dval_error("Command doesn't exist.") });
@@ -294,7 +305,7 @@ internal dval
     } else {
         free(args.result);
         free(func);
-        return(dval_int(0));
+        return(dval_int(0)); // TODO: Error?
     }
 }
 
@@ -333,6 +344,37 @@ void printREPLResult(dval *result)
             colors_printf(COLOR_RED, "Error: Cannot print value of type Unknown or Any!\n");
         }
     }
+}
+
+void unixSetupLinenoise()
+{
+#ifndef _WIN32
+    linenoiseSetMultiLine(1);
+    linenoiseHistorySetMaxLen(20);
+#endif
+}
+
+char *getInput()
+{
+    char *input;
+#ifdef _WIN32
+    win32PrintPrompt();
+    input = readline();
+#else
+    input = linenoise("Lydrige> ");
+    linenoiseHistoryAdd(input);
+#endif
+    
+    return input;
+}
+
+void freeInput(char *input)
+{
+#ifdef _WIN32
+    free(input);
+#else
+    linenoiseFree(input);
+#endif
 }
 
 int main(int argc, char** argv) // TODO: Possible memory leak from not calling bdestroy for all bstrings!
@@ -377,25 +419,21 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
         
         denv *e = denv_new();
         denv_add_builtins(e);
-        
-#ifndef _WIN32
-        linenoiseSetMultiLine(1);
-        linenoiseHistorySetMaxLen(20);
-#endif
+        unixSetupLinenoise();
         
         while (running) {
-#ifdef _WIN32
-            win32PrintPrompt();
-            char *input = readline();
-#else
-            char *input = linenoise("Lydrige> ");
-            linenoiseHistoryAdd(input);
-#endif
+            char *input = getInput();
             
             mpc_result_t r;
             if (mpc_parse("<stdin>", input, Line, &r)) {
                 //mpc_ast_print((mpc_ast_t*) r.output); puts("");
                 dval *result = read_eval_expr(e, (mpc_ast_t *) r.output);
+                if (!result) {
+                    printf("\n");
+                    mpc_ast_delete((mpc_ast_t *) r.output);
+                    freeInput(input);
+                    continue;
+                }
                 
                 printREPLResult(result);
                 
@@ -406,11 +444,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
                 mpc_err_delete(r.error);
             }
             
-#ifdef _WIN32
-            free(input);
-#else
-            linenoiseFree(input);
-#endif
+            freeInput(input);
         }
         
         denv_del(e);

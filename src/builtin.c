@@ -541,7 +541,7 @@ dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with s
     return(dval_string((char *)input));
 }
 
-dval *builtin_clear(denv *e, dval *args, unsigned int argc) { // TODO: Should this instead be a REPL command?
+dval *builtin_clear(denv *e, dval *args, unsigned int argc) {
 #ifdef _WIN32
     system("cls"); // TODO: Change this?
 #else
