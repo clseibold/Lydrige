@@ -38,7 +38,7 @@
 #include <mpc.h>
 #include <hashmap.h>
 
-#include <gb.h>
+//#include <gb.h>
 
 #define internal static
 #define global static
@@ -74,7 +74,7 @@ struct dval { // TODO: Reorder to use least amount of memory!
         int integer;
         double doub;
         char character;
-        gbString nstr; // New Strings from gb library
+        char *nstr; // New Strings from gb library
         char *str; // Old strings still used for errors and info
         dbuiltin func;
         // TODO: Not sure how to handle qexprs better?

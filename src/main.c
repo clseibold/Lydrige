@@ -42,8 +42,8 @@
 // STB and Single File Header Libs
 #define STB_SPRINTF_IMPLEMENTATION
 #include <stb_sprintf.h>
-#define GB_IMPLEMENTATION
-#include <gb.h>
+//#define GB_IMPLEMENTATION
+//#include <gb.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -269,7 +269,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 memcpy(substring, &t->children[i]->contents[1], substrlen);
                 substring[substrlen-1] = '\0';
                 
-                args[currentArgPos] = (dval) { DVAL_STRING, 0, { .nstr=gb_string_make(gb_heap_allocator(), substring) }, 30 };
+                args[currentArgPos] = (dval) { DVAL_STRING, 0, { .nstr=substring }, 30 };
             }
             
             currentArgPos++;

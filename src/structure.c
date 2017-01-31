@@ -32,7 +32,7 @@
 
 #include <structure.h>
 #include <stb_sprintf.h>
-#include <gb.h>
+//#include <gb.h>
 
 dval *dval_int(long integer) {
     dval *d = (dval *) malloc(sizeof(dval));
@@ -63,9 +63,9 @@ dval *dval_string(char *str) {
     d->type = DVAL_STRING;
     d->constant = 0;
     
-    /*d->str = (char *) malloc(strlen(str) + 1);
-    strcpy(d->str, str);*/
-    d->nstr = gb_string_make(gb_heap_allocator(), str);
+    d->str = (char *) malloc(strlen(str) + 1);
+    strcpy(d->str, str);
+    //d->nstr = gb_string_make(gb_heap_allocator(), str);
     
     return d;
 }
@@ -161,7 +161,8 @@ void dval_del(dval *d) {
         } break;
         case DVAL_STRING:
         {
-            gb_string_free(d->nstr);
+            free(d->str);
+            //gb_string_free(d->nstr);
         } break;
         break;
         default:
