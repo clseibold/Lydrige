@@ -35,6 +35,9 @@
 #include <string.h>
 #include <colors.h>
 
+#define STB_SPRINTF_IMPLEMENTATION
+#include <stb_sprintf.h>
+
 #ifdef _WIN32
 #include <windows.h>
 
@@ -192,6 +195,7 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "clear") == 0) {
                 // TODO: Use builtin_clear(null, null, 0) instead?
+                
 #ifdef _WIN32
                 system("cls");
 #else

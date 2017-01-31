@@ -31,6 +31,7 @@
  */
 
 #include <structure.h>
+#include <stb_sprintf.h>
 
 dval *dval_int(long integer) {
     dval *d = (dval *) malloc(sizeof(dval));
@@ -67,29 +68,35 @@ dval *dval_string(char *str) {
     return d;
 }
 
-dval *dval_error(char *str, ...) {
+dval *dval_error(char *fmt, ...) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_ERROR;
     
     va_list va;
-    va_start(va, str);
+    va_start(va, fmt);
     d->str = (char *) malloc(512);
-    vsnprintf(d->str, 511, str, va);
-    d->str = (char *) realloc(d->str, strlen(d->str) + 1);
+    //vsnprintf(d->str, 511, fmt, va);
+    
+    stbsp_vsnprintf(d->str, 511, fmt, va);
+    
+    d->str = (char *) realloc(d->str, strlen(d->str) + 1);// TODO: What is this for?
     va_end(va);
     
     return d;
 }
 
-dval *dval_info(char *str, ...) {
+dval *dval_info(char *fmt, ...) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_INFO;
     
     va_list va;
-    va_start(va, str);
+    va_start(va, fmt);
     d->str = (char *) malloc(512);
-    vsnprintf(d->str, 511, str, va);
-    d->str = (char *) realloc(d->str, strlen(d->str) + 1);
+    //vsnprintf(d->str, 511, fmt, va);
+    
+    stbsp_vsnprintf(d->str, 511, fmt, va);
+    
+    d->str = (char *) realloc(d->str, strlen(d->str) + 1); // TODO: What is this for?
     va_end(va);
     
     return d;
