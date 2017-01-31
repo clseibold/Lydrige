@@ -445,9 +445,9 @@ bool print_elem(dval arg, bool removeQuotations) {
         case DVAL_STRING:
         {
             if (removeQuotations) {
-                printf("%s", arg.str);
+                printf("%s", arg.nstr);
             } else {
-                printf("\"%s\"", arg.str);
+                printf("\"%s\"", arg.nstr);
             }
             return true;
         } break;

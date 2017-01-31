@@ -38,6 +38,8 @@
 #include <mpc.h>
 #include <hashmap.h>
 
+#include <gb.h>
+
 #define internal static
 #define global static
 #define bool int
@@ -72,7 +74,8 @@ struct dval { // TODO: Reorder to use least amount of memory!
         int integer;
         double doub;
         char character;
-        char *str;
+        gbString nstr; // New Strings from gb library
+        char *str; // Old strings still used for errors and info
         dbuiltin func;
         // TODO: Not sure how to handle qexprs better?
         dval *elements; // For qexpressions, expressions and other list-like elements
