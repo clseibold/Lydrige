@@ -1,0 +1,121 @@
+# This file is the same as 0.6.0NewSyntax.lydg, but without any comments!
+
+
+clear;
+print "--- Basic Things ---";
+print (+ 3 3);
+def .x :int 5;
+print (if {== x 5} "true" "false");
+print {x y non_existant_symbol};
+print [(+ x 1) x {x non_existant_symbol}];
+print (+ x (+ x 1));
+print 0x55;
+
+
+print "--- Type 'typeof' Function ---";
+print (typeof x);
+print (typeof (typeof x));
+print (typeof (typeof (typeof x)));
+
+
+print "--- Input from User ---";
+def .name :string (read "Enter your name: ");
+print "  -> Hello " name '!';
+
+
+print "--- Function/Lambda Declaractions ---";
+def .test :func
+	[.x: int, .y: string] -> {
+		print x y;
+	() };
+def .test2 :func
+	[.a: int, .f: func, .b: int] -> {
+		(f a b) };
+test 5 " string";
+test2 5 + 3;
+
+
+print "--- Lambda Evaluation ---";
+def .x :func
+	[] -> 5;
+
+print "x: " x;
+def .isFunction :func
+	[.x: any] -> {
+		(if (== func (typeof x))
+			"a function"
+			"not a function") };
+def .isInteger :func
+	[.x: any] -> {
+		(if (== int (typeof x))
+			"an integer"
+			"not an integer") };
+print "x is " (isFunction x);
+print "x is " (isInteger x);
+def .z :func
+	[.y: int] -> {
+		(+ y 1) };
+print "z: " z;
+print "z is " (isFunction z);
+print "z is " (isInteger z);
+print "(z 5): " (z 5);
+test test2 5;
+
+
+print "--- Statements ---";
+print 5; print 73;
+def .test :func
+	[] -> {
+		print "Something";
+		print "Another something";
+	5 };
+
+
+print "--- While Loops ---"
+print "Mapping to lambda '[.n: any] -> {+ n 1;}': "
+	(map ([.n: any] -> {
+			(+ n 1)
+		})
+		[3, 3, 3, 3]
+	);
+print "Mapping to function '-': " (map - [3, 3, 3, 3]);
+print "Filter using lambda '[.n: any] -> {> n 2;}': "
+	(filter ([.n: any] -> {
+			(> n 2)
+		})
+		[5, 2, 11, -7, 8, 1]
+	);
+map (join [5, 5]) [[4], [3]];
+map first [[4, 3, 2], [6, 5, 4]];
+
+
+print "--- The '==' Function ---";
+print "(== 1 0) -> " (== 1 0);
+print "(== 1 1) -> " (== 1 1);
+print "(== 1 1 0) -> " (== 1 1 0);
+print "(== 1 0 1) -> " (== 1 0 1);
+print "(== 1 0 0) -> " (== 1 0 0);
+
+
+print "--- The '!=' Function ---";
+print "(!= 1 0) -> " (!= 1 0);
+print "(!= 1 1) -> " (!= 1 1);
+print "(!= 1 1 0) -> " (!= 1 1 0);
+print "(!= 1 0 1) -> " (!= 1 0 1);
+print "(!= 1 0 0) -> " (!= 1 0 0);
+print "x = " [.x: 5, .y: 7, .z: 10]->x;
+
+
+struct .vec3i [.x: int, .y: int, .z: int];
+struct .vec4i [.x: int, .y: int, .z: int];
+
+struct .vec3f [.x: float, .y: float, .z: float];
+struct .vec4f [.x: float, .y: float, .z: float];
+
+
+def .v :vec3i [3, 1, 5];
+print "x should be 3. It is: " v->x;
+print "x should be 3. It is: " v->0;
+
+def .v2 :vec4i [2, 9, 3, 7];
+print "w should be 7. It is: " v2->w;

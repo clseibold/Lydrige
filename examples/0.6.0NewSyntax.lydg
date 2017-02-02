@@ -35,7 +35,7 @@ print (+ x (+ x 1));
 print 0x55;
 
 # -- The 'typeof' Function
-print "--- Tye 'typeof' Function ---";
+print "--- Type 'typeof' Function ---";
 print (typeof x);
 print (typeof (typeof x));
 print (typeof (typeof (typeof x)));
@@ -43,7 +43,7 @@ print (typeof (typeof (typeof x)));
 # -- Getting Input from User
 print "--- Input from User ---";
 def .name :string (read "Enter your name: ");
-print "  -> Hello " name "!";
+print "  -> Hello " name '!';
 
 # -- Function/Lambda Declarations
 print "--- Function/Lambda Declaractions ---";
@@ -86,6 +86,7 @@ print "z: " z;
 print "z is " (isFunction z);
 print "z is " (isInteger z);
 print "(z 5): " (z 5);
+test test2 5;
 
 # -- Statements
 print "--- Statements ---";
