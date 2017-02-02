@@ -62,7 +62,7 @@ print "--- Lambda Evaluation ---";
 # This function is not evaluated until it is called.
 #   If you return a variable from the function it will not be
 #   evaluated until the function is called.
-def .x :int
+def .x :func
 	[] -> 5;
 
 print "x: " x;
@@ -136,16 +136,18 @@ print "(!= 1 1 0) -> " (!= 1 1 0);
 print "(!= 1 0 1) -> " (!= 1 0 1);
 print "(!= 1 0 0) -> " (!= 1 0 0);
 
-# -- Structs
+# -- Tagged Arrays and Structs
 
-# This is how you create arrays whose indices are named.
-#  This is how function definitions work. With functions/lambdas
+# This is how you create arrays whose indices are named. These are called 'tagged arrays'.
+#  They are how function definitions work. With functions/lambdas
 #  you are essentially passing in an array of types for your arguments
 #  where each type has an assigned symbol (or name). These symbols are
-#  then automatically bound to the lambda's scope when the function is called.
+#  then automatically bound in the lambda's scope/environment when the function is called.
 print "x = " [.x: 5, .y: 7, .z: 10]->x;
 
-# This is how you create struct types.
+# This is how you create struct types. You simply pass the 'struct' function
+#  a dotted identifier (or symbol) and a 'tagged array'. The tagged array is
+#  used to tell the function the symbol names to use, and their types.
 struct .vec3i [.x: int, .y: int, .z: int];
 struct .vec4i [.x: int, .y: int, .z: int];
 
@@ -155,5 +157,9 @@ struct .vec4f [.x: float, .y: float, .z: float];
 def .v :vec3i [3, 1, 5]; # TODO: Sort out the syntax of handling how types are given for variable defines
 # 'v->x' is syntactic sugar for '(get .x v)' that works for structs and arrays whose indices are named. Both versions will work.
 print "x should be 3. It is: " v->x;
+# You can also use this syntactic surgar, for normal arrays, by using an index.
+#  Notice also that you can still access elements from a 'tagged array' by using an index.
+print "x should be 3. It is: " v->0;
+
 def .v2 :vec4i [2, 9, 3, 7];
 print "w should be 7. It is: " v2->w;
