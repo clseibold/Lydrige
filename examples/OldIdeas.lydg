@@ -1,0 +1,6 @@
+struct .vec4i
+	[.x :int, .y :int, .z :int, .w :int] -> {
+		[(+ x 1), (+ y 1), (+ z 1), (+ w 1)] };
+
+def .v2 :vec4i [2, 9, 3, 7];
+print "w should be 7. It is: " (get .w v2);

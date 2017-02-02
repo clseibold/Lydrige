@@ -4,6 +4,9 @@
 [![Build Status](https://travis-ci.org/krixano/Lydrige.svg?branch=master)](https://travis-ci.org/krixano/Lydrige)
 [![Stories in Ready](https://badge.waffle.io/krixano/Lydrige.svg?label=ready&title=Ready)](http://waffle.io/krixano/Lydrige) 
 
+To Download, Goto the Releases page [here](https://github.com/krixano/Lydrige/releases) <br>
+Currently, only the linux version of v0.5.0 can be downloaded from here.
+
 ## Contents
 1. [Introduction](#Introduction-0)
 2. [Basic Syntax](#BasicSyntax-1)
@@ -31,10 +34,10 @@ You can find even more information about this language on my website at [http://
 The syntax is similar to the syntax in Lisp. You have an expression that has other expressions or data inside and is separated by spaces. When evaluating an expression, the first item should be a function. This is, however, not needed for List Literals and Q-Expressions.
 Here is an example of the syntax of a simple print statement:
 `(print "This number evaluates to" (+ 1 1))`. This print statement returns `()` but does print out the arguments to the screen before the return.
-* The syntax has now been slightly modified. Basically, files are made up of statements OR expression. A statement is defined as multiple expressions with a semicolon at the end. However, statements are evaluated as if they were one big expression. This allows us to have a syntax more similar to that of C-based langauges. Here is the print statement using the new syntax. It is also important to note that the above syntax and this new syntax will both be allowed by the interpreter and the result will be the same.
+* The syntax has now been slightly modified. Basically, files are made up of statements. A statement is defined as an identifier (or lambda) followed by multiple expressions with a semicolon at the end. However, a statement is evaluated as if it were one big expression. This allows us to have a syntax more similar to that of C-based langauges. Here is the print statement using the new syntax.
 `print "This number evaluates to" (+ 1 1);`
 
-You can view an example of a simple program in this language in the [examples/test.lydg](http://github.com/christianap/Lydrige/blob/dev/examples/test.lydg) file. This file explains many of the different features of the language.
+You can view an example of a simple program in this language in the [examples/test.lydg](https://github.com/krixano/Lydrige/blob/master/examples/test.lydg) file. This file explains many of the different features of the language.
 
 ##  3. <a name='BuiltinFunctions-2'></a>Builtin Functions
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
@@ -55,7 +58,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `double` - number with decimal (ex: `12.0`)
 * `char`   - character surrounded by single quotes (ex: `'c'`)
 * `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
-* `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
+* `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. These are very much like Quotes in Scheme. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
 * `qidentifier` - An identifier that acts like a qexpression. The identifier is not automatically evaluated until passed to the eval function, or a function that does this (for example, the `def` function). (ex: `'ident_name` is an identifier that is not evaluated until passed into a function that does so)
 
 ##  5. <a name='Examples-4'></a>Examples
@@ -66,7 +69,7 @@ Until Lydrige is fully rewritten, these examples won't currently work. However, 
 * `print (+ 3 4.4);`
 * `print (join [5, 4, 3, 3] [2, 2, 3]);`
 * `print (+ 1 (get 0 [3, 2, 2]));`
-* `print {3 3 test (unbound 3 3)};`
+* `print {3 3 unbound (unbound_also 3 3)};`
 
 ##  6. <a name='CompilingtheInterpreterandRunningExamples-5'></a>Compiling the Interpreter and Running Examples
 ### <a name='Compiling-Linux_Mac'></a>Linux/Mac (requires gcc or clang)

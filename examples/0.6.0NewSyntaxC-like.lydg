@@ -1,0 +1,205 @@
+# This file contains a look at how I MAY want the final syntax for
+#  Lydrige to look and work in a more C-like manner. However, this
+#  may change.
+
+# Variable Declaration (So Far)
+#   def .var_name :type value;
+
+# Multiline Variable Declaration (So Far)
+#   def .var_name :type
+#   	value;
+
+# Function Declaration Syntax (So Far)
+#   def .printIntAndReturn :func
+#   	[.arg1: argType] -> returnType {
+#			# Statement(s)
+#   	returnValue };
+
+# Alternative Function Declaration Syntax (So Far)
+#   def .printInt :func
+#   	[.arg1: argType] -> {
+#			# Statement(s)
+#   	() };
+
+def .basicThings :func
+	[] -> {
+		print "--- Basic Things ---";
+		print (+ 3 3);
+		# TODO: Should this be how defines should work???
+		# def [.x: int] 5;
+		# TODO: Or should it be this???
+		def .x :int 5;
+		print (if {== x 5} "true" "false");
+		print {x y non_existant_symbol};
+		print [(+ x 1) x {x non_existant_symbol}];
+		print (+ x (+ x 1));
+		print 0x55;
+	x };
+
+def .typeofFunc :func
+	[.x: int] -> {
+		print "--- Tye 'typeof' Function ---";
+		print (typeof x);
+		print (typeof (typeof x));
+		print (typeof (typeof (typeof x)));
+	() };
+
+def .userInput :func
+	[] -> {
+		print "--- Input from User ---";
+		def .name :string (read "Enter your name: ");
+		print "  -> Hello " name "!";
+	() };
+
+def .lambdaDecl :func
+	[] -> {
+		print "--- Function/Lambda Declaractions ---";
+		def .test :func
+			[.x: int, .y: string] -> {
+				print x y; # Ends in semicolon because functions/lambdas can have multiple statements. The return value of the last statement is returned from the function. You can also use the return keyword to return based on an if-statement, etc.
+			() }; # Return value goes here if lambda uses multiple statements in code block, otherwise you can put the return value without a semicolon in the indented part. Examples of each of these are shown later on.
+		def .test2 :func
+			[.a: int, .f: func, .b: int] -> {
+				(f a b) };
+		test 5 " string";
+		test2 5 + 3;
+	() };
+
+def .lambdaEval :func
+	[] -> {
+		print "--- Lambda Evaluation ---";
+		# This function is not evaluated until it is called.
+		#   If you return a variable from the function it will not be
+		#   evaluated until the function is called.
+		def .x :int
+			[] -> 5;
+
+		print "x: " x;
+		def .isFunction :func
+			[.x: any] -> {
+				# Expressions without semicolons (ones that will return their value) must have parentheses.
+				(if (== func (typeof x))
+					"a function"
+					"not a function") };
+		def .isInteger :func
+			[.x: any] -> {
+				(if (== int (typeof x))
+					"an integer"
+					"not an integer") };
+		print "x is " (isFunction x);
+		print "x is " (isInteger x);
+		def .z :func
+			[.y: int] -> {
+				(+ y 1) };
+		print "z: " z;
+		print "z is " (isFunction z);
+		print "z is " (isInteger z);
+		print "(z 5): " (z 5);
+	() };
+
+def .statements :func
+	[] -> {
+		print "--- Statements ---";
+		# (print 5; print 73;) # This is not allowed!!!
+		print 5; print 73;     # This is allowed!
+		def .test :func
+			[] -> { # There can be multiple statements in a lambda/function block
+				print "Something";
+				print "Another something";
+			5 }; # Returning 5 from function. Note that values being returned don't need to be in parentheses, only expressions
+	() };
+
+def .whileLoops :func
+	[] -> {
+		print "--- While Loops ---"
+		print "Mapping to lambda '[.n: any] -> {+ n 1;}': "
+			(map ([.n: any] -> {
+					(+ n 1)
+				})
+				[3, 3, 3, 3]
+			); # TODO: This syntax is a little wierd
+		print "Mapping to function '-': " (map - [3, 3, 3, 3]);
+		print "Filter using lambda '[.n: any] -> {> n 2;}': "
+			(filter ([.n: any] -> {
+					(> n 2)
+				})
+				[5, 2, 11, -7, 8, 1]
+			);
+		map (join [5, 5]) [[4], [3]];
+		map first [[4, 3, 2], [6, 5, 4]];
+	() };
+
+def .equalsequals :func
+	[] -> {
+		# -- The '==' Function
+		#  Returns true if first item is equal to any of the successive items.
+		#   Note that it doesn't have to be equal to all of them, as long as it
+		#   is equal to at least one of them.
+		print "--- The '==' Function ---";
+		print "(== 1 0) -> " (== 1 0);
+		print "(== 1 1) -> " (== 1 1);
+		print "(== 1 1 0) -> " (== 1 1 0);
+		print "(== 1 0 1) -> " (== 1 0 1);
+		print "(== 1 0 0) -> " (== 1 0 0);
+	() };
+
+def .notequals :func
+	[] -> {
+		# -- The '!=' Function
+		#  Returns true if first item is not equal to ALL of the successive items.
+		#   If is equal to any of them, even just one, it will return false (0).
+		print "--- The '!=' Function ---";
+		print "(!= 1 0) -> " (!= 1 0);
+		print "(!= 1 1) -> " (!= 1 1);
+		print "(!= 1 1 0) -> " (!= 1 1 0);
+		print "(!= 1 0 1) -> " (!= 1 0 1);
+		print "(!= 1 0 0) -> " (!= 1 0 0);
+	() };
+
+# This is how you create struct types.
+struct .vec3i [.x: int, .y: int, .z: int];
+struct .vec4i [.x: int, .y: int, .z: int];
+
+struct .vec3f [.x: float, .y: float, .z: float];
+struct .vec4f [.x: float, .y: float, .z: float];
+
+def .structs :func
+	[] -> {
+		# This is how you create arrays whose indices are named.
+		#  This is how function definitions work. With functions/lambdas
+		#  you are essentially passing in an array of types for your arguments
+		#  where each type has an assigned symbol (or name). These symbols are
+		#  then automatically bound to the lambda's scope when the function is called.
+		print "x = " [.x: 5, .y: 7, .z: 10]->x;
+
+		def .v :vec3i [3, 1, 5]; # TODO: Sort out the syntax of handling how types are given for variable defines
+		# 'v->x' is syntactic sugar for '(get .x v)' that works for structs and arrays whose indices are named. Both versions will work.
+		print "x should be 3. It is: " v->x;
+
+		def .v2 :vec4i [2, 9, 3, 7];
+		print "w should be 7. It is: " v2->w;
+	() };
+
+# The main function is always called after reading a whole file!
+#  The only things allowed outside of a function are Variable Declarations
+#  and File imports (for multi-file projects).
+def .main :func
+	[args :List] -> {
+		clear; # Clears the screen before the program begins.
+		print "A demonstraction of the Lydrige language!";
+		# TODO: Allow functions that don't take parameters to
+		#  not need parentheses, so final syntax of this line
+		#  should be: 'def .x :int basicThings;'
+		def .x :int (basicThings);
+		typeofFunc x;
+		userInput;
+		lambdaDecl;
+		lambdaEval;
+		statements;
+		whileLoops;
+		equalsequals;
+		notequals;
+		structs;
+
+		print "Finished!!!";
+	() };
