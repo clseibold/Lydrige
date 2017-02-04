@@ -101,7 +101,7 @@ goto :end
 mkdir build\debug >NUL 2>NUL
 cd build\debug
 echo Using MSVC
-cl /D_CRT_SECURE_NO_WARNINGS /nologo /Wall /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
+cl /D_CRT_SECURE_NO_WARNINGS /nologo /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console
 cd ..\.. 
 goto :end
 
