@@ -1,4 +1,4 @@
-# Lydrige
+# Lydrige - v0.5.0 Stable
 ## Introduction ##
 Lydrige is an interpreted programming language built off of and expanded from the interpreter from the BuildYourOwnLisp book (by Mr Daniel Holden). Since this programming language is interpreted, it is generally slower than other compiled languages. Lydrige is a fairly simple higher level language inspired by Lisp. This makes is suitable for scripting and simple math related computations. While this language is inspired by Lisp, there are many things that make it different from lisp, for example there are no macros. Instead, macros are replaced by a simple version of q-expressions. You can see future ideas and plans in the [ideas.md file](https://github.com/christianap/Lydrige/blob/master/ideas.md "ideas.md file").
 
