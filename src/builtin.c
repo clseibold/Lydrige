@@ -418,6 +418,15 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc) {
     return(dval_info("Function 'def' has not been implemented yet."));
 }
 
+dval *builtin_typeof(denv *a, dval *args, unsigned int argc) {
+    if (argc < 1 || argc > 1) {
+        return(dval_error("function 'typeof' must be passed one argument only."));
+    }
+    
+    dval *type = dval_type(args[0].type);
+    return type;
+}
+
 char *get_type_string(dval *type) {
     switch(type->typeValue) {
         case DVAL_ANY:
@@ -643,6 +652,7 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "join", builtin_join);
     
     denv_add_builtin(e, "def", builtin_def);
+    denv_add_builtin(e, "typeof", builtin_typeof);
     
     denv_add_builtin(e, "print", builtin_print);
     denv_add_builtin(e, "read", builtin_read);
