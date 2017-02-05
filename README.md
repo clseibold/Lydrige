@@ -42,24 +42,26 @@ You can view an example of what a simple program would look like in version 0.6.
 
 ##  3. <a name='BuiltinFunctions-2'></a>Builtin Functions
 Here are the builtin functions in the language. Many of these builtin functions are very common, therefore they were written directly into the interpreter rather than a library. Note that this list does not include the basic operators and conditionals (ex: +, -, \*, /, %, ^ (power), ==, >, <, >=, <=, !=), however, they do exist within the langauge.
-* `list`  - returns a q-expression with all of the given arguments inside. (`list 5 4 4 3;` returns `[5, 4, 4, 3]`)
-* `first` - returns the first item in a given q-expression or list literal. (`first [5, 4, 4, 3];` returns `5`)
-* `last`  - returns the last item in a given q-expression or list literal. (`last [5, 4, 4, 3];` returns `3`)
-* `head`  - returns all but the last item from a given q-expression or list literal in a new q-expression. (`head [5, 4, 4, 3];` returns `[5, 4, 4]`)
-* `tail`  - returns all but the first item from a given q-expression or list literal in a new q-expression. (`tail [5, 4, 4, 3];` returns `[4, 4, 3]`)
-* `join`  - joins two lists together into a single list. (`join [5, 4] [4, 3];` returns `[5, 4, 4, 3]`)
-* `get`   - gets item from given list at given index. (`get 0 [5, 4, 4, 3];` returns `5`)
-* `set`   - returns a new q-expression with the item at the given index of given q-expression set to a given value. Doesn't modify original q-expression. (`set 0 4 [5, 4, 4, 3];` returns `[4, 4, 4, 3]`)
-* `len`   - returns the length of a given list. (`len [5, 4, 4, 3];` returns `4`)
-* `print` - prints text to the screen. Returns `1` (`print [5, 4, 4, 3] 23.5;` will print `[5, 4, 4, 3] 23.5` and return `1`)
+* `list`   - returns a q-expression with all of the given arguments inside. (`list 5 4 4 3;` returns `[5, 4, 4, 3]`)
+* `first`  - returns the first item in a given q-expression or list literal. (`first [5, 4, 4, 3];` returns `5`)
+* `last`   - returns the last item in a given q-expression or list literal. (`last [5, 4, 4, 3];` returns `3`)
+* `head`   - returns all but the last item from a given q-expression or list literal in a new q-expression. (`head [5, 4, 4, 3];` returns `[5, 4, 4]`)
+* `tail`   - returns all but the first item from a given q-expression or list literal in a new q-expression. (`tail [5, 4, 4, 3];` returns `[4, 4, 3]`)
+* `join`   - joins two lists together into a single list. (`join [5, 4] [4, 3];` returns `[5, 4, 4, 3]`)
+* `get`    - gets item from given list at given index. (`get 0 [5, 4, 4, 3];` returns `5`)
+* `set`    - returns a new q-expression with the item at the given index of given q-expression set to a given value. Doesn't modify original q-expression. (`set 0 4 [5, 4, 4, 3];` returns `[4, 4, 4, 3]`)
+* `len`    - returns the length of a given list. (`len [5, 4, 4, 3];` returns `4`)
+* `typeof` - returns the type of the given value. (`typeof [5, 4, 4, 3];` returns `array`)
+* `print`  - prints text to the screen. Returns `1` (`print [5, 4, 4, 3] 23.5;` will print `[5, 4, 4, 3] 23.5` and return `1`)
 
 ##  4. <a name='DataTypes-3'></a>Data Types
 Here are all of the data types in Lydrige and how you represent them within the language:
-* `long`   - simple number (ex: `12`)
+* `int`   - simple number (ex: `12`)
 * `double` - number with decimal (ex: `12.0`)
 * `char`   - character surrounded by single quotes (ex: `'c'`)
+* `string` - strings are surrounded by double quotes (ex: `"this is a string"`)
 * `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
-* `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. These are very much like Quotes in Scheme. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
+* `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. These are very similar to Quotes in Scheme. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
 * `qidentifier` (aka `symbol` or `dotted identifier`) - An identifier that acts like a qexpression. The identifier is *not* automatically evaluated until passed to the eval function, or a function that does this (for example, the `def` function). Note that the syntax has been recently changed to use a dot instead of a quote. Therefore you can call these `dotted indentifiers`. (ex: `.ident_name` is an identifier that is not evaluated until passed into a function that does so) (Former Syntax: `'ident_name`)
 
 ##  5. <a name='Examples-4'></a>Examples
