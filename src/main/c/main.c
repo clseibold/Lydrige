@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 static char buffer[2048];

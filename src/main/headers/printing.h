@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _PRINTING_H
+#define _PRINTING_H
 
 #include "structures.h"
 #include "reading.h"
@@ -16,3 +17,5 @@
 
 void dval_print(dval* v);
 void dval_println(dval* v);
+
+#endif

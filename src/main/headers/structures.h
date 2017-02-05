@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _STRUCTURES_H
+#define _STRUCTURES_H
 
 #include "../../mpc/headers/mpc.h"
 #include "../../hashmap/headers/hashmap.h"
@@ -123,3 +124,5 @@ dval* dval_add(dval* v, dval* x);
 dval* ddata_copy(int type, dval* d, dval* x);
 dval* dval_copy(dval* v);
 denv* denv_copy(denv* e);
+
+#endif

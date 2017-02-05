@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BUILTIN_H
+#define _BUILTIN_H
 
 #include "structures.h"
 #include "printing.h"
@@ -82,3 +83,5 @@ dval* dval_eval_slist(denv* e, dval* v);
 dval* dval_eval(denv* e, dval* v);
 
 void denv_add_builtins(denv* e);
+
+#endif
