@@ -1,2 +1,2 @@
 @echo off
-start ./build/exe/main/main.exe %*
+.\build\release\lydrige.exe %*

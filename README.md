@@ -66,8 +66,10 @@ Here are all of the data types in Lydrige and how you represent them within the 
 There are examples of programs/functions written in this language in the examples directory. This directory also includes *newstdlib.dnc*, which is the Prelude for the language; Is is auto-loaded for the REPL and every program.
 
 ## Compiling the Interpreter and Running Examples ##
-Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `gradlew.bat mainReleaseExecutable` in the cmd (Windows). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/test.lydg`.
+Compile the interpreter by running `./gradlew mainReleaseExecutable` in the terminal (Unix) or `build.bat release` in the cmd (Windows - only supports msvc). In order for this project to compile, make sure you have a C/C++ compiler installed(gcc, clang, mingw, visual studio, xcode, or cygwin). Compiling on Windows only supports msvc. To run the program, execute `./run` (Unix) or `./run.bat` (Windows) in the project root. If you want to run one of the examples, simply pass the file as an argument to the *run* or *run.bat* file, for example: `./run ./examples/test.lydg`.
 * Alternatively, you can use `make release` and `make run` to build and run the release version of this. Note that this only works with gcc.
+
+**NOTE: When using the interpreter in cmd.exe on Windows, after starting it up, type `clear` to get correct prompt and colors!**
 
 ## Sublime Syntax Definitons for Lydrige ##
 I have created a .tmLanguage file that will allow you to use Lydrige inside of Sublime Text. You simply put it in your `~/.config/sublime-text-3/Packages/User` folder.
