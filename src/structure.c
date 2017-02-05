@@ -121,6 +121,15 @@ dval *dval_list(dval *elements, unsigned int count) {
     return(d);
 }
 
+dval *dval_type(DVAL_TYPE type) {
+    dval *d = (dval *) malloc(sizeof(dval));
+    d->type = DVAL_TYPEVALUE;
+    d->constant = 1;
+    d->typeValue = type;
+    
+    return(d);
+}
+
 dval *dval_copy(dval *d) { // TODO: Add list and string
     dval *v = (dval *) malloc(sizeof(dval));
     v->type = d->type;
@@ -143,6 +152,9 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
         // Give back error?
         v->type = DVAL_ERROR;
         v->str = "(Interpreter Error) Cannot copy dval of type ANY.";
+        break;
+        case DVAL_TYPEVALUE:
+        v->typeValue = d->typeValue;
         break;
         default:
         v->type = DVAL_ERROR;

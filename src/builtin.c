@@ -418,7 +418,56 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc) {
     return(dval_info("Function 'def' has not been implemented yet."));
 }
 
-bool print_elem(dval arg, bool removeQuotations) {
+char *get_type_string(dval *type) {
+    switch(type->typeValue) {
+        case DVAL_ANY:
+        {
+            return("any");
+        } break;
+        
+        case DVAL_INT:
+        {
+            return("int");
+        } break;
+        
+        case DVAL_DOUBLE:
+        {
+            return("double");
+        } break;
+        
+        case DVAL_CHARACTER:
+        {
+            return("char");
+        } break;
+        
+        case DVAL_STRING:
+        {
+            return("string");
+        } break;
+        
+        case DVAL_FUNC:
+        {
+            return("func");
+        } break;
+        
+        case DVAL_LIST:
+        {
+            return("array");
+        } break;
+        
+        case DVAL_TYPEVALUE:
+        {
+            return("type");
+        } break;
+        
+        default:
+        {
+            return("unknown_type");
+        } break;
+    }
+}
+
+bool print_elem(dval arg, bool removeQuotations) { // Use pointer to dval?
     switch (arg.type) {
         case DVAL_INT:
         {
@@ -505,6 +554,12 @@ bool print_elem(dval arg, bool removeQuotations) {
             return true;
         } break;
         
+        case DVAL_TYPEVALUE:
+        {
+            printf("%s", get_type_string(&arg));
+            return true;
+        } break;
+        
         default:
         {
             return false;
@@ -556,6 +611,18 @@ internal void denv_add_builtin(denv *e, char *name, dbuiltin func) {
     dval_del(v);
 }
 
+internal void denv_add_type(denv *e, char *name, DVAL_TYPE type) {
+    dval *v = dval_type(type);
+    dval_del(denv_put(e, name, v, v->constant));
+    dval_del(v);
+}
+
+internal void denv_add_const(denv *e, char *name, dval *v) {
+    v->constant = 1;
+    dval_del(denv_put(e, name, v, 1));
+    dval_del(v);
+}
+
 void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "+", builtin_add);
     denv_add_builtin(e, "-", builtin_subtract);
@@ -580,4 +647,15 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "print", builtin_print);
     denv_add_builtin(e, "read", builtin_read);
     denv_add_builtin(e, "clear", builtin_clear);
+    
+    denv_add_type(e, "any", DVAL_ANY);
+    denv_add_type(e, "int", DVAL_INT);
+    denv_add_type(e, "double", DVAL_DOUBLE);
+    denv_add_type(e, "char", DVAL_CHARACTER);
+    denv_add_type(e, "string", DVAL_STRING);
+    denv_add_type(e, "func", DVAL_FUNC);
+    denv_add_type(e, "array", DVAL_LIST);
+    denv_add_type(e, "type", DVAL_TYPEVALUE);
+    
+    denv_add_const(e, "true", dval_int(0));
 }

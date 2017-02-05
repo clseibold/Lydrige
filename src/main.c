@@ -306,13 +306,13 @@ internal dval
         free(args.result);
         free(func);
         return(v);
-    } else if (func->type == DVAL_ERROR) {
+    } else if (func->type == DVAL_ERROR || func->type == DVAL_INFO) {
         free(args.result);
         return(func);
     } else {
         free(args.result);
         free(func);
-        return(dval_int(0)); // TODO: Error?
+        return(dval_error("'%s' is not a function or lambda.", ident)); // TODO: Error?
     }
 }
 
