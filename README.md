@@ -60,7 +60,7 @@ Here are all of the data types in Lydrige and how you represent them within the 
 * `double` - number with decimal (ex: `12.0`)
 * `char`   - character surrounded by single quotes (ex: `'c'`)
 * `string` - strings are surrounded by double quotes (ex: `"this is a string"`)
-* `list`   - a list whose children are evaluated, but not the list itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
+* `array`   - a list of elements which are evaluated, but not the array itself. They are implemented as a value that allocates its elements on the heap in contiguous memory. They are not dynamic! (ex: `[+, 1, (+ 1 1)]` returns `[+, 1, 2]`)
 * `qexpression` - a list in which its children and itself are not evaluated until the qexpression is evaluated. These are very similar to Quotes in Scheme. (ex: `{+ 3 (+ 3 3)}` doesn't evaluate, unless function it's passed to evaluates it)
 * `qidentifier` (aka `symbol` or `dotted identifier`) - An identifier that acts like a qexpression. The identifier is *not* automatically evaluated until passed to the eval function, or a function that does this (for example, the `def` function). Note that the syntax has been recently changed to use a dot instead of a quote. Therefore you can call these `dotted indentifiers`. (ex: `.ident_name` is an identifier that is not evaluated until passed into a function that does so) (Former Syntax: `'ident_name`)
 

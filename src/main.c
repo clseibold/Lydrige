@@ -401,7 +401,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
     Character = mpc_new("character");
     String = mpc_new("string");
     Identifier = mpc_new("ident");
-    QIdentifier = mpc_new("qident");
+    QIdentifier = mpc_new("qident"); // TODO: Change name, should they be called symbols, names, or dIdents?
     List = mpc_new("list");
     Qexpression = mpc_new("qexpr");
     
@@ -416,7 +416,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               "character : /\'(\\\\.|[^\"])\'/ ;"
               "string : /\"(\\\\.|[^\"])*\"/ ;"
               "ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
-              "qident : '\\'' /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ ;"
+              "qident : '\\.' /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ ;" // TODO: Change name
               "list : '[' (<value> (',' <value>)*)? ']' ;"
               "qexpr : '{' <ident> <value>* '}' ;",
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);
