@@ -417,7 +417,7 @@ int main(int argc, char** argv) // TODO: Possible memory leak from not calling b
               "character : /\'(\\\\.|[^\"])\'/ ;"
               "string : /\"(\\\\.|[^\"])*\"/ ;"
               "ident : /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ | '&' | '+' ;"
-              "qident : '\\.' /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ ;" // TODO: Change name
+              "qident : '.' /[a-zA-Z0-9_\\-*\\/\\\\=<>!^%]+/ ;" // TODO: Change name
               "list : '[' (<value> (',' <value>)*)? ']' ;"
               "qexpr : '{' <ident> <value>* '}' ;",
               Line, Command, Statement, Expression, Value, Double, Integer, Character, String, Identifier, QIdentifier, List, Qexpression);

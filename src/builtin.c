@@ -62,7 +62,7 @@ dval *denv_put(denv *e, char *k, dval *v, int constant) {
         t = dval_copy(v);
         t->constant = constant; // set constant
         Hashmap_set(e->map, k_bstr, t); // TODO: Check for errors!
-        return(dval_int(0)); // TODO: Return something else?
+        return(denv_get(e, "true")); // Return true
     }
 }
 
@@ -410,12 +410,12 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc) {
         return(dval_error("Function 'def' must be passed only 2 arguments."));
     }
     if (args[0].type != DVAL_IDENT) {
-        return(dval_error("Function 'def' must be passed an unbound identifier for argument 1"));
+        return(dval_error("Function 'def' must be passed quoted identifier for argument 1"));
     }
     
     
     
-    return(dval_info("Function 'def' has not been implemented yet."));
+    return(dval_error("Function 'def' has not been implemented yet."));
 }
 
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc) {
@@ -467,6 +467,11 @@ char *get_type_string(dval *type) {
         case DVAL_TYPEVALUE:
         {
             return("type");
+        } break;
+        
+        case DVAL_IDENT:
+        {
+            return("qident"); // Change this name
         } break;
         
         default:
@@ -559,7 +564,7 @@ bool print_elem(dval arg, bool removeQuotations) { // Use pointer to dval?
         
         case DVAL_IDENT:
         {
-            printf("'%s", arg.str);
+            printf(".%s", arg.str);
             return true;
         } break;
         
@@ -584,7 +589,7 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
         printf(" ");
     }
     printf("\n");
-    return(dval_int(1));
+    return(denv_get(e, "true"));
 }
 
 dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with strings not being printed correctly using this expression: print (read "> ");
@@ -611,7 +616,7 @@ dval *builtin_clear(denv *e, dval *args, unsigned int argc) {
 #else
     linenoiseClearScreen();
 #endif
-    return(dval_int(1));
+    return(denv_get(e, "true"));
 }
 
 internal void denv_add_builtin(denv *e, char *name, dbuiltin func) {
