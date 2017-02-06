@@ -619,6 +619,11 @@ dval *builtin_clear(denv *e, dval *args, unsigned int argc) {
     return(denv_get(e, "true"));
 }
 
+dval *builtin_exit(denv *e, dval *args, unsigned int argc) {
+    running = false;
+    return(denv_get(e, "true"));
+}
+
 internal void denv_add_builtin(denv *e, char *name, dbuiltin func) {
     dval *v = dval_func(func, 1);
     dval_del(denv_put(e, name, v, v->constant)); // v is coppied (but not deleted in denv_put function)
@@ -662,6 +667,7 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "print", builtin_print);
     denv_add_builtin(e, "read", builtin_read);
     denv_add_builtin(e, "clear", builtin_clear);
+    denv_add_builtin(e, "exit", builtin_exit);
     
     denv_add_type(e, "any", DVAL_ANY);
     denv_add_type(e, "int", DVAL_INT);
