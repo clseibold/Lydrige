@@ -178,8 +178,9 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 running = false;
                 
                 free(args);
-                return((dval_or_darray) { false, dval_info("Program Exited with Result: 1\n"
-                                                           "(User Interruption)\n") });
+                return((dval_or_darray) { false, dval_int(0) });
+                //return((dval_or_darray) { false, dval_info("Program Exited with Result: 0\n"
+                //"(User Interruption)\n") }); // TODO: BUG
             } else if (strcmp(t->children[i]->children[1]->contents, "version") == 0) { // TODO: Make global version string
                 printf("Lydrige Version v0.6.0a\n");
                 printf("Copyright (c) 2016-2017, Christian Seibold All Rights Reserved\n");
