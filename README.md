@@ -4,8 +4,7 @@
 [![Build Status](https://travis-ci.org/krixano/Lydrige.svg?branch=master)](https://travis-ci.org/krixano/Lydrige)
 [![Stories in Ready](https://badge.waffle.io/krixano/Lydrige.svg?label=ready&title=Ready)](http://waffle.io/krixano/Lydrige) 
 
-To Download, Goto the Releases page [here](https://github.com/krixano/Lydrige/releases) <br>
-Currently, only the linux version of v0.5.0 can be downloaded from here.
+View Docs on my Website [here](https://www.krixano.x10host.com/projects/Lydrige/Docs). It currently contains almost all of the information provided in this README file in a more organized fashion. For prebuilt downloads, click [here](https://www.krixano.x10host.com/projects/Lydrige/Download). Eventually, most of the documentation in this README file will no longer be provided here, but instead will be provided on the Website (with exception to compilation details, which will be kept in this README file).
 
 ## Contents
 1. [Introduction](#Introduction-0)
