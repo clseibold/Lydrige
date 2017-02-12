@@ -11,10 +11,6 @@
  * This file is the core module for implementing the bstring functions.
  */
 
-#if defined (_MSC_VER)
-# define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>
