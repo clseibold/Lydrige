@@ -86,7 +86,11 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\*" (
    call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
    goto :msvcdo
 )
-echo Error: Failed to find MSVC 2015. Make sure it is installed!
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build" (
+   call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86
+   goto :msvcdo
+)
+echo Error: Failed to find MSVC 2015 or 2017. Make sure it is installed!
 goto :end
 
 :msvcx64
@@ -94,7 +98,11 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\*" (
    call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
    goto :msvcdo
 )
-echo Error: Failed to find MSVC 2015. Make sure it is installed!
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build" (
+   call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+   goto :msvcdo
+)
+echo Error: Failed to find MSVC 2015 or 2017. Make sure it is installed!
 goto :end
 
 :msvcdo

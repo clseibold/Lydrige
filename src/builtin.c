@@ -33,6 +33,7 @@
 #include <builtin.h>
 #include <colors.h>
 #include <stdlib.h>
+#include <math.h>
 
 /*
 * k - key
@@ -52,7 +53,7 @@ dval *denv_put(denv *e, char *k, dval *v, int constant) {
             t = dval_copy(v); // Copy value into t
             t->constant = constant; // set constant
             Hashmap_set(e->map, k_bstr, t); // TODO: Check for errors!
-            return(dval_int(0)); // TODO: Return something else?
+            return(denv_get(e, "true")); // TODO: Return something else?
         } else { // TODO
             bdestroy(k_bstr);
             return(dval_error("Cannot edit '%s'. It is a constant.", k));
@@ -266,6 +267,34 @@ dval *builtin_mod(denv *e, dval *args, unsigned int argc) {
     return(dval_int(accumulator));
 }
 
+dval *builtin_power(denv *e, dval *args, unsigned int argc) {
+    if (argc == 0 || argc > 2) {
+        return(dval_error("Function '^' given wrong amount of arguments. Got '%d', Expected 1 or 2.", argc));
+    }
+
+    if (argc == 1) {
+        if (args[0].type == DVAL_INT) {
+            return dval_int(args[0].integer);
+        } else if (args[0].type == DVAL_DOUBLE) {
+            return dval_double(args[0].doub);
+        } else {
+            return dval_error("Function '^' may only be passed values of type int or double.");
+        }
+    } else {
+        if (args[0].type == DVAL_INT && args[1].type == DVAL_INT) {
+            return dval_int(pow(args[0].integer, args[1].integer));
+        } else if (args[0].type == DVAL_INT && args[1].type == DVAL_DOUBLE) {
+            return dval_double(pow(args[0].integer, args[1].doub));
+        } else if (args[0].type == DVAL_DOUBLE && args[1].type == DVAL_INT) {
+            return dval_double(pow(args[0].doub, args[1].integer));
+        } else if (args[0].type == DVAL_DOUBLE && args[1].type == DVAL_DOUBLE) {
+            return dval_double(pow(args[0].doub, args[1].doub));
+        } else {
+            return dval_error("Function '^' may only be passed values of type int or double.");
+        }
+    }
+}
+
 dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
     if (argc > 1) {
         return(dval_error("Function 'succ' may only be passed 1 argument."));
@@ -406,16 +435,85 @@ dval *builtin_join(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_def(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1 || argc > 2) {
-        return(dval_error("Function 'def' must be passed only 2 arguments."));
+    if (argc != 3) {
+        return(dval_error("Function 'def' must be passed only 3 arguments."));
     }
     if (args[0].type != DVAL_IDENT) {
         return(dval_error("Function 'def' must be passed quoted identifier for argument 1"));
     }
+    if (args[1].type != DVAL_TYPEVALUE) {
+        return dval_error("Function 'def' must be passed a type for argument 2.");
+    }
+
+    switch (args[1].typeValue) {
+        case DVAL_ANY:
+        {} break;
+        
+        case DVAL_INT:
+        {
+            if (args[2].type != DVAL_INT) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_DOUBLE:
+        {
+            if (args[2].type != DVAL_DOUBLE) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_CHARACTER:
+        {
+            if (args[2].type != DVAL_CHARACTER) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_STRING:
+        {
+            if (args[2].type != DVAL_STRING) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_FUNC:
+        {
+            if (args[2].type != DVAL_FUNC) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_LIST:
+        {
+            if (args[2].type != DVAL_LIST) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_TYPEVALUE:
+        {
+            if (args[2].type != DVAL_TYPEVALUE) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        case DVAL_IDENT:
+        {
+            if (args[2].type != DVAL_IDENT) {
+                return dval_error("Value passed into function 'def' does not match given type '%s'", get_type_string(&args[1]));
+            }
+        } break;
+        
+        default:
+        {
+            return dval_error("Unknown type '%s'!", get_type_string(&args[1]));
+        } break;
+
+    }
     
-    
-    
-    return(dval_error("Function 'def' has not been implemented yet."));
+    denv_put(a, args[0].str, dval_copy(&args[2]), false);
+    return denv_get(a, args[0].str);
 }
 
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc) {
@@ -649,6 +747,8 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "/", builtin_divide);
     denv_add_builtin(e, "mod", builtin_mod);
     // TODO: Add Power Operation [^]
+    denv_add_builtin(e, "^", builtin_power);
+    denv_add_builtin(e, "**", builtin_power);
     denv_add_builtin(e, "succ", builtin_succ);
     
     denv_add_builtin(e, "list", builtin_list);

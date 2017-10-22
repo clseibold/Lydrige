@@ -61,6 +61,7 @@ dval *builtin_join(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_def(denv *a, dval *args, unsigned int argc);
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc);
+char *get_type_string(dval *type);
 
 bool print_elem(dval arg, bool removeQuotations);
 dval *builtin_print(denv *e, dval *args, unsigned int argc);
