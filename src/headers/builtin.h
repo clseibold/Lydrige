@@ -60,8 +60,12 @@ dval *builtin_tail(denv *a, dval *args, unsigned int argc);
 dval *builtin_join(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_def(denv *a, dval *args, unsigned int argc);
+dval *builtin_const(denv *a, dval *args, unsigned int argc);
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc);
 char *get_type_string(dval *type);
+
+dval *builtin_and(denv *a, dval *args, unsigned int argc);
+dval *builtin_or(denv *a, dval *args, unsigned int argc);
 
 bool print_elem(dval arg, bool removeQuotations);
 dval *builtin_print(denv *e, dval *args, unsigned int argc);

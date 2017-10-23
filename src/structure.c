@@ -137,28 +137,57 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
     
     switch (d->type) {
         case DVAL_INT:
-        v->integer = d->integer;
-        break;
+        {
+            v->integer = d->integer;
+        } break;
+
         case DVAL_DOUBLE:
-        v->doub = d->doub;
-        break;
+        {
+            v->doub = d->doub;
+        } break;
+
         case DVAL_ERROR:
-        v->str = d->str;
-        break;
+        {
+            v->str = d->str; // TODO: Is this correct? Shouldn't I have to copy the string?
+        } break;
+
         case DVAL_FUNC:
-        v->func = d->func;
-        break;
+        {
+            v->func = d->func;
+        } break;
+
         case DVAL_ANY:
-        // Give back error?
-        v->type = DVAL_ERROR;
-        v->str = "(Interpreter Error) Cannot copy dval of type ANY.";
-        break;
+        {
+            v->type = DVAL_ERROR;
+            v->str = "(Interpreter Error) Cannot copy dval of type ANY.";
+        } break;
+
         case DVAL_TYPEVALUE:
-        v->typeValue = d->typeValue;
-        break;
+        {
+            v->typeValue = d->typeValue;
+        } break;
+
+        case DVAL_LIST:
+        {
+            // TODO
+            v->count = d->count;
+            v->elements = calloc(v->count, sizeof(dval));
+            for (int i = 0; i < d->count; i++) {
+                v->elements[i] = d->elements[i];
+            }
+        } break;
+
+        case DVAL_STRING:
+        {
+            v->str = (char *) malloc(strlen(d->str) + 1);
+            strcpy(v->str, d->str);
+        } break;
+
         default:
-        v->type = DVAL_ERROR;
-        v->str = "(Interpreter Error) Cannot copy dval of Unknown type.";
+        {
+            v->type = DVAL_ERROR;
+            v->str = "(Interpreter Error) Cannot copy dval of Unknown type.";
+        }
     }
     
     return(v);
@@ -167,6 +196,7 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
 void dval_del(dval *d) {
     switch(d->type) {
         case DVAL_ERROR:
+        case DVAL_IDENT:
         case DVAL_INFO:
         {
             free(d->str);

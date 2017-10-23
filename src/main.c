@@ -205,21 +205,23 @@ eval_args(int argc, mpc_ast_t *t, char **ident, denv *e, bool isQExpr)
                 free(args);
                 return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "builtins") == 0) {
-                colors_printf(COLOR_YELLOW, "basic operators  "); colors_printf(COLOR_CYAN, "[+, -, *, /, mod, ^]"); printf("            returns result of respective operation\n");
-                colors_printf(COLOR_YELLOW, "succ   :num      "); colors_printf(COLOR_MAGENTA, "[n  :num]                    "); printf("returns succession of number [n] (num + 1)\n");
-                colors_printf(COLOR_YELLOW, "list   :array    "); colors_printf(COLOR_MAGENTA, "[&v :any]                    "); printf("returns list with given values [&v] as its elements\n");
-                colors_printf(COLOR_YELLOW, "len    :int      "); colors_printf(COLOR_MAGENTA, "[l  :array]                  "); printf("returns length of given list [l] as an integer\n");
-                colors_printf(COLOR_YELLOW, "get    :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  l :array]         "); printf("returns element at given index [i] from given list [l]\n");
-                colors_printf(COLOR_YELLOW, "set    :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  v: any,  l :array]"); printf("returns copy of given list [l] with the element at given index [i] replaced with given value [v]\n");
-                colors_printf(COLOR_YELLOW, "first  :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]                  "); printf("returns first element of given list [l]\n");
-                colors_printf(COLOR_YELLOW, "last   :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]                  "); printf("returns last element of given list [l]\n");
-                colors_printf(COLOR_YELLOW, "head   :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]                  "); printf("returns list of all but last element of given list [l]\n");
-                colors_printf(COLOR_YELLOW, "tail   :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]                  "); printf("returns list of all but first element of given list [l]\n");
-                colors_printf(COLOR_YELLOW, "join   :array    "); colors_printf(COLOR_MAGENTA, "[&l :array]                  "); printf("returns list of given lists [&l] joined together\n");
-                colors_printf(COLOR_YELLOW, "typeof :type     "); colors_printf(COLOR_MAGENTA, "[v: any]                     "); printf("returns type of given value [v]\n");
-                colors_printf(COLOR_YELLOW, "print  :int      "); colors_printf(COLOR_MAGENTA, "[&v :any]                    "); printf("prints out given values [&v], returns 1\n");
-                colors_printf(COLOR_YELLOW, "read   :string   "); colors_printf(COLOR_MAGENTA, "[prompt :string]             "); printf("returns input from the user, will print out given string [prompt]\n");
-                
+                colors_printf(COLOR_YELLOW, "basic operators  "); colors_printf(COLOR_CYAN, "[+, -, *, /, mod, ^]"); printf("                    returns result of respective operation\n");
+                colors_printf(COLOR_YELLOW, "succ   :num      "); colors_printf(COLOR_MAGENTA, "[n  :num]                            "); printf("returns succession of number [n] (num + 1)\n");
+                colors_printf(COLOR_YELLOW, "list   :array    "); colors_printf(COLOR_MAGENTA, "[&v :any]                            "); printf("returns list with given values [&v] as its elements\n");
+                colors_printf(COLOR_YELLOW, "len    :int      "); colors_printf(COLOR_MAGENTA, "[l  :array]                          "); printf("returns length of given list [l] as an integer\n");
+                colors_printf(COLOR_YELLOW, "get    :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  l :array]                 "); printf("returns element at given index [i] from given list [l]\n");
+                colors_printf(COLOR_YELLOW, "set    :any      "); colors_printf(COLOR_MAGENTA, "[i  :int,  v: any,  l :array]        "); printf("returns copy of given list [l] with the element at given index [i] replaced with given value [v]\n");
+                colors_printf(COLOR_YELLOW, "first  :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]                          "); printf("returns first element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "last   :any      "); colors_printf(COLOR_MAGENTA, "[l  :array]                          "); printf("returns last element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "head   :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]                          "); printf("returns list of all but last element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "tail   :array    "); colors_printf(COLOR_MAGENTA, "[l  :array]                          "); printf("returns list of all but first element of given list [l]\n");
+                colors_printf(COLOR_YELLOW, "join   :array    "); colors_printf(COLOR_MAGENTA, "[&l :array]                          "); printf("returns list of given lists [&l] joined together\n");
+                colors_printf(COLOR_YELLOW, "typeof :type     "); colors_printf(COLOR_MAGENTA, "[v: any]                             "); printf("returns type of given value [v]\n");
+                colors_printf(COLOR_YELLOW, "print  :int      "); colors_printf(COLOR_MAGENTA, "[&v :any]                            "); printf("prints out given values [&v], returns 1\n");
+                colors_printf(COLOR_YELLOW, "read   :string   "); colors_printf(COLOR_MAGENTA, "[prompt :string]                     "); printf("returns input from the user, will print out given string [prompt]\n");
+                colors_printf(COLOR_YELLOW, "def    :int      "); colors_printf(COLOR_MAGENTA, "[name :ident, type :type, value :any]"); printf("defines a variable within the current scape with given ident [name], type [type], and value which matches the given type\n");
+                colors_printf(COLOR_YELLOW, "const    :int      "); colors_printf(COLOR_MAGENTA, "[name :ident, type :type, value :any]"); printf("defines a constant variable within the current scape with given ident [name], type [type], and value which matches the given type\n");
+
                 free(args);
                 return((dval_or_darray) { false, 0 });
             } else if (strcmp(t->children[i]->children[1]->contents, "commands") == 0) {
