@@ -565,47 +565,28 @@ dval *builtin_const(denv *a, dval *args, unsigned int argc) {
 
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc) {
     if (argc < 1 || argc > 1) {
-        return(dval_error("function 'typeof' must be passed one argument only."));
+        return(dval_error("Function 'typeof' must be passed one argument only."));
     }
     
     dval *type = dval_type(args[0].type);
     return type;
 }
 
-// and - returns 0 (true) if all given integers/doubles are 0 (true). Returns 0 if any given integer/double is 0.
-dval *builtin_and(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1) {
-        return(dval_error("Function 'and' must be passed at least 2 arguments."));
+dval *builtin_cast(denv *a, dval *args, unsigned int argc) {
+    if (argc != 2) {
+        return dval_error("Function 'cast' must be passed 2 arguments.");
+    }
+    if (args[0].type != DVAL_TYPEVALUE) {
+        return dval_error("Function 'cast' must be passed a type for argument 1.");
     }
 
-    for (int i = 0; i < argc; i++) {
-        if (args[i].type != DVAL_INT) {
-            return(dval_error("Function 'and' must be passed an integer for argument '%d'.", i));
-        }
-        if (args[i].integer != denv_get(a, "true")->integer) { // if False
-            return denv_get(a, "false");
-        }
+    if (args[0].typeValue == DVAL_INT && args[1].type == DVAL_DOUBLE) {
+        return dval_int((int) args[1].doub);
+    } else if (args[0].typeValue == DVAL_DOUBLE && args[1].type == DVAL_INT) {
+        return dval_double((double) args[1].integer);
+    } else {
+        return dval_error("Function 'cast' cannot cast value to type '%s'.", get_type_string(&args[0]));
     }
-
-    return denv_get(a, "true");
-}
-
-// or - returns true (0) if given any given integer/double is true (0). Returns false (1) if no given integer/double is true (0).
-dval *builtin_or(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1) {
-        return(dval_error("Function 'or' must be passed at least 2 arguments."));
-    }
-
-    for (int i = 0; i < argc; i++) {
-        if (args[i].type != DVAL_INT) {
-            return(dval_error("Function 'or' must be passed an integer for argument '%d'.", i));
-        }
-        if (args[i].integer == denv_get(a, "true")->integer) {
-            return denv_get(a, "true");
-        }
-    }
-
-    return denv_get(a, "false");
 }
 
 char *get_type_string(dval *type) {
@@ -660,6 +641,42 @@ char *get_type_string(dval *type) {
             return("unknown_type");
         } break;
     }
+}
+
+// and - returns 0 (true) if all given integers/doubles are 0 (true). Returns 0 if any given integer/double is 0.
+dval *builtin_and(denv *a, dval *args, unsigned int argc) {
+    if (argc <= 1) {
+        return(dval_error("Function 'and' must be passed at least 2 arguments."));
+    }
+
+    for (int i = 0; i < argc; i++) {
+        if (args[i].type != DVAL_INT) {
+            return(dval_error("Function 'and' must be passed an integer for argument '%d'.", i));
+        }
+        if (args[i].integer != denv_get(a, "true")->integer) { // if False
+            return denv_get(a, "false");
+        }
+    }
+
+    return denv_get(a, "true");
+}
+
+// or - returns true (0) if given any given integer/double is true (0). Returns false (1) if no given integer/double is true (0).
+dval *builtin_or(denv *a, dval *args, unsigned int argc) {
+    if (argc <= 1) {
+        return(dval_error("Function 'or' must be passed at least 2 arguments."));
+    }
+
+    for (int i = 0; i < argc; i++) {
+        if (args[i].type != DVAL_INT) {
+            return(dval_error("Function 'or' must be passed an integer for argument '%d'.", i));
+        }
+        if (args[i].integer == denv_get(a, "true")->integer) {
+            return denv_get(a, "true");
+        }
+    }
+
+    return denv_get(a, "false");
 }
 
 bool print_elem(dval arg, bool removeQuotations) { // Use pointer to dval?
@@ -846,6 +863,7 @@ void denv_add_builtins(denv *e) {
     denv_add_builtin(e, "def", builtin_def);
     denv_add_builtin(e, "const", builtin_const);
     denv_add_builtin(e, "typeof", builtin_typeof);
+    denv_add_builtin(e, "cast", builtin_cast);
 
     denv_add_builtin(e, "and", builtin_and);
     denv_add_builtin(e, "or", builtin_or);

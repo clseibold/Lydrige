@@ -63,6 +63,7 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc);
 dval *builtin_const(denv *a, dval *args, unsigned int argc);
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc);
 char *get_type_string(dval *type);
+dval *builtin_cast(denv *a, dval *args, unsigned int argc);
 
 dval *builtin_and(denv *a, dval *args, unsigned int argc);
 dval *builtin_or(denv *a, dval *args, unsigned int argc);
