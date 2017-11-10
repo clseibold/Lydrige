@@ -643,6 +643,22 @@ char *get_type_string(dval *type) {
     }
 }
 
+dval *builtin_if(denv *a, dval *args, unsigned int argc) {
+    if (argc != 3) {
+        return dval_error("Function 'if' must be passed only 3 arguments.");
+    }
+
+    if (args[0].type != DVAL_INT) {
+        return dval_error("Function 'if' must be passed an integer for argument 1.");
+    }
+
+    if (args[0].integer == denv_get(a, "true")->integer) {
+        return dval_copy(&args[1]);
+    } else {
+        return dval_copy(&args[2]);
+    }
+}
+
 // and - returns 0 (true) if all given integers/doubles are 0 (true). Returns 0 if any given integer/double is 0.
 dval *builtin_and(denv *a, dval *args, unsigned int argc) {
     if (argc <= 1) {
@@ -671,7 +687,7 @@ dval *builtin_or(denv *a, dval *args, unsigned int argc) {
         if (args[i].type != DVAL_INT) {
             return(dval_error("Function 'or' must be passed an integer for argument '%d'.", i));
         }
-        if (args[i].integer == denv_get(a, "true")->integer) {
+        if (args[i].integer == denv_get(a, "true")->integer) { // if True
             return denv_get(a, "true");
         }
     }
@@ -679,7 +695,7 @@ dval *builtin_or(denv *a, dval *args, unsigned int argc) {
     return denv_get(a, "false");
 }
 
-bool print_elem(dval arg, bool removeQuotations) { // Use pointer to dval?
+bool print_elem(dval arg, bool removeQuotations) { // TODO: Use pointer to dval?
     switch (arg.type) {
         case DVAL_INT:
         {
@@ -867,6 +883,8 @@ void denv_add_builtins(denv *e) {
 
     denv_add_builtin(e, "and", builtin_and);
     denv_add_builtin(e, "or", builtin_or);
+
+    denv_add_builtin(e, "if", builtin_if);
     
     denv_add_builtin(e, "print", builtin_print);
     denv_add_builtin(e, "read", builtin_read);
