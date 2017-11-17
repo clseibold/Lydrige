@@ -314,6 +314,8 @@ internal dval
 						if (args.result[i].type != funcValue->func.argTypes[i] && funcValue->func.argTypes[i] != DVAL_ANY) {
 							correctTypes = false;
 							incorrectArg = i;
+							expectedType = funcValue->func.argTypes[i];
+							gotType = args.result[i].type;
 							break;
 						}
 					} else {
@@ -322,6 +324,8 @@ internal dval
 						if (args.result[i].type != funcValue->func.argTypes[arg_i] && funcValue->func.argTypes[arg_i] != DVAL_ANY) {
 							correctTypes = false;
 							incorrectArg = i;
+							expectedType = funcValue->func.argTypes[arg_i];
+							gotType = args.result[i].type;
 							break;
 						}
 					}
@@ -329,9 +333,17 @@ internal dval
 				if (!correctTypes) {
 					free(args.result);
 					free(funcValue);
-					return(dval_error("Function '%s' passed in incorrect type for argument %d.", ident, incorrectArg));
+					return(dval_error("Function '%s' passed in incorrect type for argument %d. Expected '%s', got '%s'.", ident, incorrectArg, get_type_string(expectedType), get_type_string(gotType)));
 				}
 				v = funcValue->func.func(e, args.result, argc);
+				if (v->type != funcValue->func.returnType && funcValue->func.returnType != DVAL_ANY) {
+					DVAL_TYPE expectedReturnType = funcValue->func.returnType;
+					DVAL_TYPE gotReturnType = v->type;
+					dval_del(v);
+					free(args.result);
+					free(funcValue);
+					return(dval_error("Function '%s' returned value not matching it's return type. Expected '%s', got '%s'.", ident, get_type_string(expectedReturnType), get_type_string(gotReturnType)));
+				}
 			} else {
 				int argMin = funcValue->func.argc;
 				free(args.result);
@@ -349,6 +361,8 @@ internal dval
 						if (args.result[i].type != funcValue->func.argTypes[i] && funcValue->func.argTypes[i] != DVAL_ANY) {
 							correctTypes = false;
 							incorrectArg = i;
+							expectedType = funcValue->func.argTypes[i];
+							gotType = args.result[i].type;
 							break;
 						}
 					}
@@ -356,9 +370,17 @@ internal dval
 				if (!correctTypes) {
 					free(args.result);
 					free(funcValue);
-					return(dval_error("Function '%s' passed in incorrect type for argument %d.", ident, incorrectArg));
+					return(dval_error("Function '%s' passed in incorrect type for argument %d. Expected '%s', got '%s'.", ident, incorrectArg, get_type_string(expectedType), get_type_string(gotType)));
 				}
 				v = funcValue->func.func(e, args.result, argc);
+				if (v->type != funcValue->func.returnType && funcValue->func.returnType != DVAL_ANY) {
+					DVAL_TYPE expectedReturnType = funcValue->func.returnType;
+					DVAL_TYPE gotReturnType = v->type;
+					dval_del(v);
+					free(args.result);
+					free(funcValue);
+					return(dval_error("Function '%s' returned value not matching it's return type. Expected '%s', got '%s'.", ident, get_type_string(expectedReturnType), get_type_string(gotReturnType)));
+				}
 			} else {
 				int argMin = funcValue->func.argc;
 				free(args.result);

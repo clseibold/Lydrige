@@ -69,10 +69,10 @@ typedef struct denv denv;
 typedef dval *(*dbuiltin)(denv*, dval*, unsigned int); // Dval Array and argc
 typedef struct dval_func_info dval_func_info;
 
-//TODO: Return Value Type
-struct dval_func_info { // TODO: Add way to do variable amount of args
+struct dval_func_info {
 	dbuiltin func;
 	DVAL_TYPE *argTypes; // Currently, this is a list (on the heap) of the argument types as defined by the DVAL_TYPE enum. TODO: Make this work with custom types
+	DVAL_TYPE returnType;
 	int argc;
 	bool varargs; // boolean - allows amount of elements to be any size, with argc being the minimal amount allowed!
 };
@@ -100,7 +100,7 @@ dval *dval_character(char character);
 dval *dval_string(char *str);
 dval *dval_error(char *str, ...);
 // DVAL_TYPE *dval_types_list(); // TODO: Make this use varargs to create list on heap of DVAL_TYPES given
-dval *dval_func(dbuiltin func, int argc, bool varargs, DVAL_TYPE *argTypes, int constant);
+dval *dval_func(dbuiltin func, int argc, bool varargs, DVAL_TYPE *argTypes, DVAL_TYPE returnType, int constant);
 dval *dval_list(dval *elements, unsigned int count);
 dval *dval_type(DVAL_TYPE type);
 void dval_del(dval *d);

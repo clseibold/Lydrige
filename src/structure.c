@@ -104,11 +104,11 @@ dval *dval_info(char *fmt, ...) {
     return d;
 }
 
-dval *dval_func(dbuiltin func, int argc, bool varargs, DVAL_TYPE *argTypes, int constant) {
+dval *dval_func(dbuiltin func, int argc, bool varargs, DVAL_TYPE *argTypes, DVAL_TYPE returnType, int constant) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_FUNC;
     d->constant = constant;
-	d->func = (dval_func_info) { func, argTypes, argc, varargs };
+	d->func = (dval_func_info) { func, argTypes, returnType, argc, varargs };
     return(d);
 }
 
@@ -159,7 +159,7 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
 			for (int i = 0; i < for_length; i++) {
 				argTypes[i] = d->func.argTypes[i];
 			}
-			v->func = (dval_func_info) { d->func.func, argTypes, d->func.argc, d->func.varargs };
+			v->func = (dval_func_info) { d->func.func, argTypes, d->func.returnType, d->func.argc, d->func.varargs };
         } break;
 
         case DVAL_ANY:
