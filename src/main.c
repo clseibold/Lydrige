@@ -348,7 +348,7 @@ internal dval
 				int argMin = funcValue->func.argc;
 				free(args.result);
 				free(funcValue);
-				return(dval_error("Function '%s' must be passed %d or more arguments.", ident, argMin));
+				return(dval_error("Function '%s' must be passed %d or more arguments.", ident, argMin)); // TODO: Print out all the expected argument types (with last one having '&' to signify vararg)?
 			}
 		} else {
 			if (argc == funcValue->func.argc) {
@@ -385,7 +385,7 @@ internal dval
 				int argMin = funcValue->func.argc;
 				free(args.result);
 				free(funcValue);
-				return(dval_error("Function '%s' must be passed %d arguments.", ident));
+				return(dval_error("Function '%s' must be passed %d arguments.", ident, argMin)); // TODO: Print out all the expected argument types?
 			}
 		}
         
