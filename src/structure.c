@@ -104,11 +104,11 @@ dval *dval_info(char *fmt, ...) {
     return d;
 }
 
-dval *dval_func(dbuiltin func, int constant) {
+dval *dval_func(dbuiltin func, int argc, bool varargs, int constant) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_FUNC;
     d->constant = constant;
-    d->func = func;
+	d->func = (dval_func_info) { func, (void *) 0, argc, varargs };
     return(d);
 }
 

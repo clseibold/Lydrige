@@ -268,8 +268,8 @@ dval *builtin_mod(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_power(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0 || argc > 2) {
-        return(dval_error("Function '^' given wrong amount of arguments. Got '%d', Expected 1 or 2.", argc));
+    if (argc != 2) {
+        return(dval_error("Function '^' given wrong amount of arguments. Got '%d', Expected 2.", argc));
     }
 
     if (argc == 1) {
@@ -312,7 +312,8 @@ dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
 
 dval *builtin_list(denv *e, dval *args, unsigned int argc) {
     if (argc == 0) {
-        return(dval_error("Function 'list' must be passed 1 or more arguments."));
+		//return(dval_error("Function 'list' must be passed 1 or more arguments."));
+		return(dval_list((void *) 0, 0));
     }
     
     dval *largs = calloc(argc, sizeof(dval));
@@ -332,7 +333,7 @@ dval *builtin_len(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_get(denv *a, dval *args, unsigned int argc) {
-    if (argc > 2 || argc == 0) {
+    if (argc != 2) {
         return(dval_error("Function 'get' must be passed 2 arguments."));
     }
     if (args[0].type != DVAL_INT) {
@@ -838,8 +839,8 @@ dval *builtin_exit(denv *e, dval *args, unsigned int argc) {
     return(denv_get(e, "true"));
 }
 
-internal void denv_add_builtin(denv *e, char *name, dbuiltin func) {
-    dval *v = dval_func(func, 1);
+internal void denv_add_builtin(denv *e, char *name, dbuiltin func, int argc, bool varargs) {
+    dval *v = dval_func(func, argc, varargs, 1);
     dval_del(denv_put(e, name, v, v->constant)); // v is coppied (but not deleted in denv_put function)
     dval_del(v);
 }
@@ -857,39 +858,39 @@ internal void denv_add_const(denv *e, char *name, dval *v) {
 }
 
 void denv_add_builtins(denv *e) {
-    denv_add_builtin(e, "+", builtin_add);
-    denv_add_builtin(e, "-", builtin_subtract);
-    denv_add_builtin(e, "*", builtin_multiply);
-    denv_add_builtin(e, "/", builtin_divide);
-    denv_add_builtin(e, "mod", builtin_mod);
-    denv_add_builtin(e, "^", builtin_power);
-    denv_add_builtin(e, "**", builtin_power);
-    denv_add_builtin(e, "succ", builtin_succ);
+    denv_add_builtin(e, "+", builtin_add, 1, true);
+    denv_add_builtin(e, "-", builtin_subtract, 1, true);
+    denv_add_builtin(e, "*", builtin_multiply, 2, true);
+    denv_add_builtin(e, "/", builtin_divide, 2, true);
+    denv_add_builtin(e, "mod", builtin_mod, 2, true);
+    denv_add_builtin(e, "^", builtin_power, 2, true);
+    denv_add_builtin(e, "**", builtin_power, 2, true);
+    denv_add_builtin(e, "succ", builtin_succ, 1, false);
     
-    denv_add_builtin(e, "list", builtin_list);
-    denv_add_builtin(e, "len", builtin_len);
-    denv_add_builtin(e, "get", builtin_get);
-    denv_add_builtin(e, "set", builtin_set);
-    denv_add_builtin(e, "first", builtin_first);
-    denv_add_builtin(e, "last", builtin_last);
-    denv_add_builtin(e, "head", builtin_head);
-    denv_add_builtin(e, "tail", builtin_tail);
-    denv_add_builtin(e, "join", builtin_join);
+    denv_add_builtin(e, "list", builtin_list, 0, true);
+    denv_add_builtin(e, "len", builtin_len, 1, false);
+    denv_add_builtin(e, "get", builtin_get, 3, false);
+    denv_add_builtin(e, "set", builtin_set, 2, false);
+    denv_add_builtin(e, "first", builtin_first, 1, false);
+    denv_add_builtin(e, "last", builtin_last, 1, false);
+    denv_add_builtin(e, "head", builtin_head, 1, false);
+    denv_add_builtin(e, "tail", builtin_tail, 1, false);
+    denv_add_builtin(e, "join", builtin_join, 2, false); // TODO: Allow join to do more than 2 (varargs)
     
-    denv_add_builtin(e, "def", builtin_def);
-    denv_add_builtin(e, "const", builtin_const);
-    denv_add_builtin(e, "typeof", builtin_typeof);
-    denv_add_builtin(e, "cast", builtin_cast);
+    denv_add_builtin(e, "def", builtin_def, 3, false);
+    denv_add_builtin(e, "const", builtin_const, 3, false);
+    denv_add_builtin(e, "typeof", builtin_typeof, 1, false);
+    denv_add_builtin(e, "cast", builtin_cast, 2, false);
 
-    denv_add_builtin(e, "and", builtin_and);
-    denv_add_builtin(e, "or", builtin_or);
+    denv_add_builtin(e, "and", builtin_and, 2, true);
+    denv_add_builtin(e, "or", builtin_or, 2, true);
 
-    denv_add_builtin(e, "if", builtin_if);
+    denv_add_builtin(e, "if", builtin_if, 3, false);
     
-    denv_add_builtin(e, "print", builtin_print);
-    denv_add_builtin(e, "read", builtin_read);
-    denv_add_builtin(e, "clear", builtin_clear);
-    denv_add_builtin(e, "exit", builtin_exit);
+    denv_add_builtin(e, "print", builtin_print, 0, true);
+    denv_add_builtin(e, "read", builtin_read, 1, false);
+    denv_add_builtin(e, "clear", builtin_clear, 0, false);
+    denv_add_builtin(e, "exit", builtin_exit, 0, false);
     
     denv_add_type(e, "any", DVAL_ANY);
     denv_add_type(e, "int", DVAL_INT);

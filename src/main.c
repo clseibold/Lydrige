@@ -299,19 +299,38 @@ internal dval
     }
     
     // Function/Lambda call
-    dval *func = denv_get(e, ident);
-    if (func->type == DVAL_FUNC) {
-        dval *v = func->func(e, args.result, argc);
+    dval *funcValue = denv_get(e, ident);
+    if (funcValue->type == DVAL_FUNC) {
+		dval *v;
+		if (funcValue->func.varargs == true) {
+			if (argc >= funcValue->func.argc) {
+				v = funcValue->func.func(e, args.result, argc);
+			} else {
+				int argMin = funcValue->func.argc;
+				free(args.result);
+				free(funcValue);
+				return(dval_error("Function '%s' must be passed %d or more arguments.", ident, argMin));
+			}
+		} else {
+			if (argc == funcValue->func.argc) {
+				v = funcValue->func.func(e, args.result, argc);
+			} else {
+				int argMin = funcValue->func.argc;
+				free(args.result);
+				free(funcValue);
+				return(dval_error("Function '%s' must be passed %d arguments.", ident));
+			}
+		}
         
         free(args.result);
-        free(func);
+        free(funcValue);
         return(v);
-    } else if (func->type == DVAL_ERROR || func->type == DVAL_INFO) {
+    } else if (funcValue->type == DVAL_ERROR || funcValue->type == DVAL_INFO) {
         free(args.result);
-        return(func);
+        return(funcValue);
     } else {
         free(args.result);
-        free(func);
+        free(funcValue);
         return(dval_error("'%s' is not a function or lambda.", ident)); // TODO: Error?
     }
 }
