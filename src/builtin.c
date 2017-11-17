@@ -839,9 +839,9 @@ dval *builtin_exit(denv *e, dval *args, unsigned int argc) {
     return(denv_get(e, "true"));
 }
 
-internal void denv_add_builtin(denv *e, char *name, dbuiltin func, int argc, bool varargs) {
-    dval *v = dval_func(func, argc, varargs, 1);
-    dval_del(denv_put(e, name, v, v->constant)); // v is coppied (but not deleted in denv_put function)
+internal void denv_add_builtin(denv *e, char *name, dbuiltin func, int argc, DVAL_TYPE *argTypes, bool varargs) {
+    dval *v = dval_func(func, argc, varargs, argTypes, 1);
+    dval_del(denv_put(e, name, v, v->constant)); // NOTE: v is coppied (but not deleted in denv_put function)
     dval_del(v);
 }
 
@@ -857,40 +857,131 @@ internal void denv_add_const(denv *e, char *name, dval *v) {
     dval_del(v);
 }
 
-void denv_add_builtins(denv *e) {
-    denv_add_builtin(e, "+", builtin_add, 1, true);
-    denv_add_builtin(e, "-", builtin_subtract, 1, true);
-    denv_add_builtin(e, "*", builtin_multiply, 2, true);
-    denv_add_builtin(e, "/", builtin_divide, 2, true);
-    denv_add_builtin(e, "mod", builtin_mod, 2, true);
-    denv_add_builtin(e, "^", builtin_power, 2, true);
-    denv_add_builtin(e, "**", builtin_power, 2, true);
-    denv_add_builtin(e, "succ", builtin_succ, 1, false);
-    
-    denv_add_builtin(e, "list", builtin_list, 0, true);
-    denv_add_builtin(e, "len", builtin_len, 1, false);
-    denv_add_builtin(e, "get", builtin_get, 3, false);
-    denv_add_builtin(e, "set", builtin_set, 2, false);
-    denv_add_builtin(e, "first", builtin_first, 1, false);
-    denv_add_builtin(e, "last", builtin_last, 1, false);
-    denv_add_builtin(e, "head", builtin_head, 1, false);
-    denv_add_builtin(e, "tail", builtin_tail, 1, false);
-    denv_add_builtin(e, "join", builtin_join, 2, false); // TODO: Allow join to do more than 2 (varargs)
-    
-    denv_add_builtin(e, "def", builtin_def, 3, false);
-    denv_add_builtin(e, "const", builtin_const, 3, false);
-    denv_add_builtin(e, "typeof", builtin_typeof, 1, false);
-    denv_add_builtin(e, "cast", builtin_cast, 2, false);
+void denv_add_builtins(denv *e) { // TODO: Combine mallocs into one array so we're only doing 1 malloc rather than many
+	DVAL_TYPE *add_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	add_argTypes[0] = DVAL_ANY;
+    denv_add_builtin(e, "+", builtin_add, 1, add_argTypes, true);
 
-    denv_add_builtin(e, "and", builtin_and, 2, true);
-    denv_add_builtin(e, "or", builtin_or, 2, true);
+    DVAL_TYPE *subtract_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	subtract_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "-", builtin_subtract, 1, subtract_argTypes, true);
+ 
+    DVAL_TYPE *multiply_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	multiply_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "*", builtin_multiply, 2, multiply_argTypes, true);
+ 
+    DVAL_TYPE *divide_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	divide_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "/", builtin_divide, 2, divide_argTypes, true);
+ 
+    DVAL_TYPE *mod_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	mod_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "mod", builtin_mod, 2, mod_argTypes, true);
 
-    denv_add_builtin(e, "if", builtin_if, 3, false);
-    
-    denv_add_builtin(e, "print", builtin_print, 0, true);
-    denv_add_builtin(e, "read", builtin_read, 1, false);
-    denv_add_builtin(e, "clear", builtin_clear, 0, false);
-    denv_add_builtin(e, "exit", builtin_exit, 0, false);
+    DVAL_TYPE *power_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	power_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "^", builtin_power, 2, power_argTypes, true);
+
+    DVAL_TYPE *power_argTypes2 = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	power_argTypes2[0] = DVAL_ANY;
+	denv_add_builtin(e, "**", builtin_power, 2, power_argTypes2, true);
+ 
+    DVAL_TYPE *succ_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	succ_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "succ", builtin_succ, 1, succ_argTypes, false);
+ 
+ 
+    DVAL_TYPE *list_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	list_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "list", builtin_list, 0, list_argTypes, true);
+
+    DVAL_TYPE *len_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	len_argTypes[0] = DVAL_LIST;
+	denv_add_builtin(e, "len", builtin_len, 1, len_argTypes, false);
+
+    DVAL_TYPE *get_argTypes = (DVAL_TYPE *) malloc(2 * sizeof(DVAL_TYPE));
+	get_argTypes[0] = DVAL_INT;
+	get_argTypes[1] = DVAL_LIST;
+	denv_add_builtin(e, "get", builtin_get, 2, get_argTypes, false);
+
+    DVAL_TYPE *set_argTypes = (DVAL_TYPE *) malloc(3 * sizeof(DVAL_TYPE));
+	set_argTypes[0] = DVAL_INT;
+	set_argTypes[1] = DVAL_ANY;
+	set_argTypes[2] = DVAL_LIST;
+	denv_add_builtin(e, "set", builtin_set, 3, set_argTypes, false);
+
+    DVAL_TYPE *first_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	first_argTypes[0] = DVAL_LIST;
+	denv_add_builtin(e, "first", builtin_first, 1, first_argTypes, false);
+
+    DVAL_TYPE *last_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	last_argTypes[0] = DVAL_LIST;
+	denv_add_builtin(e, "last", builtin_last, 1, last_argTypes, false);
+
+    DVAL_TYPE *head_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	head_argTypes[0] = DVAL_LIST;
+	denv_add_builtin(e, "head", builtin_head, 1, head_argTypes, false);
+
+    DVAL_TYPE *tail_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	tail_argTypes[0] = DVAL_LIST;
+	denv_add_builtin(e, "tail", builtin_tail, 1, tail_argTypes, false);
+
+    DVAL_TYPE *join_argTypes = (DVAL_TYPE *) malloc(2 * sizeof(DVAL_TYPE));
+	join_argTypes[0] = DVAL_LIST;
+	join_argTypes[1] = DVAL_LIST;
+	denv_add_builtin(e, "join", builtin_join, 2, join_argTypes, false); // TODO: Allow join to do more than 2 (varargs)
+ 
+
+    DVAL_TYPE *def_argTypes = (DVAL_TYPE *) malloc(3 * sizeof(DVAL_TYPE));
+	def_argTypes[0] = DVAL_IDENT;
+	def_argTypes[1] = DVAL_TYPEVALUE;
+	def_argTypes[2] = DVAL_ANY;
+	denv_add_builtin(e, "def", builtin_def, 3, def_argTypes, false);
+
+    DVAL_TYPE *const_argTypes = (DVAL_TYPE *) malloc(3 * sizeof(DVAL_TYPE));
+	const_argTypes[0] = DVAL_IDENT;
+	const_argTypes[1] = DVAL_TYPEVALUE;
+	const_argTypes[2] = DVAL_ANY;
+	denv_add_builtin(e, "const", builtin_const, 3, const_argTypes, false);
+
+    DVAL_TYPE *typeof_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	typeof_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "typeof", builtin_typeof, 1, typeof_argTypes, false);
+
+    DVAL_TYPE *cast_argTypes = (DVAL_TYPE *) malloc(2 * sizeof(DVAL_TYPE));
+	cast_argTypes[0] = DVAL_TYPEVALUE;
+	cast_argTypes[1] = DVAL_ANY;
+	denv_add_builtin(e, "cast", builtin_cast, 2, cast_argTypes, false);
+
+
+    DVAL_TYPE *and_argTypes = (DVAL_TYPE *) malloc(2 * sizeof(DVAL_TYPE));
+	and_argTypes[0] = DVAL_INT;
+	and_argTypes[1] = DVAL_INT;
+	denv_add_builtin(e, "and", builtin_and, 2, and_argTypes, true);
+
+    DVAL_TYPE *or_argTypes = (DVAL_TYPE *) malloc(2 * sizeof(DVAL_TYPE));
+	or_argTypes[0] = DVAL_INT;
+	or_argTypes[1] = DVAL_INT;
+	denv_add_builtin(e, "or", builtin_or, 2, or_argTypes, true);
+
+
+    DVAL_TYPE *if_argTypes = (DVAL_TYPE *) malloc(3 * sizeof(DVAL_TYPE));
+	if_argTypes[0] = DVAL_INT;
+	if_argTypes[1] = DVAL_ANY;
+	if_argTypes[2] = DVAL_ANY;
+	denv_add_builtin(e, "if", builtin_if, 3, if_argTypes, false);
+
+
+    DVAL_TYPE *print_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	print_argTypes[0] = DVAL_ANY;
+	denv_add_builtin(e, "print", builtin_print, 0, print_argTypes, true);
+
+    DVAL_TYPE *read_argTypes = (DVAL_TYPE *) malloc(1 * sizeof(DVAL_TYPE));
+	read_argTypes[0] = DVAL_STRING;
+	denv_add_builtin(e, "read", builtin_read, 1, read_argTypes, false);
+
+	denv_add_builtin(e, "clear", builtin_clear, 0, (void *) 0, false);
+	denv_add_builtin(e, "exit", builtin_exit, 0, (void *) 0, false);
     
     denv_add_type(e, "any", DVAL_ANY);
     denv_add_type(e, "int", DVAL_INT);

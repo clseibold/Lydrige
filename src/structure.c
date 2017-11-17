@@ -104,11 +104,11 @@ dval *dval_info(char *fmt, ...) {
     return d;
 }
 
-dval *dval_func(dbuiltin func, int argc, bool varargs, int constant) {
+dval *dval_func(dbuiltin func, int argc, bool varargs, DVAL_TYPE *argTypes, int constant) {
     dval *d = (dval *) malloc(sizeof(dval));
     d->type = DVAL_FUNC;
     d->constant = constant;
-	d->func = (dval_func_info) { func, (void *) 0, argc, varargs };
+	d->func = (dval_func_info) { func, argTypes, argc, varargs };
     return(d);
 }
 
@@ -151,7 +151,7 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
             v->str = d->str; // TODO: Is this correct? Shouldn't I have to copy the string?
         } break;
 
-        case DVAL_FUNC:
+		case DVAL_FUNC: // TODO: Copy over function struct and info inside (including arg types)
         {
             v->func = d->func;
         } break;
@@ -207,8 +207,10 @@ void dval_del(dval *d) {
             //gb_string_free(d->nstr);
         } break;
         break;
-        default:
-        break;
+		case DVAL_FUNC:
+		{
+			free(d->func.argTypes);
+		} break;
     }
     free(d); // Error Handling?
 }
