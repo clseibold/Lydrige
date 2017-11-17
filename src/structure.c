@@ -151,9 +151,15 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
             v->str = d->str; // TODO: Is this correct? Shouldn't I have to copy the string?
         } break;
 
-		case DVAL_FUNC: // TODO: Copy over function struct and info inside (including arg types)
+		case DVAL_FUNC: // TODO: Shouls I be copying the dval types?
         {
-            v->func = d->func;
+			DVAL_TYPE *argTypes = (DVAL_TYPE *) malloc(d->func.argc * sizeof(DVAL_TYPE));
+			int for_length = d->func.argc;
+			if (for_length == 0 && d->func.varargs) for_length = 1; // There has to be at least 1 type is varargs is turned on.
+			for (int i = 0; i < for_length; i++) {
+				argTypes[i] = d->func.argTypes[i];
+			}
+			v->func = (dval_func_info) { d->func.func, argTypes, d->func.argc, d->func.varargs };
         } break;
 
         case DVAL_ANY:
@@ -169,7 +175,6 @@ dval *dval_copy(dval *d) { // TODO: Add list and string
 
         case DVAL_LIST:
         {
-            // TODO
             v->count = d->count;
             v->elements = calloc(v->count, sizeof(dval));
             for (int i = 0; i < d->count; i++) {

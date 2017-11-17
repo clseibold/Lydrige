@@ -305,6 +305,32 @@ internal dval
 		dval *v;
 		if (funcValue->func.varargs == true) {
 			if (argc >= funcValue->func.argc) {
+				bool correctTypes = true;
+				int incorrectArg = 0;
+				DVAL_TYPE expectedType;
+				DVAL_TYPE gotType;
+				for (int i = 0; i < argc; i++) {
+					if (i < funcValue->func.argc) {
+						if (args.result[i].type != funcValue->func.argTypes[i] && funcValue->func.argTypes[i] != DVAL_ANY) {
+							correctTypes = false;
+							incorrectArg = i;
+							break;
+						}
+					} else {
+						int arg_i = funcValue->func.argc - 1;
+						if (arg_i < 0) arg_i = 0;
+						if (args.result[i].type != funcValue->func.argTypes[arg_i] && funcValue->func.argTypes[arg_i] != DVAL_ANY) {
+							correctTypes = false;
+							incorrectArg = i;
+							break;
+						}
+					}
+				}
+				if (!correctTypes) {
+					free(args.result);
+					free(funcValue);
+					return(dval_error("Function '%s' passed in incorrect type for argument %d.", ident, incorrectArg));
+				}
 				v = funcValue->func.func(e, args.result, argc);
 			} else {
 				int argMin = funcValue->func.argc;
@@ -312,11 +338,26 @@ internal dval
 				free(funcValue);
 				return(dval_error("Function '%s' must be passed %d or more arguments.", ident, argMin));
 			}
-
-			// TODO: Check args are of correct types
-
 		} else {
 			if (argc == funcValue->func.argc) {
+				bool correctTypes = true;
+				int incorrectArg = 0;
+				DVAL_TYPE expectedType;
+				DVAL_TYPE gotType;
+				for (int i = 0; i < argc; i++) {
+					if (i < funcValue->func.argc) {
+						if (args.result[i].type != funcValue->func.argTypes[i] && funcValue->func.argTypes[i] != DVAL_ANY) {
+							correctTypes = false;
+							incorrectArg = i;
+							break;
+						}
+					}
+				}
+				if (!correctTypes) {
+					free(args.result);
+					free(funcValue);
+					return(dval_error("Function '%s' passed in incorrect type for argument %d.", ident, incorrectArg));
+				}
 				v = funcValue->func.func(e, args.result, argc);
 			} else {
 				int argMin = funcValue->func.argc;
@@ -324,9 +365,6 @@ internal dval
 				free(funcValue);
 				return(dval_error("Function '%s' must be passed %d arguments.", ident));
 			}
-
-			// TODO: Check args are of correct types
-
 		}
         
         free(args.result);
@@ -338,7 +376,7 @@ internal dval
     } else {
         free(args.result);
         free(funcValue);
-        return(dval_error("'%s' is not a function or lambda.", ident)); // TODO: Error?
+        return(dval_error("'%s' is not a function or lambda.", ident));
     }
 }
 
