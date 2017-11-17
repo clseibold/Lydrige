@@ -301,6 +301,7 @@ internal dval
     // Function/Lambda call
     dval *funcValue = denv_get(e, ident);
     if (funcValue->type == DVAL_FUNC) {
+		// Check that arguments match function arg definitions
 		dval *v;
 		if (funcValue->func.varargs == true) {
 			if (argc >= funcValue->func.argc) {

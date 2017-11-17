@@ -73,7 +73,7 @@ struct dval_func_info { // TODO: Add way to do variable amount of args
 	dbuiltin func;
 	dval *argTypes; // TODO: Unsure about how this is stored!
 	int argc;
-	int varargs; // boolean - allows amount of elements to be any size, with argc being the minimal amount allowed!
+	bool varargs; // boolean - allows amount of elements to be any size, with argc being the minimal amount allowed!
 };
 
 struct dval { // TODO: Reorder to use least amount of memory!
