@@ -312,6 +312,9 @@ internal dval
 				free(funcValue);
 				return(dval_error("Function '%s' must be passed %d or more arguments.", ident, argMin));
 			}
+
+			// TODO: Check args are of correct types
+
 		} else {
 			if (argc == funcValue->func.argc) {
 				v = funcValue->func.func(e, args.result, argc);
@@ -321,6 +324,9 @@ internal dval
 				free(funcValue);
 				return(dval_error("Function '%s' must be passed %d arguments.", ident));
 			}
+
+			// TODO: Check args are of correct types
+
 		}
         
         free(args.result);

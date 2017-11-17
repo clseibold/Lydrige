@@ -85,9 +85,9 @@ dval *denv_get(denv *e, char *k) { // Copies the value gotten from hashmap, so i
 }
 
 dval *builtin_add(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
         return(dval_error("Function '+' given wrong amount of arguments. Got '%d', Expected at least 1.", argc));
-    }
+    }*/
     // Check if any are doubles. Set isDouble to true is so.
     int isDouble = false;
     for (int i = 0; i < argc; i++) {
@@ -127,9 +127,9 @@ dval *builtin_add(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_subtract(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
         return(dval_error("Function '+' given wrong amount of arguments. Got '%d', Expected at least 1.", argc));
-    }
+    }*/
     // Check if any are doubles. Set isDouble to true is so.
     int isDouble = false;
     for (int i = 0; i < argc; i++) {
@@ -165,9 +165,9 @@ dval *builtin_subtract(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_multiply(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
         return(dval_error("Function '+' given wrong amount of arguments. Got '%d', Expected at least 1.", argc));
-    }
+    }*/
     // Check if any are doubles. Set isDouble to true is so.
     int isDouble = false;
     for (int i = 0; i < argc; i++) {
@@ -203,9 +203,9 @@ dval *builtin_multiply(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_divide(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
         return(dval_error("Function '/' given wrong amount of arguments. Got '%d', Expected at least 1.", argc));
-    }
+    }*/
     // Check if any are doubles. Set isDouble to true is so.
     int isDouble = false;
     for (int i = 0; i < argc; i++) {
@@ -247,9 +247,9 @@ dval *builtin_divide(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_mod(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
         return(dval_error("Function '%' given wrong amount of arguments. Got '%d', Expected at least 1.", argc));
-    }
+    }*/
     // Check if any are doubles. Set isDouble to true is so.
     for (int i = 0; i < argc; i++) {
         if (args[i].type == DVAL_INT) {
@@ -268,9 +268,9 @@ dval *builtin_mod(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_power(denv *e, dval *args, unsigned int argc) {
-    if (argc != 2) {
+    /*if (argc != 2) {
         return(dval_error("Function '^' given wrong amount of arguments. Got '%d', Expected 2.", argc));
-    }
+    }*/
 
     if (argc == 1) {
         if (args[0].type == DVAL_INT) {
@@ -296,9 +296,9 @@ dval *builtin_power(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
-    if (argc > 1) {
+    /*if (argc > 1) {
         return(dval_error("Function 'succ' may only be passed 1 argument."));
-    }
+    }*/
     
     switch (args[0].type) {
         case DVAL_INT:
@@ -311,10 +311,10 @@ dval *builtin_succ(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_list(denv *e, dval *args, unsigned int argc) {
-    if (argc == 0) {
+    /*if (argc == 0) {
 		//return(dval_error("Function 'list' must be passed 1 or more arguments."));
 		return(dval_list((void *) 0, 0));
-    }
+    }*/
     
     dval *largs = calloc(argc, sizeof(dval));
     memcpy(largs, args, sizeof(dval) * argc);
@@ -322,18 +322,18 @@ dval *builtin_list(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_len(denv *a, dval *args, unsigned int argc) {
-    if (argc > 1 || argc == 0) {
+    /*if (argc > 1 || argc == 0) {
         return(dval_error("Function 'len' must be passed only 1 argument."));
     }
     if (args[0].type != DVAL_LIST) {
         return(dval_error("Function 'len' must be passed a list."));
-    }
+    }*/
     
     return(dval_int(args[0].count));
 }
 
 dval *builtin_get(denv *a, dval *args, unsigned int argc) {
-    if (argc != 2) {
+    /*if (argc != 2) {
         return(dval_error("Function 'get' must be passed 2 arguments."));
     }
     if (args[0].type != DVAL_INT) {
@@ -341,7 +341,7 @@ dval *builtin_get(denv *a, dval *args, unsigned int argc) {
     }
     if (args[1].type != DVAL_LIST) {
         return(dval_error("Function 'get' must be passed a list for argument 2."));
-    }
+    }*/
     
     dval *arg = calloc(1, sizeof(dval));
     memcpy(arg, args[1].elements + args[0].integer, sizeof(dval) * 1); // Copy element at given index into arg
@@ -349,7 +349,7 @@ dval *builtin_get(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_set(denv *a, dval *args, unsigned int argc) {
-    if (argc > 3 || argc == 0) {
+    /*if (argc > 3 || argc == 0) {
         return(dval_error("Function 'get' must be passed 3 arguments."));
     }
     if (args[0].type != DVAL_INT) {
@@ -357,7 +357,7 @@ dval *builtin_set(denv *a, dval *args, unsigned int argc) {
     }
     if (args[2].type != DVAL_LIST) {
         return(dval_error("Function 'get' must be passed a list for argument 3."));
-    }
+    }*/
     
     dval *largs = calloc(args[2].count, sizeof(dval));
     memcpy(largs, args[2].elements, sizeof(dval) * (args[2].count)); // Copy all elements into arg
@@ -366,12 +366,12 @@ dval *builtin_set(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_first(denv *a, dval *args, unsigned int argc) {
-    if (argc > 1 || argc == 0) {
+    /*if (argc > 1 || argc == 0) {
         return(dval_error("Function 'first' must be passed only 1 argument."));
     }
     if (args[0].type != DVAL_LIST) {
         return(dval_error("Function 'first' must be passed a list."));
-    }
+    }*/
     
     dval *arg = calloc(1, sizeof(dval));
     memcpy(arg, args[0].elements, sizeof(dval) * 1); // Copy only the first element into arg
@@ -379,12 +379,12 @@ dval *builtin_first(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_last(denv *a, dval *args, unsigned int argc) {
-    if (argc > 1 || argc == 0) {
+    /*if (argc > 1 || argc == 0) {
         return(dval_error("Function 'last' must be passed only 1 argument."));
     }
     if (args[0].type != DVAL_LIST) {
         return(dval_error("Function 'last' must be passed a list."));
-    }
+    }*/
     
     dval *arg = calloc(1, sizeof(dval));
     memcpy(arg, args[0].elements+(args[0].count-1), sizeof(dval) * 1); // Copy only the very last element into arg
@@ -392,12 +392,12 @@ dval *builtin_last(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_head(denv *a, dval *args, unsigned int argc) {
-    if (argc > 1 || argc == 0) {
+    /*if (argc > 1 || argc == 0) {
         return(dval_error("Function 'head' must be passed only 1 argument."));
     }
     if (args[0].type != DVAL_LIST) {
         return(dval_error("Function 'head' must be passed a list."));
-    }
+    }*/
     
     unsigned int count = args[0].count - 1;
     dval *largs = calloc(count, sizeof(dval));
@@ -406,12 +406,12 @@ dval *builtin_head(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_tail(denv *a, dval *args, unsigned int argc) {
-    if (argc > 1 || argc == 0) {
+    /*if (argc > 1 || argc == 0) {
         return(dval_error("Function 'head' must be passed only 1 argument."));
     }
     if (args[0].type != DVAL_LIST) {
         return(dval_error("Function 'head' must be passed a list."));
-    }
+    }*/
     
     unsigned int count = args[0].count - 1;
     dval *largs = calloc(count, sizeof(dval));
@@ -420,12 +420,12 @@ dval *builtin_tail(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_join(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1 || argc > 2) {
+    /*if (argc <= 1 || argc > 2) {
         return(dval_error("Function 'join' must be passed only 2 arguments."));
     }
     if (args[0].type != DVAL_LIST || args[1].type != DVAL_LIST) {
         return(dval_error("Function 'join' must be passed lists."));
-    }
+    }*/
     
     unsigned int largc = args[0].count + args[1].count;
     dval *largs = calloc(largc, sizeof(dval));
@@ -511,11 +511,11 @@ int check_types(dval *typeArg, dval *arg, dval **error) {
         } break;
     }
 
-    return 1;
+    return 1; // TODO: Return true/false (using denv_get)?
 }
 
 dval *builtin_def(denv *a, dval *args, unsigned int argc) {
-    if (argc != 3) {
+    /*if (argc != 3) {
         return(dval_error("Function 'def' must be passed only 3 arguments."));
     }
     if (args[0].type != DVAL_IDENT) {
@@ -523,7 +523,7 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc) {
     }
     if (args[1].type != DVAL_TYPEVALUE) {
         return dval_error("Function 'def' must be passed a type for argument 2.");
-    }
+    }*/
 
     dval *error;
     if (!check_types(&args[1], &args[2], &error)) {
@@ -540,7 +540,7 @@ dval *builtin_def(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_const(denv *a, dval *args, unsigned int argc) {
-    if (argc != 3) {
+    /*if (argc != 3) {
         return(dval_error("Function 'const' must be passed only 3 arguments."));
     }
     if (args[0].type != DVAL_IDENT) {
@@ -548,7 +548,7 @@ dval *builtin_const(denv *a, dval *args, unsigned int argc) {
     }
     if (args[1].type != DVAL_TYPEVALUE) {
         return dval_error("Function 'const' must be passed a type for argument 2.");
-    }
+    }*/
 
     dval *error;
     if (!check_types(&args[1], &args[2], &error)) {
@@ -565,21 +565,21 @@ dval *builtin_const(denv *a, dval *args, unsigned int argc) {
 }
 
 dval *builtin_typeof(denv *a, dval *args, unsigned int argc) {
-    if (argc < 1 || argc > 1) {
+    /*if (argc < 1 || argc > 1) {
         return(dval_error("Function 'typeof' must be passed one argument only."));
-    }
+    }*/
     
     dval *type = dval_type(args[0].type);
     return type;
 }
 
 dval *builtin_cast(denv *a, dval *args, unsigned int argc) {
-    if (argc != 2) {
+    /*if (argc != 2) {
         return dval_error("Function 'cast' must be passed 2 arguments.");
     }
     if (args[0].type != DVAL_TYPEVALUE) {
         return dval_error("Function 'cast' must be passed a type for argument 1.");
-    }
+    }*/
 
     if (args[0].typeValue == DVAL_INT && args[1].type == DVAL_DOUBLE) {
         return dval_int((int) args[1].doub);
@@ -645,13 +645,12 @@ char *get_type_string(dval *type) {
 }
 
 dval *builtin_if(denv *a, dval *args, unsigned int argc) {
-    if (argc != 3) {
+    /*if (argc != 3) {
         return dval_error("Function 'if' must be passed only 3 arguments.");
     }
-
     if (args[0].type != DVAL_INT) {
         return dval_error("Function 'if' must be passed an integer for argument 1.");
-    }
+    }*/
 
     if (args[0].integer == denv_get(a, "true")->integer) {
         return dval_copy(&args[1]);
@@ -662,12 +661,12 @@ dval *builtin_if(denv *a, dval *args, unsigned int argc) {
 
 // and - returns 0 (true) if all given integers/doubles are 0 (true). Returns 0 if any given integer/double is 0.
 dval *builtin_and(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1) {
+    /*if (argc <= 1) {
         return(dval_error("Function 'and' must be passed at least 2 arguments."));
-    }
+    }*/
 
     for (int i = 0; i < argc; i++) {
-        if (args[i].type != DVAL_INT) {
+        if (args[i].type != DVAL_INT) { // TODO: I don't think I need this with the new arg type system
             return(dval_error("Function 'and' must be passed an integer for argument '%d'.", i));
         }
         if (args[i].integer != denv_get(a, "true")->integer) { // if False
@@ -680,9 +679,9 @@ dval *builtin_and(denv *a, dval *args, unsigned int argc) {
 
 // or - returns true (0) if given any given integer/double is true (0). Returns false (1) if no given integer/double is true (0).
 dval *builtin_or(denv *a, dval *args, unsigned int argc) {
-    if (argc <= 1) {
+    /*if (argc <= 1) {
         return(dval_error("Function 'or' must be passed at least 2 arguments."));
-    }
+    }*/
 
     for (int i = 0; i < argc; i++) {
         if (args[i].type != DVAL_INT) {
@@ -808,12 +807,12 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
 }
 
 dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with strings not being printed correctly using this expression: print (read "> ");
-    if (argc < 1 || argc > 1) {
+    /*if (argc < 1 || argc > 1) {
         return(dval_error("Function 'read' must be passed only 1 argument"));
     }
     if (args[0].type != DVAL_STRING) {
         return(dval_error("Function 'read' must be passed a string for argument 1"));
-    }
+    }*/
     
     printf("%s", args[0].str);
     char input[255];
