@@ -74,6 +74,7 @@ goto :end
 
 :msvc
 where cl >NUL 2>NUL
+set "projDirectory=%cd%"
 if %ERRORLEVEL%==0 goto :msvcdo
 if /i "%arch%"=="x86" goto :msvcx86
 if /i "%arch%"=="x64" goto :msvcx64
@@ -90,6 +91,10 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxi
    call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x86
    goto :msvcdo
 )
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build" (
+   call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+   goto :msvcdo
+)
 echo Error: Failed to find MSVC 2015 or 2017. Make sure it is installed!
 goto :end
 
@@ -102,11 +107,16 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxi
    call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
    goto :msvcdo
 )
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build" (
+   call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+   goto :msvcdo
+)
 echo Error: Failed to find MSVC 2015 or 2017. Make sure it is installed!
 goto :end
 
 :msvcdo
-mkdir build\debug >NUL 2>NUL
+cd %projDirectory%
+mkdir build\debug
 cd build\debug
 echo Using MSVC
 cl /D_CRT_SECURE_NO_WARNINGS /nologo /Oi /Gm- /MP /FC /fp:fast /fp:except- ..\..\src\*.c %win32sources% %libc%  /I..\..\src\headers\ %msvclibh% /link -OUT:lydrige.exe -incremental:no -opt:ref -subsystem:console

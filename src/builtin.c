@@ -806,7 +806,7 @@ dval *builtin_print(denv *e, dval *args, unsigned int argc) {
     return(denv_get(e, "true"));
 }
 
-dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with strings not being printed correctly using this expression: print (read "> ");
+dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with strings not being printed correctly using this expression: print (read "> "); // Note(Christian): Seems to have been fixed!
     /*if (argc < 1 || argc > 1) {
         return(dval_error("Function 'read' must be passed only 1 argument"));
     }
@@ -816,12 +816,16 @@ dval *builtin_read(denv *e, dval *args, unsigned int argc) { // TODO: Bug with s
     
     printf("%s", args[0].str);
     char input[255];
+    fgets(input, 255, stdin);
+    char *cpy = (char *) malloc(strlen(input) + 1);
+    strcpy(cpy, input);
+    cpy[strlen(cpy) - 1] = '\0';
     /*fgets(input, 255, stdin);
     char *pos;
     if ((pos=strchr(input, '\n')) != NULL)
      *pos = '\0';*/
-    scanf("%s", input);
-    return(dval_string((char *)input));
+    //scanf("%s", input);
+    return(dval_string((char *) cpy));
 }
 
 dval *builtin_clear(denv *e, dval *args, unsigned int argc) {
